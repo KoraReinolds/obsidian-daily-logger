@@ -30,7 +30,13 @@ export class LoggerSetting extends PluginSettingTab {
 	}
 
 	recalculateGlobalPrefix() {
-		this.globalPrefix = this.settings.blocks
+		this.globalPrefix = this.settings.order
+			.map((id) =>
+				this.settings.blocks.find(
+					(block) => block.id === id
+				)
+			)
+			.filter((item) => !!item)
 			.map((block) => block.value)
 			.join(' ')
 	}
@@ -38,8 +44,20 @@ export class LoggerSetting extends PluginSettingTab {
 	calculateText(block: TLoggerBlock) {
 		return [
 			this.globalPrefix,
-			...block.blocks.map((block) => block.value)
+			...block.order
+				.map((id) =>
+					block.blocks.find((block) => block.id === id)
+				)
+				.filter((item) => !!item)
+				.map((block) => block.value)
 		].join(' ')
+	}
+
+	displayPreview() {
+		this.recalculateGlobalPrefix()
+		this.preview.forEach(({ text, block }) => {
+			text.setValue(this.calculateText(block))
+		})
 	}
 
 	displayOrderedBlocks(
@@ -51,7 +69,7 @@ export class LoggerSetting extends PluginSettingTab {
 	) {
 		const { order, blocks } = params
 
-		order.forEach((id) => {
+		order.forEach((id, i) => {
 			const item = blocks.find((item) => item.id === id)
 
 			if (!item) return
@@ -59,7 +77,42 @@ export class LoggerSetting extends PluginSettingTab {
 			new Setting(containerEl)
 				// .setName('')
 				// .setDesc('')
+				.addButton((btn) => {
+					btn.setIcon('move-up').onClick(() => {
+						const newOrder = [...params.order]
+						;[
+							newOrder[i],
+							newOrder[i ? i - 1 : newOrder.length]
+						] = [
+							newOrder[i ? i - 1 : newOrder.length],
+							newOrder[i]
+						]
 
+						params.order = newOrder
+
+						this.plugin.saveSettings()
+						// this.displayPreview()
+						this.display()
+					})
+				})
+				.addButton((btn) => {
+					btn.setIcon('move-down').onClick(() => {
+						const newOrder = [...params.order]
+						;[
+							newOrder[i],
+							newOrder[(i + 1) % newOrder.length]
+						] = [
+							newOrder[(i + 1) % newOrder.length],
+							newOrder[i]
+						]
+
+						params.order = newOrder
+
+						this.plugin.saveSettings()
+						// this.displayPreview()
+						this.display()
+					})
+				})
 				.addDropdown((dd) =>
 					dd
 						.addOptions({
@@ -90,10 +143,7 @@ export class LoggerSetting extends PluginSettingTab {
 						.onChange(async (value) => {
 							item.value = value
 							await this.plugin.saveSettings()
-							this.recalculateGlobalPrefix()
-							this.preview.forEach(({ text, block }) => {
-								text.setValue(this.calculateText(block))
-							})
+							this.displayPreview()
 						})
 				)
 				.addButton((btn) => {
