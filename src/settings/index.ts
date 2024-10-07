@@ -1,10 +1,5 @@
 import MemoPlugin from '../../main'
-import {
-	App,
-	PluginSettingTab,
-	Setting,
-	TextComponent
-} from 'obsidian'
+import { App, PluginSettingTab, Setting } from 'obsidian'
 import { v4 as uuidv4 } from 'uuid'
 import LoggerPlugin from '../../main'
 import {
@@ -19,8 +14,7 @@ export class LoggerSetting extends PluginSettingTab {
 	settings: ILoggerSettings
 	expandedBlocks: Record<string, boolean> = {}
 	blocks: HTMLElement
-	preview: { text: TextComponent; block: TLoggerBlock }[] =
-		[]
+	preview: { text: Setting; block: TLoggerBlock }[] = []
 	globalPrefix = ''
 
 	constructor(app: App, plugin: MemoPlugin) {
@@ -56,7 +50,7 @@ export class LoggerSetting extends PluginSettingTab {
 	displayPreview() {
 		this.recalculateGlobalPrefix()
 		this.preview.forEach(({ text, block }) => {
-			text.setValue(this.calculateText(block))
+			text.setName(this.calculateText(block))
 		})
 	}
 
@@ -172,15 +166,10 @@ export class LoggerSetting extends PluginSettingTab {
 			const id = block.id
 
 			const header = new Setting(containerEl).setName(
-				'Block name'
+				this.calculateText(block)
 			)
 
-			header.addText((text) => {
-				this.preview.push({ text, block })
-				return text
-					.setValue(this.calculateText(block))
-					.setDisabled(true)
-			})
+			this.preview.push({ text: header, block })
 
 			header.addButton((btn) => {
 				btn.setIcon('trash-2').onClick(() => {
