@@ -9,6 +9,7 @@ export type TCustomBlock = {
 
 export type TLoggerBlock = {
 	id: string
+	name: string
 	blocks: TCustomBlock[]
 	order: string[]
 }

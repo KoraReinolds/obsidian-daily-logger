@@ -165,6 +165,20 @@ export class LoggerSetting extends PluginSettingTab {
 		list.forEach((block) => {
 			const id = block.id
 
+			new Setting(containerEl)
+				.setName('Command name')
+				.setDesc('Name of command for call this log')
+				.addText((text) =>
+					text
+						.setPlaceholder('Type name')
+						.setValue(block.name)
+						.onChange((value) => {
+							block.name = value
+
+							this.plugin.saveSettings()
+						})
+				)
+
 			const header = new Setting(containerEl).setName(
 				this.calculateText(block)
 			)
@@ -172,11 +186,18 @@ export class LoggerSetting extends PluginSettingTab {
 			this.preview.push({ text: header, block })
 
 			header.addButton((btn) => {
-				btn.setIcon('trash-2').onClick(() => {
-					this.plugin.settings.loggerBlocks = list.filter(
-						(item) => item.id !== id
-					)
+				btn.setIcon('plus').onClick(() => {
+					const id = uuidv4()
 
+					this.expandedBlocks[block.id] = true
+
+					block.blocks.push({
+						id,
+						name: '',
+						type: 'text',
+						value: ''
+					})
+					block.order.push(id)
 					this.plugin.saveSettings()
 					this.display()
 				})
@@ -193,18 +214,11 @@ export class LoggerSetting extends PluginSettingTab {
 			})
 
 			header.addButton((btn) => {
-				btn.setIcon('plus').onClick(() => {
-					const id = uuidv4()
+				btn.setIcon('trash-2').onClick(() => {
+					this.plugin.settings.loggerBlocks = list.filter(
+						(item) => item.id !== id
+					)
 
-					this.expandedBlocks[block.id] = true
-
-					block.blocks.push({
-						id,
-						name: '',
-						type: 'text',
-						value: ''
-					})
-					block.order.push(id)
 					this.plugin.saveSettings()
 					this.display()
 				})
@@ -231,6 +245,7 @@ export class LoggerSetting extends PluginSettingTab {
 					.onClick(async () => {
 						list.push({
 							id: uuidv4(),
+							name: '',
 							blocks: [],
 							order: []
 						})
