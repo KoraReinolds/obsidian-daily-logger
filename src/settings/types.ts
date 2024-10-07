@@ -14,11 +14,13 @@ export type TLoggerBlock = {
 }
 
 export interface ILoggerSettings {
-	prefix: string
+	blocks: TCustomBlock[]
+	order: string[]
 	loggerBlocks: TLoggerBlock[]
 }
 
 export const DEFAULT_SETTINGS: ILoggerSettings = {
-	prefix: '',
+	blocks: [],
+	order: [],
 	loggerBlocks: []
 }
