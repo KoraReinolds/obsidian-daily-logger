@@ -85,9 +85,7 @@ export default class LoggerPlugin extends Plugin {
 		this.registerDomEvent(
 			document,
 			'click',
-			(evt: MouseEvent) => {
-				console.log('click', evt)
-			}
+			(evt: MouseEvent) => {}
 		)
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
@@ -111,6 +109,35 @@ export default class LoggerPlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings)
+	}
+
+	saveAll() {
+		const commands = (this.app as any).commands as any
+
+		const pluginCommands = Object.keys(
+			commands.commands
+		).filter((commandId) =>
+			commandId.startsWith('obsidian-daily-logger')
+		)
+
+		pluginCommands.forEach((id) =>
+			commands.removeCommand(id)
+		)
+
+		this.settings.loggerBlocks.forEach((block) =>
+			this.addCommand({
+				id: block.id,
+				name: block.name,
+				editorCallback: (
+					editor: Editor,
+					view: MarkdownView
+				) => {
+					editor.replaceSelection(block.name)
+				}
+			})
+		)
+
+		console.log('save')
 	}
 }
 

@@ -253,15 +253,6 @@ export class LoggerSetting extends PluginSettingTab {
 						this.display()
 					})
 			)
-			.addButton((btn) => {
-				const hidden = !this.expandedBlocks['global']
-				btn
-					.setIcon(hidden ? 'eye' : 'eye-off')
-					.onClick(() => {
-						this.expandedBlocks['global'] = hidden
-						this.display()
-					})
-			})
 			.addButton((btn) =>
 				btn.setIcon('plus').onClick(async () => {
 					const id = uuidv4()
@@ -278,6 +269,23 @@ export class LoggerSetting extends PluginSettingTab {
 					this.display()
 				})
 			)
+			.addButton((btn) => {
+				const hidden = !this.expandedBlocks['global']
+				btn
+					.setIcon(hidden ? 'eye' : 'eye-off')
+					.onClick(() => {
+						this.expandedBlocks['global'] = hidden
+						this.display()
+					})
+			})
+			.addButton((btn) => {
+				btn
+					.setIcon('save')
+					.setCta()
+					.onClick(() => {
+						this.plugin.saveAll()
+					})
+			})
 
 		if (this.expandedBlocks['global'])
 			this.displayOrderedBlocks(this.settings, containerEl)
