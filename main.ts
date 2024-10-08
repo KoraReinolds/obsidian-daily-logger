@@ -9,7 +9,8 @@ import {
 import { LoggerSetting } from 'src/settings'
 import {
 	DEFAULT_SETTINGS,
-	ILoggerSettings
+	ILoggerSettings,
+	TCustomBlock
 } from 'src/settings/types'
 
 export default class LoggerPlugin extends Plugin {
@@ -95,6 +96,8 @@ export default class LoggerPlugin extends Plugin {
 				5 * 60 * 1000
 			)
 		)
+
+		this.saveAll()
 	}
 
 	onunload() {}
@@ -132,7 +135,20 @@ export default class LoggerPlugin extends Plugin {
 					editor: Editor,
 					view: MarkdownView
 				) => {
-					editor.replaceSelection(block.name)
+					const string = this.settings.order
+						.map((id) => {
+							const block = this.settings.blocks.find(
+								(block) => block.id === id
+							)
+							if (!block) return ''
+							if (block.type === 'text') return block.value
+							else if (block.type === 'time')
+								// @ts-ignore
+								return moment().format(block.value)
+						})
+						.join(' ')
+
+					editor.replaceSelection(string)
 				}
 			})
 		)
