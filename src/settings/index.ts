@@ -68,46 +68,12 @@ export class LoggerSetting extends PluginSettingTab {
 
 			if (!item) return
 
-			new Setting(containerEl)
-				// .setName('')
-				// .setDesc('')
-				.addButton((btn) => {
-					btn.setIcon('move-up').onClick(() => {
-						const newOrder = [...params.order]
-						;[
-							newOrder[i],
-							newOrder[i ? i - 1 : newOrder.length]
-						] = [
-							newOrder[i ? i - 1 : newOrder.length],
-							newOrder[i]
-						]
+			const blockHeader = new Setting(containerEl)
+			// .setName('')
+			// .setDesc('')
 
-						params.order = newOrder
-
-						this.plugin.saveSettings()
-						// this.displayPreview()
-						this.display()
-					})
-				})
-				.addButton((btn) => {
-					btn.setIcon('move-down').onClick(() => {
-						const newOrder = [...params.order]
-						;[
-							newOrder[i],
-							newOrder[(i + 1) % newOrder.length]
-						] = [
-							newOrder[(i + 1) % newOrder.length],
-							newOrder[i]
-						]
-
-						params.order = newOrder
-
-						this.plugin.saveSettings()
-						// this.displayPreview()
-						this.display()
-					})
-				})
-				.addDropdown((dd) =>
+			if (item.type !== 'key')
+				blockHeader.addDropdown((dd) =>
 					dd
 						.addOptions({
 							text: 'Text',
@@ -121,38 +87,81 @@ export class LoggerSetting extends PluginSettingTab {
 							this.display()
 						})
 				)
-				.addText((text) =>
-					text
-						.setPlaceholder('Type key')
-						.setValue(item.name)
-						.onChange(async (value) => {
-							item.name = value
-							await this.plugin.saveSettings()
-						})
-				)
-				.addText((text) =>
-					text
-						.setPlaceholder('Type value')
-						.setValue(item.value)
-						.onChange(async (value) => {
-							item.value = value
-							await this.plugin.saveSettings()
-							this.displayPreview()
-						})
-				)
-				.addButton((btn) => {
-					btn.setIcon('trash-2').onClick(() => {
-						params.blocks = blocks.filter(
-							(item) => item.id !== id
-						)
-						params.order = order.filter(
-							(blockId) => blockId !== id
-						)
 
-						this.plugin.saveSettings()
-						this.display()
-					})
+			blockHeader.addButton((btn) => {
+				btn.setIcon('move-up').onClick(() => {
+					const newOrder = [...params.order]
+					;[
+						newOrder[i],
+						newOrder[i ? i - 1 : newOrder.length]
+					] = [
+						newOrder[i ? i - 1 : newOrder.length],
+						newOrder[i]
+					]
+
+					params.order = newOrder
+
+					this.plugin.saveSettings()
+					// this.displayPreview()
+					this.display()
 				})
+			})
+
+			blockHeader.addButton((btn) => {
+				btn.setIcon('move-down').onClick(() => {
+					const newOrder = [...params.order]
+					;[
+						newOrder[i],
+						newOrder[(i + 1) % newOrder.length]
+					] = [
+						newOrder[(i + 1) % newOrder.length],
+						newOrder[i]
+					]
+
+					params.order = newOrder
+
+					this.plugin.saveSettings()
+					// this.displayPreview()
+					this.display()
+				})
+			})
+
+			blockHeader.addText((text) =>
+				text
+					.setPlaceholder('Type key')
+					.setValue(item.name)
+					.onChange(async (value) => {
+						item.name = value
+						await this.plugin.saveSettings()
+					})
+			)
+
+			blockHeader.addText((text) =>
+				text
+					.setPlaceholder('Type value')
+					.setValue(item.value)
+					.onChange(async (value) => {
+						item.value = value
+						await this.plugin.saveSettings()
+						this.displayPreview()
+					})
+			)
+
+			blockHeader.addButton((btn) => {
+				btn.setIcon('trash-2').onClick(() => {
+					params.blocks = blocks.filter(
+						(item) => item.id !== id
+					)
+					params.order = order.filter(
+						(blockId) => blockId !== id
+					)
+
+					this.plugin.saveSettings()
+					this.display()
+				})
+
+				if (item.type === 'key') btn.setDisabled(true)
+			})
 		})
 	}
 
@@ -243,11 +252,19 @@ export class LoggerSetting extends PluginSettingTab {
 				btn
 					.setButtonText('Add new block')
 					.onClick(async () => {
+						const blockId = uuidv4()
 						list.push({
 							id: uuidv4(),
 							name: '',
-							blocks: [],
-							order: []
+							blocks: [
+								{
+									id: blockId,
+									name: '',
+									type: 'key',
+									value: ''
+								}
+							],
+							order: [blockId]
 						})
 						this.plugin.saveSettings()
 						this.display()
