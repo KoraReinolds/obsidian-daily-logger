@@ -153,7 +153,7 @@ export default class LoggerPlugin extends Plugin {
 			})
 		)
 
-		console.log('save')
+		new Notice('Successful save')
 	}
 }
 

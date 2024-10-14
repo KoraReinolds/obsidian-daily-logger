@@ -1,5 +1,10 @@
 import MemoPlugin from '../../main'
-import { App, PluginSettingTab, Setting } from 'obsidian'
+import {
+	App,
+	Notice,
+	PluginSettingTab,
+	Setting
+} from 'obsidian'
 import { v4 as uuidv4 } from 'uuid'
 import LoggerPlugin from '../../main'
 import {
@@ -16,6 +21,8 @@ export class LoggerSetting extends PluginSettingTab {
 	blocks: HTMLElement
 	preview: { text: Setting; block: TLoggerBlock }[] = []
 	globalPrefix = ''
+	globalBlockCopy: TCustomBlock
+	blockCopy: TCustomBlock
 
 	constructor(app: App, plugin: MemoPlugin) {
 		super(app, plugin)
@@ -31,7 +38,7 @@ export class LoggerSetting extends PluginSettingTab {
 				)
 			)
 			.filter((item) => !!item)
-			.map((block) => block.value)
+			.map((block) => block?.value)
 			.join(' ')
 	}
 
@@ -43,7 +50,7 @@ export class LoggerSetting extends PluginSettingTab {
 					block.blocks.find((block) => block.id === id)
 				)
 				.filter((item) => !!item)
-				.map((block) => block.value)
+				.map((block) => block?.value)
 		].join(' ')
 	}
 
@@ -68,12 +75,12 @@ export class LoggerSetting extends PluginSettingTab {
 
 			if (!item) return
 
-			const blockHeader = new Setting(containerEl)
+			const blockItem = new Setting(containerEl)
 			// .setName('')
 			// .setDesc('')
 
 			if (item.type !== 'key')
-				blockHeader.addDropdown((dd) =>
+				blockItem.addDropdown((dd) =>
 					dd
 						.addOptions({
 							text: 'Text',
@@ -88,7 +95,18 @@ export class LoggerSetting extends PluginSettingTab {
 						})
 				)
 
-			blockHeader.addButton((btn) => {
+			if (item.type !== 'key')
+				blockItem.addButton((btn) => {
+					btn.setIcon('copy').onClick(() => {
+						this.blockCopy = item
+						this.plugin.saveSettings()
+
+						this.display()
+						new Notice('Copy block')
+					})
+				})
+
+			blockItem.addButton((btn) => {
 				btn.setIcon('move-up').onClick(() => {
 					const newOrder = [...params.order]
 					;[
@@ -107,7 +125,7 @@ export class LoggerSetting extends PluginSettingTab {
 				})
 			})
 
-			blockHeader.addButton((btn) => {
+			blockItem.addButton((btn) => {
 				btn.setIcon('move-down').onClick(() => {
 					const newOrder = [...params.order]
 					;[
@@ -126,7 +144,7 @@ export class LoggerSetting extends PluginSettingTab {
 				})
 			})
 
-			blockHeader.addText((text) =>
+			blockItem.addText((text) =>
 				text
 					.setPlaceholder('Type key')
 					.setValue(item.name)
@@ -136,7 +154,7 @@ export class LoggerSetting extends PluginSettingTab {
 					})
 			)
 
-			blockHeader.addText((text) =>
+			blockItem.addText((text) =>
 				text
 					.setPlaceholder('Type value')
 					.setValue(item.value)
@@ -147,7 +165,7 @@ export class LoggerSetting extends PluginSettingTab {
 					})
 			)
 
-			blockHeader.addButton((btn) => {
+			blockItem.addButton((btn) => {
 				btn.setIcon('trash-2').onClick(() => {
 					params.blocks = blocks.filter(
 						(item) => item.id !== id
@@ -194,21 +212,37 @@ export class LoggerSetting extends PluginSettingTab {
 
 			this.preview.push({ text: header, block })
 
+			const addNewBlock = (
+				newBlock: Partial<TCustomBlock> = {}
+			) => {
+				const id = uuidv4()
+
+				this.expandedBlocks[block.id] = true
+
+				block.blocks.push({
+					name: '',
+					type: 'text',
+					value: '',
+					...newBlock,
+					id
+				})
+				block.order.push(id)
+				this.plugin.saveSettings()
+				this.display()
+			}
+
+			header.addButton((btn) => {
+				btn
+					.setIcon('clipboard-paste')
+					.onClick(() => {
+						addNewBlock(this.blockCopy)
+					})
+					.setDisabled(!this.blockCopy)
+			})
+
 			header.addButton((btn) => {
 				btn.setIcon('plus').onClick(() => {
-					const id = uuidv4()
-
-					this.expandedBlocks[block.id] = true
-
-					block.blocks.push({
-						id,
-						name: '',
-						type: 'text',
-						value: ''
-					})
-					block.order.push(id)
-					this.plugin.saveSettings()
-					this.display()
+					addNewBlock()
 				})
 			})
 
