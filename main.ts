@@ -131,21 +131,24 @@ export default class LoggerPlugin extends Plugin {
 			this.addCommand({
 				id: block.id,
 				name: block.name,
-				editorCallback: (
-					editor: Editor,
-					view: MarkdownView
-				) => {
+				editorCallback: async (editor: Editor) => {
 					const loggerBlock =
 						this.settings.loggerBlocks.find(
 							(item) => item.name === block.name
 						)
 
-					const globalLog = this.blocksToLog(this.settings)
+					const globalLog = await this.blocksToLog(
+						this.settings
+					)
 					const localLog = loggerBlock
-						? this.blocksToLog(loggerBlock)
+						? await this.blocksToLog(loggerBlock)
 						: ''
-					const log = globalLog + localLog
+					const log = [globalLog, localLog]
+						.filter((item) => !!item)
+						.join(' ')
+
 					this.parseLog(log)
+
 					editor.replaceSelection(log)
 				}
 			})
@@ -154,7 +157,7 @@ export default class LoggerPlugin extends Plugin {
 		new Notice('Successful save')
 	}
 
-	blocksToLog(params: {
+	async blocksToLog(params: {
 		blocks: TCustomBlock[]
 		order: string[]
 	}) {
@@ -165,10 +168,19 @@ export default class LoggerPlugin extends Plugin {
 					(block) => block.id === id
 				)
 				if (!block) return ''
-				if (block.type === 'text') return block.value
-				else if (block.type === 'time')
-					// @ts-ignore
-					return moment().format(block.value)
+
+				switch (block.type) {
+					case 'text':
+					case 'key':
+						return block.value
+					case 'time':
+						// @ts-ignore
+						return moment().format(block.value)
+					case 'link':
+						return block.value
+					default:
+						break
+				}
 			})
 			.join(' ')
 
