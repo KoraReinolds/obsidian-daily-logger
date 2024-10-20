@@ -4,7 +4,9 @@ import {
 	MarkdownView,
 	Modal,
 	Notice,
-	Plugin
+	Plugin,
+	TFile,
+	TFolder
 } from 'obsidian'
 import { LoggerSetting } from 'src/settings'
 import {
@@ -15,8 +17,13 @@ import {
 
 export default class LoggerPlugin extends Plugin {
 	settings: ILoggerSettings
+	tp: any
 
 	async onload() {
+		this.tp =
+			// @ts-ignore
+			this.app.plugins?.plugins['templater-obsidian']
+
 		await this.loadSettings()
 
 		// This creates an icon in the left ribbon.
@@ -140,6 +147,7 @@ export default class LoggerPlugin extends Plugin {
 					const globalLog = await this.blocksToLog(
 						this.settings
 					)
+
 					const localLog = loggerBlock
 						? await this.blocksToLog(loggerBlock)
 						: ''
@@ -162,8 +170,8 @@ export default class LoggerPlugin extends Plugin {
 		order: string[]
 	}) {
 		const { blocks, order } = params
-		const log = order
-			.map((id) => {
+		const log = await Promise.all(
+			order.map((id) => {
 				const block = blocks.find(
 					(block) => block.id === id
 				)
@@ -177,18 +185,58 @@ export default class LoggerPlugin extends Plugin {
 						// @ts-ignore
 						return moment().format(block.value)
 					case 'link':
-						return block.value
+						return new Promise((res) =>
+							this.suggestFileByPath(block.value).then(
+								(file) => res(`[[${file.basename}]]`)
+							)
+						)
 					default:
 						break
 				}
 			})
-			.join(' ')
+		)
 
-		return log
+		return (await Promise.all(log)).join(' ')
 	}
 
 	parseLog(log: string) {
 		console.log(log)
+	}
+
+	isFile(file: any): file is TFile {
+		return file instanceof TFile
+	}
+
+	isFolder(file: any): file is TFolder {
+		return file instanceof TFolder
+	}
+
+	async getFolderByPath(
+		path: string
+	): Promise<TFolder | null> {
+		const folder =
+			this.app.vault.getAbstractFileByPath(path)
+		if (this.isFolder(folder)) return folder
+		return null
+	}
+
+	async suggestFileByPath(path: string): Promise<TFile> {
+		const file = await this.getFolderByPath(path)
+		if (this.isFolder(file)) {
+			const files = file.children.filter((f) =>
+				this.isFile(f)
+			)
+			// @ts-ignore
+			files.sort((a, b) => b.stat.mtime - a.stat.mtime)
+
+			// @ts-ignore
+			return await this.tp.templater.current_functions_object.system.suggester(
+				(file: TFile) => file.name,
+				files
+			)
+		} else {
+			new Notice(`Can't find '${path}' folder`)
+		}
 	}
 }
 
