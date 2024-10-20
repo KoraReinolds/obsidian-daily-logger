@@ -135,25 +135,48 @@ export default class LoggerPlugin extends Plugin {
 					editor: Editor,
 					view: MarkdownView
 				) => {
-					const string = this.settings.order
-						.map((id) => {
-							const block = this.settings.blocks.find(
-								(block) => block.id === id
-							)
-							if (!block) return ''
-							if (block.type === 'text') return block.value
-							else if (block.type === 'time')
-								// @ts-ignore
-								return moment().format(block.value)
-						})
-						.join(' ')
+					const loggerBlock =
+						this.settings.loggerBlocks.find(
+							(item) => item.name === block.name
+						)
 
-					editor.replaceSelection(string)
+					const globalLog = this.blocksToLog(this.settings)
+					const localLog = loggerBlock
+						? this.blocksToLog(loggerBlock)
+						: ''
+					const log = globalLog + localLog
+					this.parseLog(log)
+					editor.replaceSelection(log)
 				}
 			})
 		)
 
 		new Notice('Successful save')
+	}
+
+	blocksToLog(params: {
+		blocks: TCustomBlock[]
+		order: string[]
+	}) {
+		const { blocks, order } = params
+		const log = order
+			.map((id) => {
+				const block = blocks.find(
+					(block) => block.id === id
+				)
+				if (!block) return ''
+				if (block.type === 'text') return block.value
+				else if (block.type === 'time')
+					// @ts-ignore
+					return moment().format(block.value)
+			})
+			.join(' ')
+
+		return log
+	}
+
+	parseLog(log: string) {
+		console.log(log)
 	}
 }
 
