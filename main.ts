@@ -20,6 +20,11 @@ export default class LoggerPlugin extends Plugin {
 	tp: any
 
 	async onload() {
+		const cssContent = await this.loadCSSFile(
+			'src/assets/index.css'
+		)
+		this.injectCSS(cssContent)
+
 		this.tp =
 			// @ts-ignore
 			this.app.plugins?.plugins['templater-obsidian']
@@ -236,6 +241,31 @@ export default class LoggerPlugin extends Plugin {
 			)
 		} else {
 			new Notice(`Can't find '${path}' folder`)
+		}
+	}
+
+	async loadCSSFile(filename: string): Promise<string> {
+		const path = `${this.manifest.dir}/${filename}`
+		const data = await this.app.vault.adapter.read(path)
+		return data
+	}
+
+	injectCSS(cssContent: string) {
+		const style = document.createElement('style')
+		style.type = 'text/css'
+		style.id = `plugin-styles-${this.manifest.id}`
+		document
+			.querySelectorAll(`#${style.id}`)
+			.forEach((style) => style.remove())
+		style.innerHTML = cssContent
+		document.head.appendChild(style)
+	}
+
+	removeInjectedCSS() {
+		const id = `plugin-styles-${this.manifest.id}`
+		const style = document.getElementById(id)
+		if (style) {
+			style.remove()
 		}
 	}
 }

@@ -273,11 +273,66 @@ export class LoggerSetting extends PluginSettingTab {
 		})
 	}
 
+	displayLogs(containerEl: HTMLElement) {
+		containerEl.innerHTML = 'Log content'
+	}
+
+	displayTemplates(containerEl: HTMLElement) {
+		containerEl.innerHTML = 'Templates content'
+	}
+
 	display(): void {
 		const { containerEl } = this
 		containerEl.empty()
 		const list = this.settings.loggerBlocks
 		this.recalculateGlobalPrefix()
+
+		const tabs = [
+			{ name: 'Logs', render: this.displayLogs },
+			{ name: 'Templates', render: this.displayTemplates }
+		]
+		let activeTab = tabs[0]
+
+		const header = containerEl.createDiv()
+		const ul = header.createEl('ul', {
+			cls: 'daily-logger-tabs'
+		})
+		const content = containerEl.createEl('div')
+
+		// Function to update active tab
+		function updateActiveTab(tab: {
+			name: string
+			render: (el: HTMLElement) => void
+		}) {
+			activeTab = tab
+			header
+				.querySelectorAll('.daily-logger-tabs li')
+				.forEach((li: HTMLElement) => {
+					li.classList.toggle(
+						'active',
+						li.innerText === tab.name
+					)
+				})
+			tab.render(content)
+
+			//// Logic to show/hide content based on tab
+			//header
+			//	.querySelectorAll('.daily-logger-tab-content')
+			//	.forEach((content: HTMLElement) => {
+			//		content.style.display =
+			//			content.id === tabName ? 'block' : 'none'
+			//	})
+		}
+
+		for (const tab of tabs) {
+			const li = ul.createEl('li')
+			li.innerHTML = tab.name
+			li.addEventListener('click', () => {
+				updateActiveTab(tab)
+			})
+		}
+
+		updateActiveTab(activeTab)
 
 		new Setting(containerEl)
 			.setName('Global blocks')
