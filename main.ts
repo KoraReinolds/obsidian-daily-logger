@@ -225,7 +225,7 @@ export default class LoggerPlugin extends Plugin {
 		return null
 	}
 
-	async suggestFileByPath(path: string): Promise<TFile> {
+	async suggestFleByPath(path: string): Promise<TFile> {
 		const file = await this.getFolderByPath(path)
 		if (this.isFolder(file)) {
 			const files = file.children.filter((f) =>
