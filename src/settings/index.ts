@@ -16,13 +16,15 @@ import {
 
 type TTab = {
 	name: string
-	render: (el: HTMLElement) => void
+	render?: (el: HTMLElement) => void
+	onClick?: () => void
 }
 
 type TTabs = {
-	cls: string
 	active?: TTab
 	list: TTab[]
+	container?: HTMLElement
+	contentContainer?: HTMLElement
 }
 
 export class LoggerSetting extends PluginSettingTab {
@@ -33,6 +35,7 @@ export class LoggerSetting extends PluginSettingTab {
 	globalPrefix = ''
 	globalBlockCopy: TCustomBlock
 	blockCopy: TCustomBlock
+	openedBlockId?: string
 	globalTabs: TTabs = {
 		list: [
 			{ name: 'Logs', render: this.displayLogs.bind(this) },
@@ -40,8 +43,7 @@ export class LoggerSetting extends PluginSettingTab {
 				name: 'Templates',
 				render: this.displayTemplates.bind(this)
 			}
-		],
-		cls: 'daily-logger-tabs'
+		]
 	}
 
 	constructor(app: App, plugin: MemoPlugin) {
@@ -53,38 +55,60 @@ export class LoggerSetting extends PluginSettingTab {
 		}
 	}
 
-	displayTabs(containerEl: HTMLElement, tabs: TTabs) {
-		const container = containerEl.createDiv()
-		const ul = container.createEl('ul', {
-			cls: tabs.cls
+	addNewLog() {
+		const id = uuidv4()
+		const name = 'New log'
+
+		this.settings.loggerBlocks.push({
+			id,
+			name,
+			blocks: [],
+			order: []
 		})
-		const content = container.createEl('div')
 
-		const updateActiveTab = (tab?: TTab) => {
-			if (!tab) return
+		this.plugin.saveSettings()
+	}
 
-			tabs.active = tab
+	displayTab(tabs: TTabs) {
+		if (!tabs.active) return
 
-			container
-				.querySelectorAll('.daily-logger-tabs li')
-				.forEach((li: HTMLElement) => {
-					li.classList.toggle(
-						'active',
-						li.innerText === tab.name
-					)
-				})
-			tab.render(content)
+		tabs.container
+			?.querySelectorAll('.daily-logger-tabs li')
+			.forEach((li: HTMLElement) => {
+				li.classList.toggle(
+					'active',
+					li.innerText === tabs.active?.name
+				)
+			})
+
+		if (tabs.contentContainer) {
+			tabs.active.render?.(tabs.contentContainer)
 		}
+	}
+
+	displayTabs(containerEl: HTMLElement, tabs: TTabs) {
+		tabs.container = containerEl.createDiv()
+		const ul = tabs.container.createEl('ul', {
+			cls: 'daily-logger-tabs '
+		})
+		tabs.contentContainer = tabs.container.createEl('div')
 
 		for (const tab of tabs.list) {
 			const li = ul.createEl('li')
 			li.innerHTML = tab.name
 			li.addEventListener('click', () => {
-				updateActiveTab(tab)
+				if (tab.render) {
+					tabs.active = tab
+					this.displayTab(tabs)
+				}
+
+				if (tab.onClick) {
+					tab.onClick()
+				}
 			})
 		}
 
-		updateActiveTab(tabs.active)
+		this.displayTab(tabs)
 	}
 
 	display(): void {
@@ -133,6 +157,19 @@ export class LoggerSetting extends PluginSettingTab {
 		},
 		containerEl: HTMLElement
 	) {
+		new Setting(containerEl)
+			.setName('Command name')
+			.setDesc('Name of command for call this log')
+			.addText(
+				(text) => text.setPlaceholder('Type name')
+				//.setValue(block.name)
+				//.onChange((value) => {
+				//	block.name = value
+				//
+				//	this.plugin.saveSettings()
+				//})
+			)
+
 		const { order, blocks } = params
 
 		order.forEach((id, i) => {
@@ -250,6 +287,9 @@ export class LoggerSetting extends PluginSettingTab {
 
 	displayBlocks(containerEl: HTMLElement) {
 		containerEl.empty()
+
+		containerEl.classList.add('daily-logger-blocks')
+
 		this.preview = []
 
 		const list = this.settings.loggerBlocks
@@ -257,23 +297,9 @@ export class LoggerSetting extends PluginSettingTab {
 		list.forEach((block) => {
 			const id = block.id
 
-			new Setting(containerEl)
-				.setName('Command name')
-				.setDesc('Name of command for call this log')
-				.addText((text) =>
-					text
-						.setPlaceholder('Type name')
-						.setValue(block.name)
-						.onChange((value) => {
-							block.name = value
-
-							this.plugin.saveSettings()
-						})
-				)
-
-			const header = new Setting(containerEl).setName(
-				this.calculateText(block)
-			)
+			const header = new Setting(containerEl)
+				.setName(block.name)
+				.setDesc(this.calculateText(block))
 
 			this.preview.push({ text: header, block })
 
@@ -307,18 +333,25 @@ export class LoggerSetting extends PluginSettingTab {
 
 			header.addButton((btn) => {
 				btn.setIcon('plus').onClick(() => {
-					addNewBlock()
+					this.addNewLog()
+					this.display()
 				})
 			})
 
 			header.addButton((btn) => {
-				const hidden = !this.expandedBlocks[id]
+				const hidden = !(this.openedBlockId === id)
+
 				btn
 					.setIcon(hidden ? 'eye' : 'eye-off')
 					.onClick(() => {
-						this.expandedBlocks[id] = hidden
+						this.openedBlockId =
+							this.openedBlockId === id ? undefined : id
+
 						this.display()
 					})
+				btn.buttonEl.innerHTML += `<span style=margin-left:8px;>${
+					hidden ? 'Show' : 'Hide'
+				}</span>`
 			})
 
 			header.addButton((btn) => {
@@ -332,14 +365,18 @@ export class LoggerSetting extends PluginSettingTab {
 				})
 			})
 
-			if (!this.expandedBlocks[id]) return
-
-			this.displayOrderedBlocks(block, containerEl)
+			if (this.openedBlockId === id) {
+				this.displayOrderedBlocks(block, containerEl)
+			}
 		})
 	}
 
 	displayLogs(containerEl: HTMLElement) {
-		containerEl.innerHTML = 'Log content'
+		containerEl.innerHTML = ''
+
+		const blocks = containerEl.createDiv()
+
+		this.displayBlocks(blocks)
 	}
 
 	displayTemplates(containerEl: HTMLElement) {
