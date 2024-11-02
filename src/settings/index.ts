@@ -146,7 +146,8 @@ export class LoggerSetting extends PluginSettingTab {
 	displayPreview() {
 		this.recalculateGlobalPrefix()
 		this.preview.forEach(({ text, block }) => {
-			text.setName(this.calculateText(block))
+			text.setName(block.name)
+			text.setDesc(this.calculateText(block))
 		})
 	}
 
@@ -154,20 +155,24 @@ export class LoggerSetting extends PluginSettingTab {
 		params: {
 			order: string[]
 			blocks: TCustomBlock[]
+			name: string
+			id: string
 		},
 		containerEl: HTMLElement
 	) {
 		new Setting(containerEl)
 			.setName('Command name')
 			.setDesc('Name of command for call this log')
-			.addText(
-				(text) => text.setPlaceholder('Type name')
-				//.setValue(block.name)
-				//.onChange((value) => {
-				//	block.name = value
-				//
-				//	this.plugin.saveSettings()
-				//})
+			.addText((text) =>
+				text
+					.setPlaceholder('Type name')
+					.setValue(params.name)
+					.onChange((value) => {
+						params.name = value
+
+						this.plugin.saveSettings()
+						this.displayPreview()
+					})
 			)
 
 		const { order, blocks } = params
