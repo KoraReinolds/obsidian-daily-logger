@@ -10,18 +10,15 @@ export type TCustomBlock = {
 export type TLoggerBlock = {
 	id: string
 	name: string
-	blocks: TCustomBlock[]
 	order: string[]
 }
 
 export interface ILoggerSettings {
-	blocks: TCustomBlock[]
-	order: string[]
+	blocks: Record<string, TCustomBlock>
 	loggerBlocks: TLoggerBlock[]
 }
 
 export const DEFAULT_SETTINGS: ILoggerSettings = {
-	blocks: [],
-	order: [],
+	blocks: {},
 	loggerBlocks: []
 }

@@ -62,7 +62,6 @@ export class LoggerSetting extends PluginSettingTab {
 		this.settings.loggerBlocks.push({
 			id,
 			name,
-			blocks: [],
 			order: []
 		})
 
@@ -120,24 +119,22 @@ export class LoggerSetting extends PluginSettingTab {
 	}
 
 	recalculateGlobalPrefix() {
-		this.globalPrefix = this.settings.order
-			.map((id) =>
-				this.settings.blocks.find(
-					(block) => block.id === id
-				)
-			)
-			.filter((item) => !!item)
-			.map((block) => block?.value)
-			.join(' ')
+		//this.globalPrefix = this.settings.order
+		//	.map((id) =>
+		//		this.settings.blocks.find(
+		//			(block) => block.id === id
+		//		)
+		//	)
+		//	.filter((item) => !!item)
+		//	.map((block) => block?.value)
+		//	.join(' ')
 	}
 
 	calculateText(block: TLoggerBlock) {
 		return [
 			this.globalPrefix,
 			...block.order
-				.map((id) =>
-					block.blocks.find((block) => block.id === id)
-				)
+				.map((id) => this.settings.blocks[id])
 				.filter((item) => !!item)
 				.map((block) => block?.value)
 		].join(' ')
@@ -154,7 +151,6 @@ export class LoggerSetting extends PluginSettingTab {
 	displayOrderedBlocks(
 		params: {
 			order: string[]
-			blocks: TCustomBlock[]
 			name: string
 			id: string
 		},
@@ -175,10 +171,11 @@ export class LoggerSetting extends PluginSettingTab {
 					})
 			)
 
-		const { order, blocks } = params
+		const { order } = params
+		const blocks = this.settings.blocks
 
 		order.forEach((id, i) => {
-			const item = blocks.find((item) => item.id === id)
+			const item = blocks[id]
 
 			if (!item) return
 
@@ -274,9 +271,8 @@ export class LoggerSetting extends PluginSettingTab {
 
 			blockItem.addButton((btn) => {
 				btn.setIcon('trash-2').onClick(() => {
-					params.blocks = blocks.filter(
-						(item) => item.id !== id
-					)
+					delete this.settings.blocks[id]
+
 					params.order = order.filter(
 						(blockId) => blockId !== id
 					)
@@ -313,13 +309,13 @@ export class LoggerSetting extends PluginSettingTab {
 
 				this.expandedBlocks[block.id] = true
 
-				block.blocks.push({
+				this.settings.blocks[id] = {
 					name: '',
 					type: 'text',
 					value: '',
 					...newBlock,
 					id
-				})
+				}
 				block.order.push(id)
 				this.plugin.saveSettings()
 				this.display()
@@ -409,45 +405,45 @@ export class LoggerSetting extends PluginSettingTab {
 						list.push({
 							id: uuidv4(),
 							name: '',
-							blocks: [
-								{
-									id: blockId,
-									name: '',
-									type: 'key',
-									value: ''
-								}
-							],
+							//blocks: [
+							//	{
+							//		id: blockId,
+							//		name: '',
+							//		type: 'key',
+							//		value: ''
+							//	}
+							//],
 							order: [blockId]
 						})
 						this.plugin.saveSettings()
 						this.display()
 					})
 			)
-			.addButton((btn) =>
-				btn.setIcon('plus').onClick(async () => {
-					const id = uuidv4()
-					this.expandedBlocks['global'] = true
-
-					this.settings.blocks.push({
-						id,
-						name: '',
-						type: 'text',
-						value: ''
-					})
-					this.settings.order.push(id)
-					this.plugin.saveSettings()
-					this.display()
-				})
-			)
-			.addButton((btn) => {
-				const hidden = !this.expandedBlocks['global']
-				btn
-					.setIcon(hidden ? 'eye' : 'eye-off')
-					.onClick(() => {
-						this.expandedBlocks['global'] = hidden
-						this.display()
-					})
-			})
+			//.addButton((btn) =>
+			//	btn.setIcon('plus').onClick(async () => {
+			//		const id = uuidv4()
+			//		this.expandedBlocks['global'] = true
+			//
+			//		this.settings.blocks[id] = {
+			//			id,
+			//			name: '',
+			//			type: 'text',
+			//			value: ''
+			//		}
+			//		this.settings.order.push(id)
+			//		this.plugin.saveSettings()
+			//		this.display()
+			//	})
+			//)
+			//.addButton((btn) => {
+			//	const hidden = !this.expandedBlocks['global']
+			//	btn
+			//		.setIcon(hidden ? 'eye' : 'eye-off')
+			//		.onClick(() => {
+			//			this.expandedBlocks['global'] = hidden
+			//			this.display()
+			//		})
+			//})
 			.addButton((btn) => {
 				btn
 					.setIcon('save')
@@ -457,8 +453,8 @@ export class LoggerSetting extends PluginSettingTab {
 					})
 			})
 
-		if (this.expandedBlocks['global'])
-			this.displayOrderedBlocks(this.settings, containerEl)
+		//if (this.expandedBlocks['global'])
+		//	this.displayOrderedBlocks(this.settings, containerEl)
 
 		const blocks = containerEl.createDiv()
 
