@@ -293,8 +293,6 @@ export class LoggerSetting extends PluginSettingTab {
 	displayBlocks(containerEl: HTMLElement) {
 		containerEl.empty()
 
-		containerEl.classList.add('daily-logger-blocks')
-
 		this.preview = []
 
 		const list = this.settings.loggerBlocks
@@ -379,7 +377,18 @@ export class LoggerSetting extends PluginSettingTab {
 	displayLogs(containerEl: HTMLElement) {
 		containerEl.innerHTML = ''
 
-		const blocks = containerEl.createDiv()
+		const logsContent = containerEl.createDiv()
+
+		logsContent.classList.add('daily-logger-blocks')
+
+		new Setting(logsContent).addButton((btn) =>
+			btn.setButtonText('Add New Log').onClick(() => {
+				this.addNewLog()
+				this.display()
+			})
+		)
+
+		const blocks = logsContent.createDiv()
 
 		this.displayBlocks(blocks)
 	}
