@@ -55,17 +55,27 @@ export class LoggerSetting extends PluginSettingTab {
 		}
 	}
 
+	addNewBlock(params: Partial<TCustomBlock> = {}) {
+		const id = uuidv4()
+
+		this.settings.blocks[id] = {
+			id: id,
+			type: 'text',
+			name: '',
+			value: '',
+			...params
+		}
+
+		return id
+	}
+
 	addNewLog() {
 		const id = uuidv4()
 		const name = 'New log'
-		const keyId = uuidv4()
-
-		this.settings.blocks[keyId] = {
-			id: keyId,
+		const keyId = this.addNewBlock({
 			type: 'key',
-			name: 'key',
-			value: ''
-		}
+			name: 'key'
+		})
 
 		this.settings.loggerBlocks.push({
 			id,
@@ -340,7 +350,7 @@ export class LoggerSetting extends PluginSettingTab {
 
 			header.addButton((btn) => {
 				btn.setIcon('plus').onClick(() => {
-					this.addNewLog()
+					block.order.push(this.addNewBlock())
 					this.display()
 				})
 			})
