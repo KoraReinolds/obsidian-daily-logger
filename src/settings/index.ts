@@ -50,8 +50,6 @@ export class LoggerSetting extends PluginSettingTab {
 		super(app, plugin)
 		this.plugin = plugin
 		this.settings = this.plugin.settings
-		this.plugin.settings.blocks = {}
-		this.plugin.saveSettings()
 		if (!this.globalTabs.active) {
 			this.globalTabs.active = this.globalTabs.list[0]
 		}
@@ -353,6 +351,7 @@ export class LoggerSetting extends PluginSettingTab {
 			header.addButton((btn) => {
 				btn.setIcon('plus').onClick(() => {
 					block.order.push(this.addNewBlock())
+					this.openedBlockId = id
 					this.display()
 				})
 			})
