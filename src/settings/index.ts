@@ -8,6 +8,7 @@ import {
 import { v4 as uuidv4 } from 'uuid'
 import LoggerPlugin from '../../main'
 import {
+	ELoggerType,
 	ILoggerSettings,
 	TBlockType,
 	TCustomBlock,
@@ -69,7 +70,7 @@ export class LoggerSetting extends PluginSettingTab {
 		return id
 	}
 
-	addNewLog(list: TLoggerBlock[]) {
+	addNewLog(list: TLoggerBlock[], type: ELoggerType) {
 		const id = uuidv4()
 		const name = 'New log'
 		const keyId = this.addNewBlock({
@@ -79,6 +80,7 @@ export class LoggerSetting extends PluginSettingTab {
 
 		list.push({
 			id,
+			type,
 			name,
 			order: [keyId]
 		})
@@ -131,35 +133,19 @@ export class LoggerSetting extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this
 		containerEl.empty()
-		this.recalculateGlobalPrefix()
 
 		this.displayTabs(containerEl, this.globalTabs)
 	}
 
-	recalculateGlobalPrefix() {
-		//this.globalPrefix = this.settings.order
-		//	.map((id) =>
-		//		this.settings.blocks.find(
-		//			(block) => block.id === id
-		//		)
-		//	)
-		//	.filter((item) => !!item)
-		//	.map((block) => block?.value)
-		//	.join(' ')
-	}
-
 	calculateText(block: TLoggerBlock) {
-		return [
-			this.globalPrefix,
-			...block.order
-				.map((id) => this.settings.blocks[id])
-				.filter((item) => !!item)
-				.map((block) => block?.value)
-		].join(' ')
+		return block.order
+			.map((id) => this.settings.blocks[id])
+			.filter((item) => !!item)
+			.map((block) => block?.value)
+			.join(' ')
 	}
 
 	displayPreview() {
-		this.recalculateGlobalPrefix()
 		this.preview.forEach(({ text, block }) => {
 			text.setName(block.name)
 			text.setDesc(this.calculateText(block))
@@ -414,7 +400,7 @@ export class LoggerSetting extends PluginSettingTab {
 
 		new Setting(logsContent).addButton((btn) =>
 			btn.setButtonText('Add New Log').onClick(() => {
-				this.addNewLog(blocks)
+				this.addNewLog(blocks, ELoggerType.LOGGER)
 				this.display()
 			})
 		)
@@ -434,7 +420,7 @@ export class LoggerSetting extends PluginSettingTab {
 
 		new Setting(logsContent).addButton((btn) =>
 			btn.setButtonText('Add New Template').onClick(() => {
-				this.addNewLog(blocks)
+				this.addNewLog(blocks, ELoggerType.TEMPLATE)
 				this.display()
 			})
 		)

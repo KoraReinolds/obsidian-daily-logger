@@ -1,5 +1,10 @@
 export type TBlockType = 'key' | 'time' | 'link' | 'text'
 
+export enum ELoggerType {
+	TEMPLATE = 'template',
+	LOGGER = 'logger'
+}
+
 export type TCustomBlock = {
 	id: string
 	name: string
@@ -9,6 +14,7 @@ export type TCustomBlock = {
 
 export type TLoggerBlock = {
 	id: string
+	type: ELoggerType
 	name: string
 	order: string[]
 }
