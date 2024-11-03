@@ -58,11 +58,19 @@ export class LoggerSetting extends PluginSettingTab {
 	addNewLog() {
 		const id = uuidv4()
 		const name = 'New log'
+		const keyId = uuidv4()
+
+		this.settings.blocks[keyId] = {
+			id: keyId,
+			type: 'key',
+			name: 'key',
+			value: ''
+		}
 
 		this.settings.loggerBlocks.push({
 			id,
 			name,
-			order: []
+			order: [keyId]
 		})
 
 		this.plugin.saveSettings()
