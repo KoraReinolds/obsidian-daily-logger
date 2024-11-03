@@ -69,7 +69,7 @@ export class LoggerSetting extends PluginSettingTab {
 		return id
 	}
 
-	addNewLog() {
+	addNewLog(list: TLoggerBlock[]) {
 		const id = uuidv4()
 		const name = 'New log'
 		const keyId = this.addNewBlock({
@@ -77,7 +77,7 @@ export class LoggerSetting extends PluginSettingTab {
 			name: 'key'
 		})
 
-		this.settings.loggerBlocks.push({
+		list.push({
 			id,
 			name,
 			order: [keyId]
@@ -304,12 +304,13 @@ export class LoggerSetting extends PluginSettingTab {
 		})
 	}
 
-	displayBlocks(containerEl: HTMLElement) {
+	displayBlocks(
+		containerEl: HTMLElement,
+		list: TLoggerBlock[]
+	) {
 		containerEl.empty()
 
 		this.preview = []
-
-		const list = this.settings.loggerBlocks
 
 		list.forEach((block) => {
 			const id = block.id
@@ -320,30 +321,40 @@ export class LoggerSetting extends PluginSettingTab {
 
 			this.preview.push({ text: header, block })
 
-			const addNewBlock = (
-				newBlock: Partial<TCustomBlock> = {}
-			) => {
-				const id = uuidv4()
+			header.addButton((btn) => {
+				btn.setIcon('layout-template').onClick(() => {
+					const blockCopy = { ...block, id: uuidv4() }
+					const orderCopy: string[] = []
 
-				this.expandedBlocks[block.id] = true
+					blockCopy.order
+						.map((id) => this.settings.blocks[id])
+						.filter(
+							(block) => block && block.type !== 'key'
+						)
+						.forEach((item) => {
+							const id = uuidv4()
+							this.settings.blocks[id] = {
+								...item,
+								id
+							}
+							orderCopy.push(id)
+						})
 
-				this.settings.blocks[id] = {
-					name: '',
-					type: 'text',
-					value: '',
-					...newBlock,
-					id
-				}
-				block.order.push(id)
-				this.plugin.saveSettings()
-				this.display()
-			}
+					blockCopy.order = orderCopy
+
+					this.settings.templateBlocks.push(blockCopy)
+					this.plugin.saveSettings()
+
+					this.display()
+					new Notice('Template created')
+				})
+			})
 
 			header.addButton((btn) => {
 				btn
 					.setIcon('clipboard-paste')
 					.onClick(() => {
-						addNewBlock(this.blockCopy)
+						this.addNewBlock(this.blockCopy)
 					})
 					.setDisabled(!this.blockCopy)
 			})
@@ -397,90 +408,39 @@ export class LoggerSetting extends PluginSettingTab {
 		containerEl.innerHTML = ''
 
 		const logsContent = containerEl.createDiv()
+		const blocks = this.settings.loggerBlocks
 
 		logsContent.classList.add('daily-logger-blocks')
 
 		new Setting(logsContent).addButton((btn) =>
 			btn.setButtonText('Add New Log').onClick(() => {
-				this.addNewLog()
+				this.addNewLog(blocks)
 				this.display()
 			})
 		)
 
-		const blocks = logsContent.createDiv()
+		const el = logsContent.createDiv()
 
-		this.displayBlocks(blocks)
+		this.displayBlocks(el, blocks)
 	}
 
 	displayTemplates(containerEl: HTMLElement) {
 		containerEl.innerHTML = ''
 
-		const list = this.settings.loggerBlocks
+		const logsContent = containerEl.createDiv()
+		const blocks = this.settings.templateBlocks
 
-		new Setting(containerEl)
-			.setName('Global blocks')
-			.setDesc('Define rules for each log msg')
-			.addButton((btn) =>
-				btn
-					.setButtonText('Add new block')
-					.onClick(async () => {
-						const blockId = uuidv4()
-						list.push({
-							id: uuidv4(),
-							name: '',
-							//blocks: [
-							//	{
-							//		id: blockId,
-							//		name: '',
-							//		type: 'key',
-							//		value: ''
-							//	}
-							//],
-							order: [blockId]
-						})
-						this.plugin.saveSettings()
-						this.display()
-					})
-			)
-			//.addButton((btn) =>
-			//	btn.setIcon('plus').onClick(async () => {
-			//		const id = uuidv4()
-			//		this.expandedBlocks['global'] = true
-			//
-			//		this.settings.blocks[id] = {
-			//			id,
-			//			name: '',
-			//			type: 'text',
-			//			value: ''
-			//		}
-			//		this.settings.order.push(id)
-			//		this.plugin.saveSettings()
-			//		this.display()
-			//	})
-			//)
-			//.addButton((btn) => {
-			//	const hidden = !this.expandedBlocks['global']
-			//	btn
-			//		.setIcon(hidden ? 'eye' : 'eye-off')
-			//		.onClick(() => {
-			//			this.expandedBlocks['global'] = hidden
-			//			this.display()
-			//		})
-			//})
-			.addButton((btn) => {
-				btn
-					.setIcon('save')
-					.setCta()
-					.onClick(() => {
-						this.plugin.saveAll()
-					})
+		logsContent.classList.add('daily-logger-blocks')
+
+		new Setting(logsContent).addButton((btn) =>
+			btn.setButtonText('Add New Template').onClick(() => {
+				this.addNewLog(blocks)
+				this.display()
 			})
+		)
 
-		//if (this.expandedBlocks['global'])
-		//	this.displayOrderedBlocks(this.settings, containerEl)
+		const el = logsContent.createDiv()
 
-		const blocks = containerEl.createDiv()
-
-		this.displayBlocks(blocks)
+		this.displayBlocks(el, blocks)
 	}
 }

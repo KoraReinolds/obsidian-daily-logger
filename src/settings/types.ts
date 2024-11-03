@@ -16,10 +16,11 @@ export type TLoggerBlock = {
 export interface ILoggerSettings {
 	blocks: Record<string, TCustomBlock>
 	loggerBlocks: TLoggerBlock[]
+	templateBlocks: TLoggerBlock[]
 }
 
 export const DEFAULT_SETTINGS: ILoggerSettings = {
 	blocks: {},
-
-	loggerBlocks: []
+	loggerBlocks: [],
+	templateBlocks: []
 }
