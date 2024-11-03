@@ -50,6 +50,8 @@ export class LoggerSetting extends PluginSettingTab {
 		super(app, plugin)
 		this.plugin = plugin
 		this.settings = this.plugin.settings
+		this.plugin.settings.blocks = {}
+		this.plugin.saveSettings()
 		if (!this.globalTabs.active) {
 			this.globalTabs.active = this.globalTabs.list[0]
 		}
@@ -243,7 +245,6 @@ export class LoggerSetting extends PluginSettingTab {
 					params.order = newOrder
 
 					this.plugin.saveSettings()
-					this.displayPreview()
 					this.display()
 				})
 			})
@@ -263,7 +264,6 @@ export class LoggerSetting extends PluginSettingTab {
 					params.order = newOrder
 
 					this.plugin.saveSettings()
-					// this.displayPreview()
 					this.display()
 				})
 			})
@@ -375,6 +375,10 @@ export class LoggerSetting extends PluginSettingTab {
 
 			header.addButton((btn) => {
 				btn.setIcon('trash-2').onClick(() => {
+					block.order.forEach(
+						(id) => delete this.settings.blocks[id]
+					)
+
 					this.settings.loggerBlocks = list.filter(
 						(item) => item.id !== id
 					)
