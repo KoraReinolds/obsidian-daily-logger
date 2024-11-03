@@ -189,6 +189,7 @@ export class LoggerSetting extends PluginSettingTab {
 					})
 			)
 
+		console.log(params)
 		const { order } = params
 		const blocks = this.settings.blocks
 
@@ -196,7 +197,6 @@ export class LoggerSetting extends PluginSettingTab {
 			const item = blocks[id]
 
 			if (!item) return
-
 			const blockItem = new Setting(containerEl)
 			// .setName('')
 			// .setDesc('')
@@ -230,33 +230,35 @@ export class LoggerSetting extends PluginSettingTab {
 
 			blockItem.addButton((btn) => {
 				btn.setIcon('move-up').onClick(() => {
+					const item = params.order[i]
 					const newOrder = [...params.order]
-					;[
-						newOrder[i],
-						newOrder[i ? i - 1 : newOrder.length]
-					] = [
-						newOrder[i ? i - 1 : newOrder.length],
-						newOrder[i]
-					]
+
+					newOrder.splice(i, 1)
+					newOrder.splice(
+						i ? i - 1 : params.order.length,
+						0,
+						item
+					)
 
 					params.order = newOrder
 
 					this.plugin.saveSettings()
-					// this.displayPreview()
+					this.displayPreview()
 					this.display()
 				})
 			})
 
 			blockItem.addButton((btn) => {
 				btn.setIcon('move-down').onClick(() => {
+					const item = params.order[i]
 					const newOrder = [...params.order]
-					;[
-						newOrder[i],
-						newOrder[(i + 1) % newOrder.length]
-					] = [
-						newOrder[(i + 1) % newOrder.length],
-						newOrder[i]
-					]
+
+					newOrder.splice(i, 1)
+					newOrder.splice(
+						i === params.order.length - 1 ? 0 : i + 1,
+						0,
+						item
+					)
 
 					params.order = newOrder
 
@@ -373,7 +375,7 @@ export class LoggerSetting extends PluginSettingTab {
 
 			header.addButton((btn) => {
 				btn.setIcon('trash-2').onClick(() => {
-					this.plugin.settings.loggerBlocks = list.filter(
+					this.settings.loggerBlocks = list.filter(
 						(item) => item.id !== id
 					)
 

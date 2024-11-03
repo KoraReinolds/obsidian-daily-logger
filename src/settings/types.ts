@@ -20,5 +20,6 @@ export interface ILoggerSettings {
 
 export const DEFAULT_SETTINGS: ILoggerSettings = {
 	blocks: {},
+
 	loggerBlocks: []
 }

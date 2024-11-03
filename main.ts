@@ -122,6 +122,7 @@ export default class LoggerPlugin extends Plugin {
 	}
 
 	async saveSettings() {
+		console.log(this.settings)
 		await this.saveData(this.settings)
 	}
 
