@@ -8,25 +8,14 @@ import {
 import { v4 as uuidv4 } from 'uuid'
 import LoggerPlugin from '../../main'
 import {
-	ELoggerType,
 	ILoggerSettings,
-	TBlockType,
+	TLoggerBlock,
 	TCustomBlock,
-	TLoggerBlock
+	ELoggerType,
+	TBlockType,
+	TTabs
 } from './types'
-
-type TTab = {
-	name: string
-	render?: (el: HTMLElement) => void
-	onClick?: () => void
-}
-
-type TTabs = {
-	active?: TTab
-	list: TTab[]
-	container?: HTMLElement
-	contentContainer?: HTMLElement
-}
+import { displayTabs } from './tabs'
 
 export class LoggerSetting extends PluginSettingTab {
 	plugin: LoggerPlugin
@@ -37,7 +26,7 @@ export class LoggerSetting extends PluginSettingTab {
 	globalBlockCopy: TCustomBlock
 	blockCopy: TCustomBlock
 	openedBlockId?: string
-	globalTabs: TTabs = {
+	tabs: TTabs = {
 		list: [
 			{ name: 'Logs', render: this.displayLogs.bind(this) },
 			{
@@ -51,8 +40,8 @@ export class LoggerSetting extends PluginSettingTab {
 		super(app, plugin)
 		this.plugin = plugin
 		this.settings = this.plugin.settings
-		if (!this.globalTabs.active) {
-			this.globalTabs.active = this.globalTabs.list[0]
+		if (!this.tabs.active) {
+			this.tabs.active = this.tabs.list[0]
 		}
 	}
 
@@ -88,53 +77,11 @@ export class LoggerSetting extends PluginSettingTab {
 		this.plugin.saveSettings()
 	}
 
-	displayTab(tabs: TTabs) {
-		if (!tabs.active) return
-
-		tabs.container
-			?.querySelectorAll('.daily-logger-tabs li')
-			.forEach((li: HTMLElement) => {
-				li.classList.toggle(
-					'active',
-					li.innerText === tabs.active?.name
-				)
-			})
-
-		if (tabs.contentContainer) {
-			tabs.active.render?.(tabs.contentContainer)
-		}
-	}
-
-	displayTabs(containerEl: HTMLElement, tabs: TTabs) {
-		tabs.container = containerEl.createDiv()
-		const ul = tabs.container.createEl('ul', {
-			cls: 'daily-logger-tabs '
-		})
-		tabs.contentContainer = tabs.container.createEl('div')
-
-		for (const tab of tabs.list) {
-			const li = ul.createEl('li')
-			li.innerHTML = tab.name
-			li.addEventListener('click', () => {
-				if (tab.render) {
-					tabs.active = tab
-					this.displayTab(tabs)
-				}
-
-				if (tab.onClick) {
-					tab.onClick()
-				}
-			})
-		}
-
-		this.displayTab(tabs)
-	}
-
 	display(): void {
 		const { containerEl } = this
 		containerEl.empty()
 
-		this.displayTabs(containerEl, this.globalTabs)
+		displayTabs(containerEl, this.tabs)
 	}
 
 	calculateText(block: TLoggerBlock) {

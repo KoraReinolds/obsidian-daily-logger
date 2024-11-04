@@ -1,5 +1,18 @@
 export type TBlockType = 'key' | 'time' | 'link' | 'text'
 
+export type TTab = {
+	name: string
+	render?: (el: HTMLElement) => void
+	onClick?: () => void
+}
+
+export type TTabs = {
+	active?: TTab
+	list: TTab[]
+	container?: HTMLElement
+	contentContainer?: HTMLElement
+}
+
 export enum ELoggerType {
 	TEMPLATE = 'template',
 	LOGGER = 'logger'
