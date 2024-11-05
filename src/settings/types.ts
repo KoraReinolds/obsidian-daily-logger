@@ -3,7 +3,8 @@ export type TBlockType = 'key' | 'time' | 'link' | 'text'
 export type TTab = {
 	name: string
 	render?: (el: HTMLElement) => void
-	onClick?: () => void
+	data: ITabData
+	type: ELoggerType
 }
 
 export type TTabs = {
@@ -42,4 +43,13 @@ export const DEFAULT_SETTINGS: ILoggerSettings = {
 	blocks: {},
 	loggerBlocks: [],
 	templateBlocks: []
+}
+
+export interface ITabData {
+	settings: {
+		blocks: TLoggerBlock[]
+		header: {
+			btnText: string
+		}
+	}
 }

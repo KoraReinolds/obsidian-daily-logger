@@ -1,4 +1,3 @@
-import MemoPlugin from '../../main'
 import {
 	App,
 	Notice,
@@ -6,16 +5,20 @@ import {
 	Setting
 } from 'obsidian'
 import { v4 as uuidv4 } from 'uuid'
-import LoggerPlugin from '../../main'
 import {
-	ILoggerSettings,
-	TLoggerBlock,
-	TCustomBlock,
+	default as LoggerPlugin,
+	default as MemoPlugin
+} from '../../main'
+import { displayTabs } from './tabs'
+import {
 	ELoggerType,
+	ILoggerSettings,
+	ITabData,
 	TBlockType,
+	TCustomBlock,
+	TLoggerBlock,
 	TTabs
 } from './types'
-import { displayTabs } from './tabs'
 
 export class LoggerSetting extends PluginSettingTab {
 	plugin: LoggerPlugin
@@ -27,19 +30,42 @@ export class LoggerSetting extends PluginSettingTab {
 	blockCopy: TCustomBlock
 	openedBlockId?: string
 	tabs: TTabs = {
-		list: [
-			{ name: 'Logs', render: this.displayLogs.bind(this) },
-			{
-				name: 'Templates',
-				render: this.displayTemplates.bind(this)
-			}
-		]
+		list: []
 	}
 
 	constructor(app: App, plugin: MemoPlugin) {
 		super(app, plugin)
 		this.plugin = plugin
 		this.settings = this.plugin.settings
+		this.tabs.list = [
+			{
+				name: 'Logs',
+				type: ELoggerType.LOGGER,
+				render: this.displayTab.bind(this),
+				data: {
+					settings: {
+						blocks: this.settings.loggerBlocks,
+						header: {
+							btnText: 'Add New Log'
+						}
+					}
+				}
+			},
+			{
+				name: 'Templates',
+				type: ELoggerType.TEMPLATE,
+				render: this.displayTab.bind(this),
+				data: {
+					settings: {
+						blocks: this.settings.templateBlocks,
+						header: {
+							btnText: 'Add New Template'
+						}
+					}
+				}
+			}
+		]
+
 		if (!this.tabs.active) {
 			this.tabs.active = this.tabs.list[0]
 		}
@@ -337,39 +363,27 @@ export class LoggerSetting extends PluginSettingTab {
 		})
 	}
 
-	displayLogs(containerEl: HTMLElement) {
+	displayTab(containerEl: HTMLElement) {
 		containerEl.innerHTML = ''
 
+		const activeTab = this.tabs.active
+
+		if (!activeTab) return
+
 		const logsContent = containerEl.createDiv()
-		const blocks = this.settings.loggerBlocks
+		const blocks = activeTab.data.settings.blocks
 
 		logsContent.classList.add('daily-logger-blocks')
 
 		new Setting(logsContent).addButton((btn) =>
-			btn.setButtonText('Add New Log').onClick(() => {
-				this.addNewLog(blocks, ELoggerType.LOGGER)
-				this.display()
-			})
-		)
-
-		const el = logsContent.createDiv()
-
-		this.displayBlocks(el, blocks)
-	}
-
-	displayTemplates(containerEl: HTMLElement) {
-		containerEl.innerHTML = ''
-
-		const logsContent = containerEl.createDiv()
-		const blocks = this.settings.templateBlocks
-
-		logsContent.classList.add('daily-logger-blocks')
-
-		new Setting(logsContent).addButton((btn) =>
-			btn.setButtonText('Add New Template').onClick(() => {
-				this.addNewLog(blocks, ELoggerType.TEMPLATE)
-				this.display()
-			})
+			btn
+				.setButtonText(
+					activeTab.data.settings.header.btnText
+				)
+				.onClick(() => {
+					this.addNewLog(blocks, activeTab.type)
+					this.display()
+				})
 		)
 
 		const el = logsContent.createDiv()
