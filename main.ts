@@ -11,7 +11,7 @@ import { LoggerSetting } from 'src/settings'
 import {
 	DEFAULT_SETTINGS,
 	ILoggerSettings,
-	TCustomBlock
+	TItem
 } from 'src/settings/types'
 
 export default class LoggerPlugin extends Plugin {
@@ -139,15 +139,14 @@ export default class LoggerPlugin extends Plugin {
 			commands.removeCommand(id)
 		)
 
-		this.settings.loggerBlocks.forEach((block) =>
+		this.settings.blocks.forEach((block) =>
 			this.addCommand({
 				id: block.id,
 				name: block.name,
 				editorCallback: async (editor: Editor) => {
-					const loggerBlock =
-						this.settings.loggerBlocks.find(
-							(item) => item.name === block.name
-						)
+					const loggerBlock = this.settings.blocks.find(
+						(item) => item.name === block.name
+					)
 
 					const globalLog = await this.blocksToLog(
 						this.settings
@@ -171,7 +170,7 @@ export default class LoggerPlugin extends Plugin {
 	}
 
 	async blocksToLog(params: {
-		blocks: TCustomBlock[]
+		blocks: TItem[]
 		order: string[]
 	}) {
 		const { blocks, order } = params

@@ -13,10 +13,9 @@ import { displayTabs } from './tabs'
 import {
 	ELoggerType,
 	ILoggerSettings,
-	ITabData,
 	TBlockType,
-	TCustomBlock,
-	TLoggerBlock,
+	TItem,
+	TBlock,
 	TTabs
 } from './types'
 
@@ -24,10 +23,10 @@ export class LoggerSetting extends PluginSettingTab {
 	plugin: LoggerPlugin
 	settings: ILoggerSettings
 	expandedBlocks: Record<string, boolean> = {}
-	preview: { text: Setting; block: TLoggerBlock }[] = []
+	preview: { text: Setting; block: TBlock }[] = []
 	globalPrefix = ''
-	globalBlockCopy: TCustomBlock
-	blockCopy: TCustomBlock
+	globalBlockCopy: TItem
+	blockCopy: TItem
 	openedBlockId?: string
 	tabs: TTabs = {
 		list: []
@@ -44,7 +43,7 @@ export class LoggerSetting extends PluginSettingTab {
 				render: this.displayTab.bind(this),
 				data: {
 					settings: {
-						blocks: this.settings.loggerBlocks,
+						blocks: this.settings.blocks,
 						header: {
 							btnText: 'Add New Log'
 						}
@@ -57,7 +56,7 @@ export class LoggerSetting extends PluginSettingTab {
 				render: this.displayTab.bind(this),
 				data: {
 					settings: {
-						blocks: this.settings.templateBlocks,
+						blocks: this.settings.blocks,
 						header: {
 							btnText: 'Add New Template'
 						}
@@ -71,10 +70,10 @@ export class LoggerSetting extends PluginSettingTab {
 		}
 	}
 
-	addNewBlock(params: Partial<TCustomBlock> = {}) {
+	addNewBlock(params: Partial<TItem> = {}) {
 		const id = uuidv4()
 
-		this.settings.blocks[id] = {
+		this.settings.items[id] = {
 			id: id,
 			type: 'text',
 			name: '',
@@ -85,7 +84,7 @@ export class LoggerSetting extends PluginSettingTab {
 		return id
 	}
 
-	addNewLog(list: TLoggerBlock[], type: ELoggerType) {
+	addNewLog(list: TBlock[], type: ELoggerType) {
 		const id = uuidv4()
 		const name = 'New log'
 		const keyId = this.addNewBlock({
@@ -110,9 +109,9 @@ export class LoggerSetting extends PluginSettingTab {
 		displayTabs(containerEl, this.tabs)
 	}
 
-	calculateText(block: TLoggerBlock) {
+	calculateText(block: TBlock) {
 		return block.order
-			.map((id) => this.settings.blocks[id])
+			.map((id) => this.settings.items[id])
 			.filter((item) => !!item)
 			.map((block) => block?.value)
 			.join(' ')
@@ -150,7 +149,7 @@ export class LoggerSetting extends PluginSettingTab {
 
 		console.log(params)
 		const { order } = params
-		const blocks = this.settings.blocks
+		const blocks = this.settings.items
 
 		order.forEach((id, i) => {
 			const item = blocks[id]
@@ -248,7 +247,7 @@ export class LoggerSetting extends PluginSettingTab {
 
 			blockItem.addButton((btn) => {
 				btn.setIcon('trash-2').onClick(() => {
-					delete this.settings.blocks[id]
+					delete this.settings.items[id]
 
 					params.order = order.filter(
 						(blockId) => blockId !== id
@@ -263,10 +262,7 @@ export class LoggerSetting extends PluginSettingTab {
 		})
 	}
 
-	displayBlocks(
-		containerEl: HTMLElement,
-		list: TLoggerBlock[]
-	) {
+	displayBlocks(containerEl: HTMLElement, list: TBlock[]) {
 		containerEl.empty()
 
 		this.preview = []
@@ -286,13 +282,13 @@ export class LoggerSetting extends PluginSettingTab {
 					const orderCopy: string[] = []
 
 					blockCopy.order
-						.map((id) => this.settings.blocks[id])
+						.map((id) => this.settings.items[id])
 						.filter(
 							(block) => block && block.type !== 'key'
 						)
 						.forEach((item) => {
 							const id = uuidv4()
-							this.settings.blocks[id] = {
+							this.settings.items[id] = {
 								...item,
 								id
 							}
@@ -301,7 +297,7 @@ export class LoggerSetting extends PluginSettingTab {
 
 					blockCopy.order = orderCopy
 
-					this.settings.templateBlocks.push(blockCopy)
+					this.settings.blocks.push(blockCopy)
 					this.plugin.saveSettings()
 
 					this.display()
@@ -345,10 +341,10 @@ export class LoggerSetting extends PluginSettingTab {
 			header.addButton((btn) => {
 				btn.setIcon('trash-2').onClick(() => {
 					block.order.forEach(
-						(id) => delete this.settings.blocks[id]
+						(id) => delete this.settings.items[id]
 					)
 
-					this.settings.loggerBlocks = list.filter(
+					this.settings.blocks = list.filter(
 						(item) => item.id !== id
 					)
 
@@ -388,6 +384,11 @@ export class LoggerSetting extends PluginSettingTab {
 
 		const el = logsContent.createDiv()
 
-		this.displayBlocks(el, blocks)
+		this.displayBlocks(
+			el,
+			blocks.filter(
+				(block) => block.type === activeTab.type
+			)
+		)
 	}
 }

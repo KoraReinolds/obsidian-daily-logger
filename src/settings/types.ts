@@ -19,14 +19,14 @@ export enum ELoggerType {
 	LOGGER = 'logger'
 }
 
-export type TCustomBlock = {
+export type TItem = {
 	id: string
 	name: string
 	type: TBlockType
 	value: string
 }
 
-export type TLoggerBlock = {
+export type TBlock = {
 	id: string
 	type: ELoggerType
 	name: string
@@ -34,20 +34,18 @@ export type TLoggerBlock = {
 }
 
 export interface ILoggerSettings {
-	blocks: Record<string, TCustomBlock>
-	loggerBlocks: TLoggerBlock[]
-	templateBlocks: TLoggerBlock[]
+	items: Record<string, TItem>
+	blocks: TBlock[]
 }
 
 export const DEFAULT_SETTINGS: ILoggerSettings = {
-	blocks: {},
-	loggerBlocks: [],
-	templateBlocks: []
+	items: {},
+	blocks: []
 }
 
 export interface ITabData {
 	settings: {
-		blocks: TLoggerBlock[]
+		blocks: TBlock[]
 		header: {
 			btnText: string
 		}
