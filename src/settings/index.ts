@@ -43,7 +43,6 @@ export class LoggerSetting extends PluginSettingTab {
 				render: this.displayTab.bind(this),
 				data: {
 					settings: {
-						blocks: this.settings.blocks,
 						header: {
 							btnText: 'Add New Log'
 						}
@@ -56,7 +55,6 @@ export class LoggerSetting extends PluginSettingTab {
 				render: this.displayTab.bind(this),
 				data: {
 					settings: {
-						blocks: this.settings.blocks,
 						header: {
 							btnText: 'Add New Template'
 						}
@@ -367,7 +365,7 @@ export class LoggerSetting extends PluginSettingTab {
 		if (!activeTab) return
 
 		const logsContent = containerEl.createDiv()
-		const blocks = activeTab.data.settings.blocks
+		const blocks = this.settings.blocks
 
 		logsContent.classList.add('daily-logger-blocks')
 

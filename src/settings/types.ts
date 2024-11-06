@@ -45,7 +45,6 @@ export const DEFAULT_SETTINGS: ILoggerSettings = {
 
 export interface ITabData {
 	settings: {
-		blocks: TBlock[]
 		header: {
 			btnText: string
 		}
