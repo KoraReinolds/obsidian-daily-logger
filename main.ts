@@ -116,9 +116,17 @@ export default class LoggerPlugin extends Plugin {
 	async loadSettings() {
 		this.settings = Object.assign(
 			{},
-			DEFAULT_SETTINGS,
+			JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
 			await this.loadData()
 		)
+	}
+
+	async clearData() {
+		this.settings = Object.assign(
+			{},
+			JSON.parse(JSON.stringify(DEFAULT_SETTINGS))
+		)
+		this.saveSettings()
 	}
 
 	async saveSettings() {

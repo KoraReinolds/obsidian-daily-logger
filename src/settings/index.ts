@@ -100,13 +100,6 @@ export class LoggerSetting extends PluginSettingTab {
 		this.plugin.saveSettings()
 	}
 
-	display(): void {
-		const { containerEl } = this
-		containerEl.empty()
-
-		displayTabs(containerEl, this.tabs)
-	}
-
 	calculateText(block: TBlock) {
 		return block.order
 			.map((id) => this.settings.items[id])
@@ -122,7 +115,7 @@ export class LoggerSetting extends PluginSettingTab {
 		})
 	}
 
-	displayOrderedBlocks(
+	displayItems(
 		params: {
 			order: string[]
 			name: string
@@ -145,7 +138,6 @@ export class LoggerSetting extends PluginSettingTab {
 					})
 			)
 
-		console.log(params)
 		const { order } = params
 		const blocks = this.settings.items
 
@@ -274,34 +266,37 @@ export class LoggerSetting extends PluginSettingTab {
 
 			this.preview.push({ text: header, block })
 
-			header.addButton((btn) => {
-				btn.setIcon('layout-template').onClick(() => {
-					const blockCopy = { ...block, id: uuidv4() }
-					const orderCopy: string[] = []
+			if (block.type === ELoggerType.LOGGER) {
+				header.addButton((btn) => {
+					btn.setIcon('layout-template').onClick(() => {
+						const blockCopy = { ...block, id: uuidv4() }
+						const orderCopy: string[] = []
 
-					blockCopy.order
-						.map((id) => this.settings.items[id])
-						.filter(
-							(block) => block && block.type !== 'key'
-						)
-						.forEach((item) => {
-							const id = uuidv4()
-							this.settings.items[id] = {
-								...item,
-								id
-							}
-							orderCopy.push(id)
-						})
+						blockCopy.order
+							.map((id) => this.settings.items[id])
+							.filter(
+								(block) => block && block.type !== 'key'
+							)
+							.forEach((item) => {
+								const id = uuidv4()
+								this.settings.items[id] = {
+									...item,
+									id
+								}
+								orderCopy.push(id)
+							})
 
-					blockCopy.order = orderCopy
+						blockCopy.order = orderCopy
+						blockCopy.type = ELoggerType.TEMPLATE
 
-					this.settings.blocks.push(blockCopy)
-					this.plugin.saveSettings()
+						this.settings.blocks.push(blockCopy)
+						this.plugin.saveSettings()
 
-					this.display()
-					new Notice('Template created')
+						this.display()
+						new Notice('Template created')
+					})
 				})
-			})
+			}
 
 			header.addButton((btn) => {
 				btn
@@ -352,7 +347,7 @@ export class LoggerSetting extends PluginSettingTab {
 			})
 
 			if (this.openedBlockId === id) {
-				this.displayOrderedBlocks(block, containerEl)
+				this.displayItems(block, containerEl)
 			}
 		})
 	}
@@ -388,5 +383,20 @@ export class LoggerSetting extends PluginSettingTab {
 				(block) => block.type === activeTab.type
 			)
 		)
+	}
+
+	display(): void {
+		const { containerEl } = this
+		containerEl.empty()
+		const debug = containerEl.createDiv()
+		debug.innerHTML = JSON.stringify(this.settings)
+		debug.onclick = async () => {
+			debugger
+			await this.plugin.clearData()
+			this.settings = this.plugin.settings
+			this.display()
+		}
+
+		displayTabs(containerEl, this.tabs)
 	}
 }
