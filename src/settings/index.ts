@@ -337,9 +337,10 @@ export class LoggerSetting extends PluginSettingTab {
 						(id) => delete this.settings.items[id]
 					)
 
-					this.settings.blocks = list.filter(
-						(item) => item.id !== id
-					)
+					this.settings.blocks =
+						this.settings.blocks.filter(
+							(item) => item.id !== id
+						)
 
 					this.plugin.saveSettings()
 					this.display()
@@ -388,10 +389,12 @@ export class LoggerSetting extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this
 		containerEl.empty()
+
 		const debug = containerEl.createDiv()
-		debug.innerHTML = JSON.stringify(this.settings)
-		debug.onclick = async () => {
-			debugger
+		const debugBtn = debug.createEl('button')
+		debugBtn.innerHTML = 'Clear'
+		console.log(this.settings)
+		debugBtn.onclick = async () => {
 			await this.plugin.clearData()
 			this.settings = this.plugin.settings
 			this.display()
