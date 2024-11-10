@@ -13,7 +13,7 @@ import { displayTabs } from './tabs'
 import {
 	ELoggerType,
 	ILoggerSettings,
-	TBlockType,
+	EBlockType,
 	TItem,
 	TBlock,
 	TTabs
@@ -152,17 +152,17 @@ export class LoggerSetting extends PluginSettingTab {
 			// .setName('')
 			// .setDesc('')
 
-			if (item.type !== 'key')
+			const templates = this.getListByType(
+				ELoggerType.TEMPLATE
+			).map((item) => [item.id, item.name])
+
+			if (item.type !== EBlockType.KEY && templates.length)
 				blockItem.addDropdown((dd) =>
 					dd
-						.addOptions({
-							text: 'Text',
-							time: 'Time',
-							link: 'Link'
-						})
+						.addOptions(Object.fromEntries(templates))
 						.setValue(item.type)
 						.onChange((value) => {
-							item.type = value as TBlockType
+							item.type = value
 							this.plugin.saveSettings()
 							this.display()
 						})
@@ -303,6 +303,7 @@ export class LoggerSetting extends PluginSettingTab {
 
 			header.addButton((btn) => {
 				btn
+					.setDisabled(!!block.locked)
 					.setIcon('clipboard-paste')
 					.onClick(() => {
 						this.addNewBlock(this.blockCopy)
@@ -311,11 +312,14 @@ export class LoggerSetting extends PluginSettingTab {
 			})
 
 			header.addButton((btn) => {
-				btn.setIcon('plus').onClick(() => {
-					block.order.push(this.addNewBlock())
-					this.openedBlockId = id
-					this.display()
-				})
+				btn
+					.setIcon('plus')
+					.setDisabled(!!block.locked)
+					.onClick(() => {
+						block.order.push(this.addNewBlock())
+						this.openedBlockId = id
+						this.display()
+					})
 			})
 
 			header.addButton((btn) => {
@@ -323,6 +327,7 @@ export class LoggerSetting extends PluginSettingTab {
 
 				btn
 					.setIcon(hidden ? 'eye' : 'eye-off')
+					.setDisabled(!!block.locked)
 					.onClick(() => {
 						this.openedBlockId =
 							this.openedBlockId === id ? undefined : id
@@ -335,19 +340,22 @@ export class LoggerSetting extends PluginSettingTab {
 			})
 
 			header.addButton((btn) => {
-				btn.setIcon('trash-2').onClick(() => {
-					block.order.forEach(
-						(id) => delete this.settings.items[id]
-					)
-
-					this.settings.blocks =
-						this.settings.blocks.filter(
-							(item) => item.id !== id
+				btn
+					.setIcon('trash-2')
+					.setDisabled(!!block.locked)
+					.onClick(() => {
+						block.order.forEach(
+							(id) => delete this.settings.items[id]
 						)
 
-					this.plugin.saveSettings()
-					this.display()
-				})
+						this.settings.blocks =
+							this.settings.blocks.filter(
+								(item) => item.id !== id
+							)
+
+						this.plugin.saveSettings()
+						this.display()
+					})
 			})
 
 			if (this.openedBlockId === id) {
@@ -383,9 +391,13 @@ export class LoggerSetting extends PluginSettingTab {
 
 		this.displayBlocks(
 			el,
-			blocks.filter(
-				(block) => block.type === activeTab.type
-			)
+			this.getListByType(activeTab.type)
+		)
+	}
+
+	getListByType(type: ELoggerType): TBlock[] {
+		return this.settings.blocks.filter(
+			(block) => block.type === type
 		)
 	}
 

@@ -1,4 +1,9 @@
-export type TBlockType = 'key' | 'time' | 'link' | 'text'
+export enum EBlockType {
+	KEY = 'key',
+	TIME = 'time',
+	LINK = 'link',
+	TEXT = 'text'
+}
 
 export type TTab = {
 	name: string
@@ -22,7 +27,7 @@ export enum ELoggerType {
 export type TItem = {
 	id: string
 	name: string
-	type: TBlockType
+	type: string
 	value: string
 }
 
@@ -31,6 +36,7 @@ export type TBlock = {
 	type: ELoggerType
 	name: string
 	order: string[]
+	locked?: boolean
 }
 
 export interface ILoggerSettings {
@@ -40,7 +46,15 @@ export interface ILoggerSettings {
 
 export const DEFAULT_SETTINGS: ILoggerSettings = {
 	items: {},
-	blocks: []
+	blocks: [
+		{
+			id: EBlockType.TEXT,
+			type: ELoggerType.TEMPLATE,
+			order: [],
+			name: 'Text',
+			locked: true
+		}
+	]
 }
 
 export interface ITabData {
