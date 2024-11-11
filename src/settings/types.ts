@@ -1,8 +1,23 @@
-export enum EBlockType {
+export enum EItemType {
 	KEY = 'key',
 	TIME = 'time',
 	LINK = 'link',
 	TEXT = 'text'
+}
+
+export type TItemDataType = {
+	defaultValue: string
+}
+
+export const DEFAUTL_ITEM_DATA: TItemDataType = {
+	defaultValue: ''
+}
+
+export const itemData: Record<EItemType, TItemDataType> = {
+	[EItemType.KEY]: { defaultValue: '' },
+	[EItemType.TIME]: { defaultValue: 'HH:mm' },
+	[EItemType.LINK]: { defaultValue: '' },
+	[EItemType.TEXT]: { defaultValue: '' }
 }
 
 export type TTab = {
@@ -48,14 +63,14 @@ export const DEFAULT_SETTINGS: ILoggerSettings = {
 	items: {},
 	blocks: [
 		{
-			id: EBlockType.TEXT,
+			id: EItemType.TEXT,
 			type: ELoggerType.TEMPLATE,
 			order: [],
 			name: 'Text',
 			locked: true
 		},
 		{
-			id: EBlockType.TIME,
+			id: EItemType.TIME,
 			type: ELoggerType.TEMPLATE,
 			order: [],
 			name: 'Time',

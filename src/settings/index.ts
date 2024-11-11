@@ -13,10 +13,13 @@ import { displayTabs } from './tabs'
 import {
 	ELoggerType,
 	ILoggerSettings,
-	EBlockType,
+	EItemType,
 	TItem,
 	TBlock,
-	TTabs
+	TTabs,
+	TItemDataType,
+	itemData,
+	DEFAUTL_ITEM_DATA
 } from './types'
 
 export class LoggerSetting extends PluginSettingTab {
@@ -157,18 +160,29 @@ export class LoggerSetting extends PluginSettingTab {
 				ELoggerType.TEMPLATE
 			).map((item) => [item.id, item.name])
 
-			if (item.type !== EBlockType.KEY && templates.length)
+			// item type
+			if (item.type !== EItemType.KEY && templates.length) {
 				blockItem.addDropdown((dd) =>
 					dd
 						.addOptions(Object.fromEntries(templates))
 						.setValue(item.type)
 						.onChange((value) => {
 							item.type = value
+
+							const data: TItemDataType =
+								(itemData[
+									item.type as EItemType
+								] as TItemDataType) || DEFAUTL_ITEM_DATA
+
+							item.value = data.defaultValue
+
 							this.plugin.saveSettings()
 							this.display()
 						})
 				)
+			}
 
+			// copy item
 			if (item.type !== 'key')
 				blockItem.addButton((btn) => {
 					btn.setIcon('copy').onClick(() => {
@@ -180,6 +194,7 @@ export class LoggerSetting extends PluginSettingTab {
 					})
 				})
 
+			// move item up
 			blockItem.addButton((btn) => {
 				btn.setIcon('move-up').onClick(() => {
 					const item = params.order[i]
@@ -199,6 +214,7 @@ export class LoggerSetting extends PluginSettingTab {
 				})
 			})
 
+			// move item down
 			blockItem.addButton((btn) => {
 				btn.setIcon('move-down').onClick(() => {
 					const item = params.order[i]
@@ -218,6 +234,7 @@ export class LoggerSetting extends PluginSettingTab {
 				})
 			})
 
+			// show/hide item
 			blockItem.addButton((btn) => {
 				const hidden = !(this.openedItemId === id)
 
@@ -233,6 +250,7 @@ export class LoggerSetting extends PluginSettingTab {
 				}</span>`
 			})
 
+			// remove item
 			blockItem.addButton((btn) => {
 				btn.setIcon('trash-2').onClick(() => {
 					delete this.settings.items[id]
@@ -250,6 +268,7 @@ export class LoggerSetting extends PluginSettingTab {
 
 			if (this.openedItemId !== id) return
 
+			// item key
 			new Setting(containerEl)
 				.setName('Key')
 				.addText((text) =>
@@ -263,6 +282,7 @@ export class LoggerSetting extends PluginSettingTab {
 						})
 				)
 
+			// item value
 			new Setting(containerEl)
 				.setName('Value')
 				.addText((text) =>
@@ -287,12 +307,14 @@ export class LoggerSetting extends PluginSettingTab {
 		list.forEach((block) => {
 			const id = block.id
 
+			// block header
 			const header = new Setting(containerEl)
 				.setName(block.name)
 				.setDesc(this.calculateText(block))
 
 			this.preview.push({ text: header, block })
 
+			// block template
 			if (block.type === ELoggerType.LOGGER) {
 				header.addButton((btn) => {
 					btn.setIcon('layout-template').onClick(() => {
@@ -325,6 +347,7 @@ export class LoggerSetting extends PluginSettingTab {
 				})
 			}
 
+			// copy block
 			header.addButton((btn) => {
 				btn
 					.setDisabled(!!block.locked)
@@ -335,6 +358,7 @@ export class LoggerSetting extends PluginSettingTab {
 					.setDisabled(!this.blockCopy)
 			})
 
+			// add item to block
 			header.addButton((btn) => {
 				btn
 					.setIcon('plus')
@@ -346,6 +370,7 @@ export class LoggerSetting extends PluginSettingTab {
 					})
 			})
 
+			// show/hide block
 			header.addButton((btn) => {
 				const hidden = !(this.openedBlockId === id)
 
@@ -362,6 +387,7 @@ export class LoggerSetting extends PluginSettingTab {
 				}</span>`
 			})
 
+			// remove block
 			header.addButton((btn) => {
 				btn
 					.setIcon('trash-2')
