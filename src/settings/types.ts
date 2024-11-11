@@ -53,6 +53,13 @@ export const DEFAULT_SETTINGS: ILoggerSettings = {
 			order: [],
 			name: 'Text',
 			locked: true
+		},
+		{
+			id: EBlockType.TIME,
+			type: ELoggerType.TEMPLATE,
+			order: [],
+			name: 'Time',
+			locked: true
 		}
 	]
 }

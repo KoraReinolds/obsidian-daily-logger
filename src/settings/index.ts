@@ -28,6 +28,7 @@ export class LoggerSetting extends PluginSettingTab {
 	globalBlockCopy: TItem
 	blockCopy: TItem
 	openedBlockId?: string
+	openedItemId?: string
 	tabs: TTabs = {
 		list: []
 	}
@@ -149,8 +150,8 @@ export class LoggerSetting extends PluginSettingTab {
 
 			if (!item) return
 			const blockItem = new Setting(containerEl)
-			// .setName('')
-			// .setDesc('')
+				.setName(item.name)
+				.setDesc(item.value)
 
 			const templates = this.getListByType(
 				ELoggerType.TEMPLATE
@@ -217,26 +218,20 @@ export class LoggerSetting extends PluginSettingTab {
 				})
 			})
 
-			blockItem.addText((text) =>
-				text
-					.setPlaceholder('Type key')
-					.setValue(item.name)
-					.onChange(async (value) => {
-						item.name = value
-						await this.plugin.saveSettings()
-					})
-			)
+			blockItem.addButton((btn) => {
+				const hidden = !(this.openedItemId === id)
 
-			blockItem.addText((text) =>
-				text
-					.setPlaceholder('Type value')
-					.setValue(item.value)
-					.onChange(async (value) => {
-						item.value = value
-						await this.plugin.saveSettings()
-						this.displayPreview()
+				btn
+					.setIcon(hidden ? 'eye' : 'eye-off')
+					.onClick(() => {
+						this.openedItemId = hidden ? id : undefined
+
+						this.display()
 					})
-			)
+				btn.buttonEl.innerHTML += `<span style=margin-left:8px;>${
+					hidden ? 'Show' : 'Hide'
+				}</span>`
+			})
 
 			blockItem.addButton((btn) => {
 				btn.setIcon('trash-2').onClick(() => {
@@ -252,6 +247,35 @@ export class LoggerSetting extends PluginSettingTab {
 
 				if (item.type === 'key') btn.setDisabled(true)
 			})
+
+			if (this.openedItemId !== id) return
+
+			new Setting(containerEl)
+				.setName('Key')
+				.addText((text) =>
+					text
+						.setPlaceholder('Type key')
+						.setValue(item.name)
+						.onChange(async (value) => {
+							item.name = value
+							blockItem.setName(value)
+							await this.plugin.saveSettings()
+						})
+				)
+
+			new Setting(containerEl)
+				.setName('Value')
+				.addText((text) =>
+					text
+						.setPlaceholder('Type value')
+						.setValue(item.value)
+						.onChange(async (value) => {
+							item.value = value
+							blockItem.setDesc(value)
+							await this.plugin.saveSettings()
+							this.displayPreview()
+						})
+				)
 		})
 	}
 
@@ -329,8 +353,7 @@ export class LoggerSetting extends PluginSettingTab {
 					.setIcon(hidden ? 'eye' : 'eye-off')
 					.setDisabled(!!block.locked)
 					.onClick(() => {
-						this.openedBlockId =
-							this.openedBlockId === id ? undefined : id
+						this.openedBlockId = hidden ? id : undefined
 
 						this.display()
 					})
