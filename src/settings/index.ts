@@ -144,6 +144,7 @@ export class LoggerSetting extends PluginSettingTab {
 						this.displayPreview()
 					})
 			)
+			.setClass('daily-logger-block-item-header')
 
 		const { order } = params
 		const blocks = this.settings.items
@@ -155,6 +156,7 @@ export class LoggerSetting extends PluginSettingTab {
 			const blockItem = new Setting(containerEl)
 				.setName(item.name)
 				.setDesc(item.value)
+				.setClass('daily-logger-block-item')
 
 			const templates = this.getListByType(
 				ELoggerType.TEMPLATE
@@ -281,6 +283,7 @@ export class LoggerSetting extends PluginSettingTab {
 							await this.plugin.saveSettings()
 						})
 				)
+				.setClass('daily-logger-block-item-data')
 
 			// item value
 			new Setting(containerEl)
@@ -296,6 +299,7 @@ export class LoggerSetting extends PluginSettingTab {
 							this.displayPreview()
 						})
 				)
+				.setClass('daily-logger-block-item-data')
 		})
 	}
 
@@ -311,6 +315,7 @@ export class LoggerSetting extends PluginSettingTab {
 			const header = new Setting(containerEl)
 				.setName(block.name)
 				.setDesc(this.calculateText(block))
+			header.setClass('daily-logger-block-header')
 
 			this.preview.push({ text: header, block })
 
@@ -437,6 +442,7 @@ export class LoggerSetting extends PluginSettingTab {
 		)
 
 		const el = logsContent.createDiv()
+		el.classList.add('daily-logger-block')
 
 		this.displayBlocks(
 			el,

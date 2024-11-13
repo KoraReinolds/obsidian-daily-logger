@@ -42,3 +42,19 @@
 .daily-logger-blocks {
 	margin-top: 16px;
 }
+
+.daily-logger-blocks .setting-item-info .setting-item-info {
+	margin-left: 16px;
+}
+
+.daily-logger-block-item .setting-item-info {
+	margin-left: 16px;
+}
+
+.daily-logger-block-item-header .setting-item-info {
+	margin-left: 16px;
+}
+
+.daily-logger-block-item-data .setting-item-info {
+	margin-left: 32px;
+}
