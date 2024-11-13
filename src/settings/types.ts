@@ -2,7 +2,8 @@ export enum EItemType {
 	KEY = 'key',
 	TIME = 'time',
 	LINK = 'link',
-	TEXT = 'text'
+	TEXT = 'text',
+	SLOT = 'slot'
 }
 
 export type TItemDataType = {

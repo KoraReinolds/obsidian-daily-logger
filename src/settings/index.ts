@@ -160,7 +160,9 @@ export class LoggerSetting extends PluginSettingTab {
 
 			const templates = this.getListByType(
 				ELoggerType.TEMPLATE
-			).map((item) => [item.id, item.name])
+			)
+				.map((item) => [item.id, item.name])
+				.filter(([id]) => id !== params.id)
 
 			// item type
 			if (item.type !== EItemType.KEY && templates.length) {
