@@ -111,15 +111,15 @@ export class LoggerSetting extends PluginSettingTab {
 		return block.order
 			.map((id) => this.settings.items[id])
 			.filter((item) => !!item)
-			.map((block) => block?.value)
+			.map((item) => this.getValueFromItem(item))
 			.join(' ')
 	}
 
 	displayPreview() {
-		this.preview.forEach(({ text, block }) => {
-			text.setName(block.name)
-			text.setDesc(this.calculateText(block))
-		})
+		//this.preview.forEach(({ text, block }) => {
+		//	text.setName(block.name)
+		//	text.setDesc(this.calculateText(block))
+		//})
 	}
 
 	displayItems(
@@ -127,6 +127,7 @@ export class LoggerSetting extends PluginSettingTab {
 			order: string[]
 			name: string
 			id: string
+			type: string
 		},
 		containerEl: HTMLElement
 	) {
@@ -155,14 +156,22 @@ export class LoggerSetting extends PluginSettingTab {
 			if (!item) return
 			const blockItem = new Setting(containerEl)
 				.setName(item.name)
-				.setDesc(item.value)
+				.setDesc(this.getValueFromItem(item))
 				.setClass('daily-logger-block-item')
 
 			const templates = this.getListByType(
 				ELoggerType.TEMPLATE
 			)
 				.map((item) => [item.id, item.name])
-				.filter(([id]) => id !== params.id)
+				.filter(([id]) => {
+					if (
+						params.type === ELoggerType.LOGGER &&
+						id === EItemType.SLOT
+					) {
+						return false
+					}
+					return id !== params.id
+				})
 
 			// item type
 			if (item.type !== EItemType.KEY && templates.length) {
@@ -293,11 +302,12 @@ export class LoggerSetting extends PluginSettingTab {
 				.addText((text) =>
 					text
 						.setPlaceholder('Type value')
-						.setValue(item.value)
+						.setValue(this.getValueFromItem(item))
 						.onChange(async (value) => {
 							item.value = value
 							blockItem.setDesc(value)
 							await this.plugin.saveSettings()
+							this.settings = this.plugin.settings
 							this.displayPreview()
 						})
 				)
@@ -305,10 +315,31 @@ export class LoggerSetting extends PluginSettingTab {
 		})
 	}
 
+	getValueFromItem(item: TItem): string {
+		switch (item.type) {
+			case EItemType.TEXT:
+			case EItemType.TIME:
+			case EItemType.KEY:
+				return item.value
+			default: {
+				const block = this.settings.blocks.find(
+					(block) => block.id === item.type
+				)
+
+				if (!block) return ''
+
+				return block.order
+					.map((id) => this.settings.items[id])
+					.map((item) => this.getValueFromItem(item))
+					.join('')
+			}
+		}
+	}
+
 	displayBlocks(containerEl: HTMLElement, list: TBlock[]) {
 		containerEl.empty()
 
-		this.preview = []
+		//this.preview = []
 
 		list.forEach((block) => {
 			const id = block.id
@@ -317,9 +348,10 @@ export class LoggerSetting extends PluginSettingTab {
 			const header = new Setting(containerEl)
 				.setName(block.name)
 				.setDesc(this.calculateText(block))
+
 			header.setClass('daily-logger-block-header')
 
-			this.preview.push({ text: header, block })
+			//this.preview.push({ text: header, block })
 
 			// block template
 			if (block.type === ELoggerType.LOGGER) {

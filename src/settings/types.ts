@@ -15,6 +15,7 @@ export const DEFAUTL_ITEM_DATA: TItemDataType = {
 }
 
 export const itemData: Record<EItemType, TItemDataType> = {
+	[EItemType.SLOT]: { defaultValue: '' },
 	[EItemType.KEY]: { defaultValue: '' },
 	[EItemType.TIME]: { defaultValue: 'HH:mm' },
 	[EItemType.LINK]: { defaultValue: '' },
@@ -63,6 +64,13 @@ export interface ILoggerSettings {
 export const DEFAULT_SETTINGS: ILoggerSettings = {
 	items: {},
 	blocks: [
+		{
+			id: EItemType.SLOT,
+			type: ELoggerType.TEMPLATE,
+			order: [],
+			name: 'Slot',
+			locked: true
+		},
 		{
 			id: EItemType.TEXT,
 			type: ELoggerType.TEMPLATE,
