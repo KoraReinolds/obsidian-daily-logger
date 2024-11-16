@@ -122,15 +122,16 @@ export class LoggerSetting extends PluginSettingTab {
 		//})
 	}
 
-	displayItems(
-		params: {
-			order: string[]
-			name: string
-			id: string
-			type: string
-		},
-		containerEl: HTMLElement
-	) {
+	displayItems(params: {
+		order: string[]
+		name: string
+		id: string
+		type: string
+		el?: HTMLElement
+	}) {
+		if (!params.el) return
+
+		const containerEl = params.el
 		new Setting(containerEl)
 			.setName('Command name')
 			.setDesc('Name of command for call this log')
@@ -153,11 +154,20 @@ export class LoggerSetting extends PluginSettingTab {
 		order.forEach((id, i) => {
 			const item = blocks[id]
 
+			const itemEl = item.el || containerEl.createDiv()
+			itemEl.classList.add('daily-logger-block-item')
+			if (item.el) {
+				itemEl.empty()
+				containerEl.append(item.el)
+			} else {
+				item.el = itemEl
+			}
+
 			if (!item) return
-			const blockItem = new Setting(containerEl)
+			const blockItem = new Setting(itemEl)
 				.setName(item.name)
 				.setDesc(this.getValueFromItem(item))
-				.setClass('daily-logger-block-item')
+				.setClass('daily-logger-block-item-header')
 
 			const templates = this.getListByType(
 				ELoggerType.TEMPLATE
@@ -282,7 +292,7 @@ export class LoggerSetting extends PluginSettingTab {
 			if (this.openedItemId !== id) return
 
 			// item key
-			new Setting(containerEl)
+			new Setting(itemEl)
 				.setName('Key')
 				.addText((text) =>
 					text
@@ -297,7 +307,7 @@ export class LoggerSetting extends PluginSettingTab {
 				.setClass('daily-logger-block-item-data')
 
 			// item value
-			new Setting(containerEl)
+			new Setting(itemEl)
 				.setName('Value')
 				.addText((text) =>
 					text
@@ -339,19 +349,23 @@ export class LoggerSetting extends PluginSettingTab {
 	displayBlocks(containerEl: HTMLElement, list: TBlock[]) {
 		containerEl.empty()
 
-		//this.preview = []
-
 		list.forEach((block) => {
 			const id = block.id
 
+			const blockEl = block.el || containerEl.createDiv()
+			blockEl.classList.add('daily-logger-block')
+			if (block.el) {
+				blockEl.empty()
+				containerEl.append(block.el)
+			} else {
+				block.el = blockEl
+			}
+
 			// block header
-			const header = new Setting(containerEl)
+			const header = new Setting(blockEl)
 				.setName(block.name)
 				.setDesc(this.calculateText(block))
-
-			header.setClass('daily-logger-block-header')
-
-			//this.preview.push({ text: header, block })
+				.setClass('daily-logger-block-header')
 
 			// block template
 			if (block.type === ELoggerType.LOGGER) {
@@ -447,13 +461,13 @@ export class LoggerSetting extends PluginSettingTab {
 			})
 
 			if (this.openedBlockId === id) {
-				this.displayItems(block, containerEl)
+				this.displayItems(block)
 			}
 		})
 	}
 
 	displayTab(containerEl: HTMLElement) {
-		containerEl.innerHTML = ''
+		containerEl.empty()
 
 		const activeTab = this.tabs.active
 
@@ -464,22 +478,26 @@ export class LoggerSetting extends PluginSettingTab {
 
 		logsContent.classList.add('daily-logger-blocks')
 
-		new Setting(logsContent).addButton((btn) =>
-			btn
-				.setButtonText(
-					activeTab.data.settings.header.btnText
-				)
-				.onClick(() => {
-					this.addNewLog(blocks, activeTab.type)
-					this.display()
-				})
+		new Setting(logsContent)
+			.addButton((btn) =>
+				btn
+					.setButtonText(
+						activeTab.data.settings.header.btnText
+					)
+					.onClick(() => {
+						this.addNewLog(blocks, activeTab.type)
+						this.display()
+					})
+			)
+			.setClass('daily-logger-blocks-header')
+
+		const blocksContent = logsContent.createDiv()
+		blocksContent.classList.add(
+			'daily-logger-blocks-content'
 		)
 
-		const el = logsContent.createDiv()
-		el.classList.add('daily-logger-block')
-
 		this.displayBlocks(
-			el,
+			blocksContent,
 			this.getListByType(activeTab.type)
 		)
 	}

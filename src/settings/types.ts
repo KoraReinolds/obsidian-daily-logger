@@ -46,6 +46,7 @@ export type TItem = {
 	name: string
 	type: string
 	value: string
+	el?: HTMLElement
 }
 
 export type TBlock = {
@@ -54,6 +55,7 @@ export type TBlock = {
 	name: string
 	order: string[]
 	locked?: boolean
+	el?: HTMLElement
 }
 
 export interface ILoggerSettings {

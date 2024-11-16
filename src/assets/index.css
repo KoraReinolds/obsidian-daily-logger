@@ -43,6 +43,12 @@
 	margin-top: 16px;
 }
 
+.daily-logger-block {
+	padding-top: 16px;
+	background-color: var(--background-primary);
+	border-top: 2px solid var(--background-modifier-border);
+}
+
 .daily-logger-blocks .setting-item-info .setting-item-info {
 	margin-left: 16px;
 }
@@ -51,10 +57,19 @@
 	margin-left: 16px;
 }
 
+.daily-logger-block-item {
+	padding-top: 16px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
 .daily-logger-block-item-header .setting-item-info {
 	margin-left: 16px;
 }
 
 .daily-logger-block-item-data .setting-item-info {
 	margin-left: 32px;
+}
+
+.daily-logger-block-item-data {
+	border: 0px;
 }
