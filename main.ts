@@ -130,8 +130,27 @@ export default class LoggerPlugin extends Plugin {
 	}
 
 	async saveSettings() {
-		console.log(this.settings)
-		await this.saveData(this.settings)
+		const settings = {
+			...this.settings,
+			blocks: this.settings.blocks.map((block) => {
+				const blockCopy = { ...block }
+				delete blockCopy.el
+
+				return blockCopy
+			}),
+			items: Object.fromEntries(
+				Object.entries(this.settings.items).map(
+					([key, val]) => {
+						const copyVal = { ...val }
+						delete copyVal.el
+
+						return [key, copyVal]
+					}
+				)
+			)
+		}
+
+		await this.saveData(settings)
 	}
 
 	saveAll() {
