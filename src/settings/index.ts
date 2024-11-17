@@ -154,21 +154,16 @@ export class LoggerSetting extends PluginSettingTab {
 			.setClass('daily-logger-block-item-header')
 
 		const { order } = params
-		const blocks = this.settings.items
+		const items = this.settings.items
 
 		order.forEach((id, i) => {
-			const item = blocks[id]
-
-			const itemEl = item.el || containerEl.createDiv()
-			itemEl.classList.add('daily-logger-block-item')
-			if (item.el) {
-				itemEl.empty()
-				containerEl.append(item.el)
-			} else {
-				item.el = itemEl
-			}
+			const item = items[id]
 
 			if (!item) return
+
+			const itemEl = containerEl.createDiv()
+			itemEl.classList.add('daily-logger-block-item')
+
 			const blockItem = new Setting(itemEl)
 				.setName(item.name)
 				.setDesc(this.getValueFromItem(item))
@@ -288,6 +283,7 @@ export class LoggerSetting extends PluginSettingTab {
 					)
 
 					this.plugin.saveSettings()
+					this.displayPreview()
 					this.display()
 				})
 
@@ -426,6 +422,9 @@ export class LoggerSetting extends PluginSettingTab {
 					.setIcon('plus')
 					.setDisabled(!!block.locked)
 					.onClick(() => {
+						this.settings
+						debugger
+
 						block.order.push(this.addNewBlock())
 						this.openedBlockId = id
 						this.display()
@@ -464,6 +463,7 @@ export class LoggerSetting extends PluginSettingTab {
 								(item) => item.id !== id
 							)
 
+						this.displayPreview()
 						this.plugin.saveSettings()
 						this.display()
 					})
