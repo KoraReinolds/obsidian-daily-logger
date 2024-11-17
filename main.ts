@@ -16,6 +16,7 @@ import {
 
 export default class LoggerPlugin extends Plugin {
 	settings: ILoggerSettings
+	lastSettings: ILoggerSettings
 	tp: any
 
 	async onload() {
@@ -114,11 +115,19 @@ export default class LoggerPlugin extends Plugin {
 	onunload() {}
 
 	async loadSettings() {
-		this.settings = Object.assign(
+		const loadData = await this.loadData()
+
+		const { settings, lastSettings } = Object.assign(
 			{},
-			JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),
-			await this.loadData()
+			{
+				settings: this.getSettingsCopy(DEFAULT_SETTINGS),
+				lastSettings: this.getSettingsCopy(DEFAULT_SETTINGS)
+			},
+			loadData
 		)
+
+		this.settings = settings
+		this.lastSettings = lastSettings
 	}
 
 	async clearData() {
@@ -129,30 +138,41 @@ export default class LoggerPlugin extends Plugin {
 		this.saveSettings()
 	}
 
-	async saveSettings() {
-		const settings = {
-			...this.settings,
-			blocks: this.settings.blocks.map((block) => {
+	getSettingsCopy(settings: TLoggerSettings) {
+		const settingsCopy = {
+			...settings,
+			blocks: settings.blocks.map((block) => {
 				const blockCopy = { ...block }
 				delete blockCopy.headerEl
 
 				return blockCopy
 			}),
 			items: Object.fromEntries(
-				Object.entries(this.settings.items).map(
-					([key, val]) => {
-						const copyVal = { ...val }
-						delete copyVal.el
+				Object.entries(settings.items).map(([key, val]) => {
+					const copyVal = { ...val }
+					delete copyVal.el
 
-						return [key, copyVal]
-					}
-				)
+					return [key, copyVal]
+				})
 			)
 		}
+		return JSON.parse(JSON.stringify(settingsCopy))
+	}
 
-		console.log(this.settings, settings)
+	async saveSettings() {
+		console.log(this.settings, this.lastSettings)
+		await this.saveData({
+			settings: this.getSettingsCopy(this.settings),
+			lastSettings: this.getSettingsCopy(this.lastSettings)
+		})
+	}
 
-		await this.saveData(settings)
+	async clearChanges() {
+		this.settings = this.getSettingsCopy(this.lastSettings)
+		this.lastSettings = this.getSettingsCopy(
+			this.lastSettings
+		)
+		await this.saveData()
 	}
 
 	saveAll() {

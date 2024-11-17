@@ -524,16 +524,25 @@ export class LoggerSetting extends PluginSettingTab {
 		const { containerEl } = this
 		containerEl.empty()
 
-		const debug = containerEl.createDiv()
-		const debugBtn = debug.createEl('button')
-		debugBtn.innerHTML = 'Clear'
-		console.log(this.settings)
-		debugBtn.onclick = async () => {
-			await this.plugin.clearData()
-			this.settings = this.plugin.settings
-			this.display()
-		}
+		new Setting(containerEl)
+			.addButton((btn) =>
+				btn.setButtonText('Default').onClick(async () => {
+					await this.plugin.clearData()
+					this.settings = this.plugin.settings
+					this.display()
+				})
+			)
+			.addButton((btn) =>
+				btn
+					.setButtonText('Clear changes')
+					.onClick(async () => {
+						await this.plugin.clearChanges()
+						this.settings = this.plugin.settings
+						this.display()
+					})
+			)
 
+		console.log(this.settings)
 		displayTabs(containerEl, this.tabs)
 	}
 }
