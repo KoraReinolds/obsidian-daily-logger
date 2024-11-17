@@ -1,3 +1,5 @@
+import { Setting } from 'obsidian'
+
 export enum EItemType {
 	KEY = 'key',
 	TIME = 'time',
@@ -55,7 +57,7 @@ export type TBlock = {
 	name: string
 	order: string[]
 	locked?: boolean
-	el?: HTMLElement
+	headerEl?: Setting
 }
 
 export interface ILoggerSettings {

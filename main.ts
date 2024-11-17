@@ -134,7 +134,7 @@ export default class LoggerPlugin extends Plugin {
 			...this.settings,
 			blocks: this.settings.blocks.map((block) => {
 				const blockCopy = { ...block }
-				delete blockCopy.el
+				delete blockCopy.headerEl
 
 				return blockCopy
 			}),
@@ -149,6 +149,8 @@ export default class LoggerPlugin extends Plugin {
 				)
 			)
 		}
+
+		console.log(this.settings, settings)
 
 		await this.saveData(settings)
 	}

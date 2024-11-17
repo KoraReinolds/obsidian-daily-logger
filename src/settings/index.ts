@@ -26,8 +26,6 @@ export class LoggerSetting extends PluginSettingTab {
 	plugin: LoggerPlugin
 	settings: ILoggerSettings
 	expandedBlocks: Record<string, boolean> = {}
-	preview: { text: Setting; block: TBlock }[] = []
-	globalPrefix = ''
 	globalBlockCopy: TItem
 	blockCopy: TItem
 	openedBlockId?: string
@@ -116,10 +114,17 @@ export class LoggerSetting extends PluginSettingTab {
 	}
 
 	displayPreview() {
-		//this.preview.forEach(({ text, block }) => {
-		//	text.setName(block.name)
-		//	text.setDesc(this.calculateText(block))
-		//})
+		this.settings.blocks.forEach((block) => {
+			if (!block.headerEl) return
+
+			const desc = block.order
+				.map((itemId) => this.settings.items[itemId])
+				.filter((item) => !!item)
+				.map((item) => this.getValueFromItem(item))
+				.join(' ')
+
+			block.headerEl.setDesc(desc)
+		})
 	}
 
 	displayItems(params: {
@@ -341,7 +346,7 @@ export class LoggerSetting extends PluginSettingTab {
 				return block.order
 					.map((id) => this.settings.items[id])
 					.map((item) => this.getValueFromItem(item))
-					.join('')
+					.join(' ')
 			}
 		}
 	}
@@ -352,20 +357,24 @@ export class LoggerSetting extends PluginSettingTab {
 		list.forEach((block) => {
 			const id = block.id
 
-			const blockEl = block.el || containerEl.createDiv()
+			const blockEl = containerEl.createDiv()
 			blockEl.classList.add('daily-logger-block')
-			if (block.el) {
-				blockEl.empty()
-				containerEl.append(block.el)
-			} else {
-				block.el = blockEl
-			}
 
 			// block header
-			const header = new Setting(blockEl)
-				.setName(block.name)
-				.setDesc(this.calculateText(block))
-				.setClass('daily-logger-block-header')
+			const header =
+				block.headerEl ||
+				new Setting(blockEl)
+					.setName(block.name)
+					.setDesc(this.calculateText(block))
+					.setClass('daily-logger-block-header')
+
+			if (block.headerEl) {
+				blockEl.empty()
+				blockEl.append(header.settingEl)
+				block.headerEl.controlEl.empty()
+			} else {
+				block.headerEl = header
+			}
 
 			// block template
 			if (block.type === ELoggerType.LOGGER) {
@@ -461,7 +470,7 @@ export class LoggerSetting extends PluginSettingTab {
 			})
 
 			if (this.openedBlockId === id) {
-				this.displayItems(block)
+				this.displayItems({ ...block, el: blockEl })
 			}
 		})
 	}
