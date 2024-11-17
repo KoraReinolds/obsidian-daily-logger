@@ -70,7 +70,7 @@ export class LoggerSetting extends PluginSettingTab {
 		}
 	}
 
-	addNewBlock(params: Partial<TItem> = {}) {
+	addNewItem(params: Partial<TItem> = {}) {
 		const id = uuidv4()
 
 		this.settings.items[id] = {
@@ -84,12 +84,12 @@ export class LoggerSetting extends PluginSettingTab {
 		return id
 	}
 
-	addNewLog(list: TBlock[], type: ELoggerType) {
+	addNewBlock(list: TBlock[], type: ELoggerType) {
 		const id = uuidv4()
 		const name = 'New log'
 		const keyId =
 			type === ELoggerType.LOGGER
-				? this.addNewBlock({
+				? this.addNewItem({
 						type: 'key',
 						name: 'key'
 					})
@@ -277,6 +277,7 @@ export class LoggerSetting extends PluginSettingTab {
 			blockItem.addButton((btn) => {
 				btn.setIcon('trash-2').onClick(() => {
 					delete this.settings.items[id]
+					this.displayPreview()
 
 					params.order = order.filter(
 						(blockId) => blockId !== id
@@ -408,12 +409,21 @@ export class LoggerSetting extends PluginSettingTab {
 			// copy block
 			header.addButton((btn) => {
 				btn
-					.setDisabled(!!block.locked)
 					.setIcon('clipboard-paste')
 					.onClick(() => {
-						this.addNewBlock(this.blockCopy)
+						this.blockCopy
+						block
+						const id = this.addNewItem(this.blockCopy)
+						block.order.push(id)
+						this.plugin.saveSettings()
+						this.displayPreview()
+						this.display()
 					})
-					.setDisabled(!this.blockCopy)
+					.setDisabled(
+						!!block.locked ||
+							!this.blockCopy ||
+							this.blockCopy.type === block.id // same template
+					)
 			})
 
 			// add item to block
@@ -423,9 +433,8 @@ export class LoggerSetting extends PluginSettingTab {
 					.setDisabled(!!block.locked)
 					.onClick(() => {
 						this.settings
-						debugger
 
-						block.order.push(this.addNewBlock())
+						block.order.push(this.addNewItem())
 						this.openedBlockId = id
 						this.display()
 					})
@@ -494,7 +503,7 @@ export class LoggerSetting extends PluginSettingTab {
 						activeTab.data.settings.header.btnText
 					)
 					.onClick(() => {
-						this.addNewLog(blocks, activeTab.type)
+						this.addNewBlock(blocks, activeTab.type)
 						this.display()
 					})
 			)
