@@ -174,12 +174,6 @@ export class LoggerSetting extends PluginSettingTab {
 			)
 				.map((item) => [item.id, item.name])
 				.filter(([id]) => {
-					if (
-						params.type === ELoggerType.LOGGER &&
-						id === EItemType.SLOT
-					) {
-						return false
-					}
 					return id !== params.id
 				})
 
