@@ -124,19 +124,19 @@ export class LoggerSetting extends PluginSettingTab {
 				.join(' ')
 
 			block.headerEl.setDesc(desc)
+			block.headerEl.setName(block.name)
 		})
 	}
 
-	displayItems(params: {
-		order: string[]
-		name: string
-		id: string
-		type: string
-		el?: HTMLElement
-	}) {
-		if (!params.el) return
-
-		const containerEl = params.el
+	displayItems(
+		params: {
+			order: string[]
+			name: string
+			id: string
+			type: string
+		},
+		containerEl: HTMLElement
+	) {
 		new Setting(containerEl)
 			.setName('Command name')
 			.setDesc('Name of command for call this log')
@@ -479,7 +479,7 @@ export class LoggerSetting extends PluginSettingTab {
 			})
 
 			if (this.openedBlockId === id) {
-				this.displayItems({ ...block, el: blockEl })
+				this.displayItems(block, blockEl)
 			}
 		})
 	}
