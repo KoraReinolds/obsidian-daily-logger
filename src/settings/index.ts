@@ -541,6 +541,14 @@ export class LoggerSetting extends PluginSettingTab {
 						this.display()
 					})
 			)
+			.addButton((btn) =>
+				btn
+					.setIcon('save')
+					.onClick(async () => {
+						await this.plugin.saveAll()
+					})
+					.setCta()
+			)
 
 		console.log(this.settings)
 		displayTabs(containerEl, this.tabs)

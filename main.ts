@@ -10,6 +10,7 @@ import {
 import { LoggerSetting } from 'src/settings'
 import {
 	DEFAULT_SETTINGS,
+	ELoggerType,
 	ILoggerSettings,
 	TItem
 } from 'src/settings/types'
@@ -175,7 +176,10 @@ export default class LoggerPlugin extends Plugin {
 		await this.saveData()
 	}
 
-	saveAll() {
+	async saveAll() {
+		this.lastSettings = this.getSettingsCopy(this.settings)
+		await this.saveData
+
 		const commands = (this.app as any).commands as any
 
 		const pluginCommands = Object.keys(
@@ -188,62 +192,70 @@ export default class LoggerPlugin extends Plugin {
 			commands.removeCommand(id)
 		)
 
-		this.settings.blocks.forEach((block) =>
-			this.addCommand({
-				id: block.id,
-				name: block.name,
-				editorCallback: async (editor: Editor) => {
-					const loggerBlock = this.settings.blocks.find(
-						(item) => item.name === block.name
-					)
+		this.settings.blocks
+			.filter((block) => block.type === ELoggerType.LOGGER)
+			.forEach((block) =>
+				this.addCommand({
+					id: block.id,
+					name: block.name,
+					editorCallback: async (editor: Editor) => {
+						const log = await this.blockToLog(block.id)
 
-					const globalLog = await this.blocksToLog(
-						this.settings
-					)
+						//if (!loggerBlock) return
+						//
+						//const log = loggerBlock
+						//await this.blocksToLog(
+						//	loggerBlock.order
+						//		.map((id) => this.settings.items[id])
+						//		.filter((item) => !!item)
+						//)
+						//	.filter((item) => !!item)
+						//	.join(' ')
 
-					const localLog = loggerBlock
-						? await this.blocksToLog(loggerBlock)
-						: ''
-					const log = [globalLog, localLog]
-						.filter((item) => !!item)
-						.join(' ')
+						//this.parseLog(log)
 
-					this.parseLog(log)
-
-					editor.replaceSelection(log)
-				}
-			})
-		)
+						editor.replaceSelection(log)
+					}
+				})
+			)
 
 		new Notice('Successful save')
 	}
 
-	async blocksToLog(params: {
-		blocks: TItem[]
-		order: string[]
-	}) {
-		const { blocks, order } = params
-		const log = await Promise.all(
-			order.map((id) => {
-				const block = blocks.find(
-					(block) => block.id === id
-				)
-				if (!block) return ''
+	async blockToLog(blockId?: string) {
+		const block = this.settings.blocks.find(
+			(block) => block.id === blockId
+		)
 
-				switch (block.type) {
+		if (!block) return ''
+
+		const log = await this.itemToLog(
+			block.order
+				.map((id) => this.settings.items[id])
+				.filter((item) => !!item)
+		)
+
+		return log
+	}
+
+	async itemToLog(items: TItem[]) {
+		const log = await Promise.all(
+			items.map((item) => {
+				switch (item.type) {
 					case 'text':
 					case 'key':
-						return block.value
+						return item.value
 					case 'time':
 						// @ts-ignore
-						return moment().format(block.value)
+						return moment().format(item.value)
 					case 'link':
 						return new Promise((res) =>
-							this.suggestFileByPath(block.value).then(
+							this.suggestFileByPath(item.value).then(
 								(file) => res(`[[${file.basename}]]`)
 							)
 						)
 					default:
+						return this.blockToLog(item.type)
 						break
 				}
 			})
