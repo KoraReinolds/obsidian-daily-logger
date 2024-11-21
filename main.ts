@@ -1,6 +1,7 @@
 import {
 	App,
 	Editor,
+	MarkdownView,
 	Modal,
 	Notice,
 	Plugin,
@@ -139,7 +140,7 @@ export default class LoggerPlugin extends Plugin {
 		this.saveSettings()
 	}
 
-	getSettingsCopy(settings: TLoggerSettings) {
+	getSettingsCopy(settings: ILoggerSettings) {
 		const settingsCopy = {
 			...settings,
 			blocks: settings.blocks.map((block) => {
@@ -173,12 +174,12 @@ export default class LoggerPlugin extends Plugin {
 		this.lastSettings = this.getSettingsCopy(
 			this.lastSettings
 		)
-		await this.saveData()
+		await this.saveSettings()
 	}
 
 	async saveAll() {
 		this.lastSettings = this.getSettingsCopy(this.settings)
-		await this.saveData
+		await this.saveSettings()
 
 		const commands = (this.app as any).commands as any
 
@@ -222,7 +223,7 @@ export default class LoggerPlugin extends Plugin {
 		new Notice('Successful save')
 	}
 
-	async blockToLog(blockId?: string) {
+	async blockToLog(blockId?: string): Promise<string> {
 		const block = this.settings.blocks.find(
 			(block) => block.id === blockId
 		)
@@ -249,14 +250,14 @@ export default class LoggerPlugin extends Plugin {
 						// @ts-ignore
 						return moment().format(item.value)
 					case 'link':
-						return new Promise((res) =>
-							this.suggestFileByPath(item.value).then(
-								(file) => res(`[[${file.basename}]]`)
-							)
-						)
+						return item.value
+					//return new Promise((res) =>
+					//	this.suggestFileByPath(item.value).then(
+					//		(file) => res(`[[${file.basename}]]`)
+					//	)
+					//)
 					default:
 						return this.blockToLog(item.type)
-						break
 				}
 			})
 		)
@@ -285,7 +286,9 @@ export default class LoggerPlugin extends Plugin {
 		return null
 	}
 
-	async suggestFleByPath(path: string): Promise<TFile> {
+	async suggestFleByPath(
+		path: string
+	): Promise<TFile | undefined> {
 		const file = await this.getFolderByPath(path)
 		if (this.isFolder(file)) {
 			const files = file.children.filter((f) =>

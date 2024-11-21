@@ -1,3 +1,4 @@
+import LoggerPlugin from 'main'
 import {
 	App,
 	Notice,
@@ -5,10 +6,6 @@ import {
 	Setting
 } from 'obsidian'
 import { v4 as uuidv4 } from 'uuid'
-import {
-	default as LoggerPlugin,
-	default as MemoPlugin
-} from '../../main'
 import { displayTabs } from './tabs'
 import {
 	ELoggerType,
@@ -34,7 +31,7 @@ export class LoggerSetting extends PluginSettingTab {
 		list: []
 	}
 
-	constructor(app: App, plugin: MemoPlugin) {
+	constructor(app: App, plugin: LoggerPlugin) {
 		super(app, plugin)
 		this.plugin = plugin
 		this.settings = this.plugin.settings
