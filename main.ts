@@ -431,11 +431,38 @@ class FindOrCreateNoteModal extends FuzzySuggestModal<string> {
 				.trim()
 				.replace('New File: ', '')
 			if (newFileName) {
-				const newFilePath = `${this.folderPath}/${newFileName}.md`
+				const newFilePath = `${this.folderPath}/${newFileName}`
 				if (
 					!this.app.vault.getAbstractFileByPath(newFilePath)
 				) {
-					await this.app.vault.create(newFilePath, '')
+					const templater = (this.app as any).plugins
+						.plugins['templater-obsidian']
+
+					const templates: {
+						folder: string
+						template: string
+					}[] = templater.settings.folder_templates
+
+					console.log(this.folderPath)
+					const template = templates.find(
+						(t) => t.folder === this.folderPath
+					)?.template
+
+					if (templater && template) {
+						const tp =
+							templater.templater[
+								'current_functions_object'
+							]
+
+						await tp.file.create_new(
+							await tp.file.find_tfile(template),
+							newFilePath,
+							true,
+							this.folderPath
+						)
+					} else {
+						await this.app.vault.create(newFilePath, '')
+					}
 				}
 				this.resolve(`[[${newFileName}]]`)
 			}
