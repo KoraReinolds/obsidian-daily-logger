@@ -217,7 +217,7 @@ export default class LoggerPlugin extends Plugin {
 							)
 						).join(' ')
 
-						//console.log(await this.parseLog(log))
+						console.log(await this.parseLog(log))
 
 						editor.replaceSelection(log)
 					}

@@ -1,6 +1,30 @@
 import { TItemData } from 'src/entities/types'
 import { EItemType, TItem } from 'src/settings/types'
 
+export const momentPatternToRegex = (pattern: string) => {
+	const replacements = {
+		YYYY: '\\d{4}',
+		MM: '0[1-9]|1[0-2]',
+		DD: '0[1-9]|[12]\\d|3[01]',
+		HH: '[01]\\d|2[0-3]',
+		mm: '[0-5]\\d'
+	}
+
+	const escapedPattern = pattern.replace(
+		// eslint-disable-next-line
+		/[-\/\\^$*+?.()|[\]{}]/g,
+		'\\$&'
+	)
+
+	const regexPattern = Object.entries(replacements).reduce(
+		(acc, [key, value]) =>
+			acc.replace(new RegExp(`\\b${key}\\b`, 'g'), value),
+		escapedPattern
+	)
+
+	return regexPattern
+}
+
 export const itemData: Record<EItemType, TItemData> = {
 	[EItemType.key]: {
 		toValue: async (item) => item.value,
@@ -21,7 +45,8 @@ export const itemData: Record<EItemType, TItemData> = {
 		// @ts-ignore
 		toValue: async (item) => moment().format(item.value),
 		defaultValue: 'HH:mm',
-		toRegexpr: async (item) => `\\d+:\\d+`
+		toRegexpr: async (item) =>
+			momentPatternToRegex(item.value)
 	}
 }
 
