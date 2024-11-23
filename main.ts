@@ -8,7 +8,10 @@ import {
 	TFile,
 	TFolder
 } from 'obsidian'
-import { itemData } from 'src/entities'
+import {
+	generateDynamicRegExp,
+	itemData
+} from 'src/entities'
 import { LoggerSetting } from 'src/settings'
 import {
 	DEFAULT_SETTINGS,
@@ -214,6 +217,8 @@ export default class LoggerPlugin extends Plugin {
 							)
 						).join(' ')
 
+						//console.log(await this.parseLog(log))
+
 						editor.replaceSelection(log)
 					}
 				})
@@ -238,9 +243,7 @@ export default class LoggerPlugin extends Plugin {
 				})
 				.filter((item) => !!item)
 				.map((item) => {
-					if (
-						EItemType[item.type as keyof typeof EItemType]
-					) {
+					if (EItemType[item.type as EItemType]) {
 						return [item]
 					} else {
 						return this.getItemsFromBlock(item.type)
@@ -251,8 +254,42 @@ export default class LoggerPlugin extends Plugin {
 		return items.flat()
 	}
 
-	parseLog(log: string) {
-		console.log(log)
+	async parseLog(log: string) {
+		const blocks = this.settings.blocks.filter(
+			(block) => block.type === ELoggerType.LOGGER
+		)
+
+		const itemsArr = await Promise.all(
+			blocks.map((block) =>
+				this.getItemsFromBlock(block.id)
+			)
+		)
+
+		const regArr = await Promise.all(
+			itemsArr.map((items) => generateDynamicRegExp(items))
+		)
+
+		const matchArr = regArr.map((reg) => log.match(reg))
+
+		const firstMatch = matchArr.findIndex(
+			(match) => !!match
+		)
+
+		if (firstMatch < 0) return {}
+
+		const res = itemsArr[firstMatch].reduce(
+			(r, item, i) => {
+				const value = matchArr[firstMatch]?.[i + 1] || ''
+				r[item.name] = value
+
+				return r
+			},
+			{} as Record<string, string>
+		)
+
+		console.log(res)
+
+		return res
 	}
 
 	isFile(file: any): file is TFile {
