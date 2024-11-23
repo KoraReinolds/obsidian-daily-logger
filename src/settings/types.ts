@@ -7,19 +7,8 @@ export enum EItemType {
 	text = 'text'
 }
 
-export type TItemDataType = {
-	defaultValue: string
-}
-
-export const DEFAUTL_ITEM_DATA: TItemDataType = {
+export const DEFAUTL_ITEM_DATA = {
 	defaultValue: ''
-}
-
-export const itemData: Record<EItemType, TItemDataType> = {
-	[EItemType.key]: { defaultValue: '' },
-	[EItemType.time]: { defaultValue: 'HH:mm' },
-	[EItemType.link]: { defaultValue: '' },
-	[EItemType.text]: { defaultValue: '' }
 }
 
 export type TTab = {

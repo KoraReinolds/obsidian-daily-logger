@@ -5,6 +5,8 @@ import {
 	PluginSettingTab,
 	Setting
 } from 'obsidian'
+import { itemData } from 'src/entities'
+import { TItemData } from 'src/entities/types'
 import { v4 as uuidv4 } from 'uuid'
 import { displayTabs } from './tabs'
 import {
@@ -14,8 +16,6 @@ import {
 	TItem,
 	TBlock,
 	TTabs,
-	TItemDataType,
-	itemData,
 	DEFAUTL_ITEM_DATA
 } from './types'
 
@@ -175,7 +175,7 @@ export class LoggerSetting extends PluginSettingTab {
 				})
 
 			// item type
-			if (item.type !== EItemType.KEY && templates.length) {
+			if (item.type !== EItemType.key && templates.length) {
 				blockItem.addDropdown((dd) =>
 					dd
 						.addOptions(Object.fromEntries(templates))
@@ -183,10 +183,10 @@ export class LoggerSetting extends PluginSettingTab {
 						.onChange((value) => {
 							item.type = value
 
-							const data: TItemDataType =
+							const data: TItemData =
 								(itemData[
 									item.type as EItemType
-								] as TItemDataType) || DEFAUTL_ITEM_DATA
+								] as TItemData) || DEFAUTL_ITEM_DATA
 
 							item.value = data.defaultValue
 
@@ -320,9 +320,9 @@ export class LoggerSetting extends PluginSettingTab {
 
 	getValueFromItem(item: TItem): string {
 		switch (item.type) {
-			case EItemType.TEXT:
-			case EItemType.TIME:
-			case EItemType.KEY:
+			case EItemType.text:
+			case EItemType.time:
+			case EItemType.key:
 				return item.value
 			default: {
 				const block = this.settings.blocks.find(
