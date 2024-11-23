@@ -1,8 +1,9 @@
 import {
 	App,
 	Editor,
+	FuzzyMatch,
+	FuzzySuggestModal,
 	MarkdownView,
-	Modal,
 	Notice,
 	Plugin,
 	TFile,
@@ -59,7 +60,7 @@ export default class LoggerPlugin extends Plugin {
 			id: 'open-sample-modal-simple',
 			name: 'Open sample modal (simple)',
 			callback: () => {
-				new SampleModal(this.app).open()
+				//
 			}
 		})
 		// This adds an editor command that can perform some operation on the current editor instance
@@ -88,7 +89,7 @@ export default class LoggerPlugin extends Plugin {
 					// If checking is true, we're simply "checking" if the command can be run.
 					// If checking is false, then we want to actually perform the operation.
 					if (!checking) {
-						new SampleModal(this.app).open()
+						//
 					}
 
 					// This command will only show up in Command Palette when the check function returns true
@@ -219,7 +220,23 @@ export default class LoggerPlugin extends Plugin {
 
 						console.log(await this.parseLog(log))
 
-						editor.replaceSelection(log)
+						console.log(
+							await new FindOrCreateNoteModal(
+								this.app,
+								'Tasks'
+							).open()
+						)
+
+						//// Установка базовой папки в Quick Switcher
+						//quickSwitcher.instance.openQuickSwitcher(
+						//	basePath
+						//)
+						//
+						//console.log(
+						//	`Открыто окно Find or Create Note для папки: ${basePath}`
+						//)
+						//
+						//editor.replaceSelection(log)
 					}
 				})
 			)
@@ -356,18 +373,74 @@ export default class LoggerPlugin extends Plugin {
 	}
 }
 
-class SampleModal extends Modal {
-	constructor(app: App) {
+class FindOrCreateNoteModal extends FuzzySuggestModal<string> {
+	private folderPath: string
+	resolve: (value: string) => void
+	reject: (reason?: any) => void
+
+	constructor(app: App, folderPath: string) {
 		super(app)
+		this.folderPath = folderPath
+		this.setPlaceholder('Введите название файла...')
 	}
 
-	onOpen() {
-		const { contentEl } = this
-		contentEl.setText('Woah!')
+	open(): Promise<string> {
+		return new Promise((resolve, reject) => {
+			this.resolve = resolve
+			this.reject = reject
+			super.open()
+		})
 	}
 
-	onClose() {
-		const { contentEl } = this
-		contentEl.empty()
+	getSuggestions(query: string): FuzzyMatch<string>[] {
+		const data = super.getSuggestions(query)
+
+		if (!data.length) {
+			return [
+				{
+					item: `New File: ${query}`,
+					match: {
+						score: 1,
+						matches: []
+					}
+				}
+			]
+		}
+
+		return data
+	}
+
+	getItems(): string[] {
+		return this.app.vault
+			.getFiles()
+			.filter((file) =>
+				file.path.startsWith(this.folderPath)
+			)
+			.map((file) =>
+				file.path.replace(this.folderPath + '/', '')
+			)
+	}
+
+	getItemText(item: string): string {
+		return item
+	}
+
+	async onChooseItem(item: string) {
+		if (item.startsWith('New File: ')) {
+			const newFileName = this.inputEl.value
+				.trim()
+				.replace('New File: ', '')
+			if (newFileName) {
+				const newFilePath = `${this.folderPath}/${newFileName}.md`
+				if (
+					!this.app.vault.getAbstractFileByPath(newFilePath)
+				) {
+					await this.app.vault.create(newFilePath, '')
+				}
+				this.resolve(`[[${newFileName}]]`)
+			}
+		} else {
+			this.resolve(`[[${item}]]`)
+		}
 	}
 }

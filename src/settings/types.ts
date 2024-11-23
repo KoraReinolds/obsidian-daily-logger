@@ -68,6 +68,13 @@ export const DEFAULT_SETTINGS: ILoggerSettings = {
 			order: [],
 			name: 'Time',
 			locked: true
+		},
+		{
+			id: EItemType.link,
+			type: ELoggerType.TEMPLATE,
+			order: [],
+			name: 'Link',
+			locked: true
 		}
 	]
 }
