@@ -8,9 +8,11 @@ import {
 	TFile,
 	TFolder
 } from 'obsidian'
+import { itemData } from 'src/entities'
 import { LoggerSetting } from 'src/settings'
 import {
 	DEFAULT_SETTINGS,
+	EItemType,
 	ELoggerType,
 	ILoggerSettings,
 	TItem
@@ -200,20 +202,17 @@ export default class LoggerPlugin extends Plugin {
 					id: block.id,
 					name: block.name,
 					editorCallback: async (editor: Editor) => {
-						const log = await this.blockToLog(block.id)
-
-						//if (!loggerBlock) return
-						//
-						//const log = loggerBlock
-						//await this.blocksToLog(
-						//	loggerBlock.order
-						//		.map((id) => this.settings.items[id])
-						//		.filter((item) => !!item)
-						//)
-						//	.filter((item) => !!item)
-						//	.join(' ')
-
-						//this.parseLog(log)
+						const log = (
+							await Promise.all(
+								(
+									await this.getItemsFromBlock(block.id)
+								).map((item) =>
+									itemData[
+										item.type as keyof typeof EItemType
+									].toValue(item)
+								)
+							)
+						).join(' ')
 
 						editor.replaceSelection(log)
 					}
@@ -223,46 +222,33 @@ export default class LoggerPlugin extends Plugin {
 		new Notice('Successful save')
 	}
 
-	async blockToLog(blockId?: string): Promise<string> {
+	async getItemsFromBlock(
+		blockId?: string
+	): Promise<TItem[]> {
 		const block = this.settings.blocks.find(
 			(block) => block.id === blockId
 		)
 
-		if (!block) return ''
+		if (!block) return []
 
-		const log = await this.itemToLog(
+		const items = await Promise.all(
 			block.order
-				.map((id) => this.settings.items[id])
+				.map((id) => {
+					return this.settings.items[id]
+				})
 				.filter((item) => !!item)
+				.map((item) => {
+					if (
+						EItemType[item.type as keyof typeof EItemType]
+					) {
+						return [item]
+					} else {
+						return this.getItemsFromBlock(item.type)
+					}
+				})
 		)
 
-		return log
-	}
-
-	async itemToLog(items: TItem[]) {
-		const log = await Promise.all(
-			items.map((item) => {
-				switch (item.type) {
-					case 'text':
-					case 'key':
-						return item.value
-					case 'time':
-						// @ts-ignore
-						return moment().format(item.value)
-					case 'link':
-						return item.value
-					//return new Promise((res) =>
-					//	this.suggestFileByPath(item.value).then(
-					//		(file) => res(`[[${file.basename}]]`)
-					//	)
-					//)
-					default:
-						return this.blockToLog(item.type)
-				}
-			})
-		)
-
-		return (await Promise.all(log)).join(' ')
+		return items.flat()
 	}
 
 	parseLog(log: string) {

@@ -1,10 +1,10 @@
 import { Setting } from 'obsidian'
 
 export enum EItemType {
-	KEY = 'key',
-	TIME = 'time',
-	LINK = 'link',
-	TEXT = 'text'
+	key = 'key',
+	time = 'time',
+	link = 'link',
+	text = 'text'
 }
 
 export type TItemDataType = {
@@ -16,10 +16,10 @@ export const DEFAUTL_ITEM_DATA: TItemDataType = {
 }
 
 export const itemData: Record<EItemType, TItemDataType> = {
-	[EItemType.KEY]: { defaultValue: '' },
-	[EItemType.TIME]: { defaultValue: 'HH:mm' },
-	[EItemType.LINK]: { defaultValue: '' },
-	[EItemType.TEXT]: { defaultValue: '' }
+	[EItemType.key]: { defaultValue: '' },
+	[EItemType.time]: { defaultValue: 'HH:mm' },
+	[EItemType.link]: { defaultValue: '' },
+	[EItemType.text]: { defaultValue: '' }
 }
 
 export type TTab = {
@@ -67,14 +67,14 @@ export const DEFAULT_SETTINGS: ILoggerSettings = {
 	items: {},
 	blocks: [
 		{
-			id: EItemType.TEXT,
+			id: EItemType.text,
 			type: ELoggerType.TEMPLATE,
 			order: [],
 			name: 'Text',
 			locked: true
 		},
 		{
-			id: EItemType.TIME,
+			id: EItemType.time,
 			type: ELoggerType.TEMPLATE,
 			order: [],
 			name: 'Time',
