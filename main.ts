@@ -214,7 +214,7 @@ export default class LoggerPlugin extends Plugin {
 									].toValue(item)
 								)
 							)
-						).join(' ')
+						).join('')
 
 						console.log(log, await this.parseLog(log))
 
@@ -288,7 +288,7 @@ export default class LoggerPlugin extends Plugin {
 		const res = itemsArr[firstMatch].reduce(
 			(r, item, i) => {
 				const value = matchArr[firstMatch]?.[i + 1] || ''
-				r[item.name] = value
+				r[item.name] = value.trim()
 
 				return r
 			},

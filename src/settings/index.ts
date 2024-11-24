@@ -107,7 +107,7 @@ export class LoggerSetting extends PluginSettingTab {
 			.map((id) => this.settings.items[id])
 			.filter((item) => !!item)
 			.map((item) => this.getValueFromItem(item))
-			.join(' ')
+			.join('')
 	}
 
 	displayPreview() {
@@ -118,7 +118,7 @@ export class LoggerSetting extends PluginSettingTab {
 				.map((itemId) => this.settings.items[itemId])
 				.filter((item) => !!item)
 				.map((item) => this.getValueFromItem(item))
-				.join(' ')
+				.join('')
 
 			block.headerEl.setDesc(desc)
 			block.headerEl.setName(block.name)
@@ -334,7 +334,7 @@ export class LoggerSetting extends PluginSettingTab {
 				return block.order
 					.map((id) => this.settings.items[id])
 					.map((item) => this.getValueFromItem(item))
-					.join(' ')
+					.join('')
 			}
 		}
 	}

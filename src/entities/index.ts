@@ -72,7 +72,7 @@ export const generateDynamicRegExp = async (
 		)
 	)
 		.map((str) => `(${str})`)
-		.join(' ')
+		.join('')
 
 	return new RegExp(`^${combinedPattern}$`)
 }
