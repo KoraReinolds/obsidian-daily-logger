@@ -287,9 +287,10 @@ export default class LoggerPlugin extends Plugin {
 
 		const res = itemsArr[firstMatch].reduce(
 			(r, item, i) => {
-				const value = matchArr[firstMatch]?.[i + 1] || ''
-				r[item.name] = value.trim()
-
+				if (item.name) {
+					const value = matchArr[firstMatch]?.[i + 1] || ''
+					r[item.name] = value.trim()
+				}
 				return r
 			},
 			{} as Record<string, string>
