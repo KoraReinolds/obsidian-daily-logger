@@ -30,7 +30,8 @@ export const itemData: Record<EItemType, TItemData> = {
 	[EItemType.key]: {
 		toValue: async (item) => item.value,
 		defaultValue: '',
-		toRegexpr: async (item) => item.value
+		toRegexpr: async (item) => item.value,
+		isDisabled: false
 	},
 	[EItemType.link]: {
 		toValue: async (item) => {
@@ -41,26 +42,30 @@ export const itemData: Record<EItemType, TItemData> = {
 			).open()
 		},
 		defaultValue: '',
-		toRegexpr: async (item) => `\\[\\[([^\\]]+)\\]\\]`
+		toRegexpr: async (item) => `\\[\\[([^\\]]+)\\]\\]`,
+		isDisabled: false
 	},
 	[EItemType.text]: {
 		toValue: async (item) => item.value,
 		defaultValue: '',
-		toRegexpr: async (item) => item.value
+		toRegexpr: async (item) => item.value,
+		isDisabled: false
 	},
 	[EItemType.hours]: {
 		// @ts-ignore
 		toValue: async (item) => moment().format(item.value),
 		defaultValue: 'HH',
 		toRegexpr: async (item) =>
-			momentPatternToRegex(item.value)
+			momentPatternToRegex(item.value),
+		isDisabled: true
 	},
 	[EItemType.minutes]: {
 		// @ts-ignore
 		toValue: async (item) => moment().format(item.value),
 		defaultValue: 'mm',
 		toRegexpr: async (item) =>
-			momentPatternToRegex(item.value)
+			momentPatternToRegex(item.value),
+		isDisabled: true
 	}
 }
 

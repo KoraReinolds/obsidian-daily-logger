@@ -5,7 +5,7 @@ import {
 	PluginSettingTab,
 	Setting
 } from 'obsidian'
-import { itemData } from 'src/entities'
+import { itemData, itemData } from 'src/entities'
 import { TItemData } from 'src/entities/types'
 import { v4 as uuidv4 } from 'uuid'
 import { displayTabs } from './tabs'
@@ -299,6 +299,7 @@ export class LoggerSetting extends PluginSettingTab {
 				)
 				.setClass('daily-logger-block-item-data')
 
+			const data = itemData[item.type as EItemType]
 			// item value
 			new Setting(itemEl)
 				.setName('Value')
@@ -313,6 +314,7 @@ export class LoggerSetting extends PluginSettingTab {
 							this.settings = this.plugin.settings
 							this.displayPreview()
 						})
+						.setDisabled(data ? data.isDisabled : true)
 				)
 				.setClass('daily-logger-block-item-data')
 		})

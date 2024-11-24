@@ -127,8 +127,8 @@ export default class LoggerPlugin extends Plugin {
 			{
 				settings: this.getSettingsCopy(DEFAULT_SETTINGS),
 				lastSettings: this.getSettingsCopy(DEFAULT_SETTINGS)
-			}
-			//loadData
+			},
+			loadData
 		)
 
 		this.settings = settings
