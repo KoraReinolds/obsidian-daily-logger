@@ -1,4 +1,5 @@
 import { TItemData } from 'src/entities/types'
+import { FindOrCreateNoteModal } from 'src/lib/fuzzyModal'
 import { EItemType, TItem } from 'src/settings/types'
 
 export const momentPatternToRegex = (pattern: string) => {
@@ -6,8 +7,8 @@ export const momentPatternToRegex = (pattern: string) => {
 		YYYY: '\\d{4}',
 		MM: '0[1-9]|1[0-2]',
 		DD: '0[1-9]|[12]\\d|3[01]',
-		HH: '[01]\\d|2[0-3]',
-		mm: '[0-5]\\d'
+		HH: '\\d+',
+		mm: '\\d+'
 	}
 
 	const escapedPattern = pattern.replace(
@@ -32,9 +33,15 @@ export const itemData: Record<EItemType, TItemData> = {
 		toRegexpr: async (item) => item.value
 	},
 	[EItemType.link]: {
-		toValue: async (item) => item.value,
+		toValue: async (item) => {
+			return await new FindOrCreateNoteModal(
+				// @ts-ignore
+				app,
+				item.value
+			).open()
+		},
 		defaultValue: '',
-		toRegexpr: async (item) => item.value
+		toRegexpr: async (item) => `\\[\\[([^\\]]+)\\]\\]`
 	},
 	[EItemType.text]: {
 		toValue: async (item) => item.value,

@@ -216,15 +216,15 @@ export default class LoggerPlugin extends Plugin {
 							)
 						).join(' ')
 
-						console.log(await this.parseLog(log))
+						console.log(log, await this.parseLog(log))
 
-						console.log(
-							await new FindOrCreateNoteModal(
-								this.app,
-								'Tasks'
-							).open()
-						)
-
+						//console.log(
+						//	await new FindOrCreateNoteModal(
+						//		this.app,
+						//		'Tasks'
+						//	).open()
+						//)
+						//
 						// editor.replaceSelection(log)
 					}
 				})
@@ -280,6 +280,8 @@ export default class LoggerPlugin extends Plugin {
 		const firstMatch = matchArr.findIndex(
 			(match) => !!match
 		)
+
+		console.log(regArr, matchArr)
 
 		if (firstMatch < 0) return {}
 

@@ -12,7 +12,7 @@ export class FindOrCreateNoteModal extends FuzzySuggestModal<string> {
 	constructor(app: App, folderPath: string) {
 		super(app)
 		this.folderPath = folderPath
-		this.setPlaceholder('Введите название файла...')
+		this.setPlaceholder('Input file name...')
 	}
 
 	open(): Promise<string> {
@@ -44,12 +44,15 @@ export class FindOrCreateNoteModal extends FuzzySuggestModal<string> {
 	getItems(): string[] {
 		return this.app.vault
 			.getFiles()
-			.filter((file) =>
-				file.path.startsWith(this.folderPath)
+			.filter(
+				(file) =>
+					file.path.startsWith(this.folderPath) &&
+					file.path.endsWith('.md')
 			)
 			.map((file) =>
 				file.path.replace(this.folderPath + '/', '')
 			)
+			.map((path) => path.replace('.md', ''))
 	}
 
 	getItemText(item: string): string {
