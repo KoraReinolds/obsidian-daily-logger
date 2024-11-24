@@ -10,7 +10,6 @@ import {
 	generateDynamicRegExp,
 	itemData
 } from 'src/entities'
-import { FindOrCreateNoteModal } from 'src/lib/fuzzyModal'
 import { LoggerSetting } from 'src/settings'
 import {
 	DEFAULT_SETTINGS,
@@ -128,8 +127,8 @@ export default class LoggerPlugin extends Plugin {
 			{
 				settings: this.getSettingsCopy(DEFAULT_SETTINGS),
 				lastSettings: this.getSettingsCopy(DEFAULT_SETTINGS)
-			},
-			loadData
+			}
+			//loadData
 		)
 
 		this.settings = settings

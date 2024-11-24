@@ -48,10 +48,17 @@ export const itemData: Record<EItemType, TItemData> = {
 		defaultValue: '',
 		toRegexpr: async (item) => item.value
 	},
-	[EItemType.time]: {
+	[EItemType.hours]: {
 		// @ts-ignore
 		toValue: async (item) => moment().format(item.value),
-		defaultValue: 'HH:mm',
+		defaultValue: 'HH',
+		toRegexpr: async (item) =>
+			momentPatternToRegex(item.value)
+	},
+	[EItemType.minutes]: {
+		// @ts-ignore
+		toValue: async (item) => moment().format(item.value),
+		defaultValue: 'mm',
 		toRegexpr: async (item) =>
 			momentPatternToRegex(item.value)
 	}

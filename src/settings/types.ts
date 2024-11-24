@@ -2,7 +2,8 @@ import { Setting } from 'obsidian'
 
 export enum EItemType {
 	key = 'key',
-	time = 'time',
+	hours = 'hours',
+	minutes = 'minutes',
 	link = 'link',
 	text = 'text'
 }
@@ -63,10 +64,17 @@ export const DEFAULT_SETTINGS: ILoggerSettings = {
 			locked: true
 		},
 		{
-			id: EItemType.time,
+			id: EItemType.hours,
 			type: ELoggerType.TEMPLATE,
 			order: [],
-			name: 'Time',
+			name: 'Hours',
+			locked: true
+		},
+		{
+			id: EItemType.minutes,
+			type: ELoggerType.TEMPLATE,
+			order: [],
+			name: 'Minutes',
 			locked: true
 		},
 		{

@@ -321,7 +321,8 @@ export class LoggerSetting extends PluginSettingTab {
 	getValueFromItem(item: TItem): string {
 		switch (item.type) {
 			case EItemType.text:
-			case EItemType.time:
+			case EItemType.hours:
+			case EItemType.minutes:
 			case EItemType.key:
 				return item.value
 			default: {
