@@ -268,14 +268,12 @@ export class LoggerSetting extends PluginSettingTab {
 			blockItem.addButton((btn) => {
 				btn.setIcon('trash-2').onClick(() => {
 					delete this.settings.items[id]
-					this.displayPreview()
 
 					params.order = order.filter(
 						(blockId) => blockId !== id
 					)
 
 					this.plugin.saveSettings()
-					this.displayPreview()
 					this.display()
 				})
 
@@ -410,7 +408,6 @@ export class LoggerSetting extends PluginSettingTab {
 						const id = this.addNewItem(this.blockCopy)
 						block.order.push(id)
 						this.plugin.saveSettings()
-						this.displayPreview()
 						this.display()
 					})
 					.setDisabled(
@@ -466,7 +463,6 @@ export class LoggerSetting extends PluginSettingTab {
 								(item) => item.id !== id
 							)
 
-						this.displayPreview()
 						this.plugin.saveSettings()
 						this.display()
 					})
@@ -552,5 +548,6 @@ export class LoggerSetting extends PluginSettingTab {
 
 		console.log(this.settings)
 		displayTabs(containerEl, this.tabs)
+		this.displayPreview()
 	}
 }
