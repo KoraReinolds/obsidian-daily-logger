@@ -206,7 +206,10 @@ export default class LoggerPlugin extends Plugin {
 						const log = (
 							await Promise.all(
 								(
-									await this.getItemsFromBlock(block.id)
+									await this.getItemsFromBlock(
+										block.id,
+										true
+									)
 								).map((item) =>
 									itemData[
 										item.type as keyof typeof EItemType
@@ -233,7 +236,8 @@ export default class LoggerPlugin extends Plugin {
 	}
 
 	async getItemsFromBlock(
-		blockId?: string
+		blockId?: string,
+		deep?: boolean
 	): Promise<TItem[]> {
 		const block = this.settings.blocks.find(
 			(block) => block.id === blockId
@@ -251,12 +255,65 @@ export default class LoggerPlugin extends Plugin {
 					if (EItemType[item.type as EItemType]) {
 						return [item]
 					} else {
-						return this.getItemsFromBlock(item.type)
+						return deep
+							? this.getItemsFromBlock(item.type)
+							: [item]
 					}
 				})
 		)
 
 		return items.flat()
+	}
+
+	//async parseLogForItems(items: TItem[]) {}
+
+	getDataFromItems(
+		items: TItem[],
+		matches: RegExpMatchArray,
+		i = 0
+	) {
+		return items.reduce(
+			(r, item) => {
+				if (item.name) {
+					debugger
+					if (item.nested?.length) {
+						r[item.name] = this.getDataFromItems(
+							item.nested,
+							matches,
+							i
+						)
+					} else {
+						r[item.name] = (matches[i] || '').trim()
+						i += 1
+					}
+				}
+				return r
+			},
+			{} as Record<string, any>
+		)
+	}
+
+	async getItemsForBlockId(id: string): Promise<any> {
+		const items = await this.getItemsFromBlock(id)
+
+		return (
+			await Promise.all(
+				items.map((item) => {
+					if (itemData[item.type as EItemType]) {
+						return item
+					} else {
+						return this.getItemsForBlockId(item.type)
+					}
+				})
+			)
+		).map((res, i) => {
+			return Array.isArray(res)
+				? {
+						...items[i],
+						nested: res
+					}
+				: res
+		})
 	}
 
 	async parseLog(log: string) {
@@ -266,7 +323,7 @@ export default class LoggerPlugin extends Plugin {
 
 		const itemsArr = await Promise.all(
 			blocks.map((block) =>
-				this.getItemsFromBlock(block.id)
+				this.getItemsForBlockId(block.id)
 			)
 		)
 
@@ -274,28 +331,25 @@ export default class LoggerPlugin extends Plugin {
 			itemsArr.map((items) => generateDynamicRegExp(items))
 		)
 
-		const matchArr = regArr.map((reg) => log.match(reg))
+		const matchArr = regArr.map((reg) => {
+			const match = log.match(reg)
+			console.log(log, reg, match)
+			return match
+		})
 
 		const firstMatch = matchArr.findIndex(
 			(match) => !!match
 		)
 
-		console.log(regArr, matchArr)
+		const matches = matchArr[firstMatch]
 
-		if (firstMatch < 0) return {}
+		if (!matches || firstMatch < 0) return {}
 
-		const res = itemsArr[firstMatch].reduce(
-			(r, item, i) => {
-				if (item.name) {
-					const value = matchArr[firstMatch]?.[i + 1] || ''
-					r[item.name] = value.trim()
-				}
-				return r
-			},
-			{} as Record<string, string>
+		const res = this.getDataFromItems(
+			itemsArr[firstMatch],
+			matches,
+			1
 		)
-
-		console.log(res)
 
 		return res
 	}

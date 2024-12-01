@@ -5,7 +5,7 @@ import {
 	PluginSettingTab,
 	Setting
 } from 'obsidian'
-import { itemData, itemData } from 'src/entities'
+import { itemData } from 'src/entities'
 import { TItemData } from 'src/entities/types'
 import { v4 as uuidv4 } from 'uuid'
 import { displayTabs } from './tabs'

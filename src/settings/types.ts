@@ -36,6 +36,7 @@ export type TItem = {
 	name: string
 	type: string
 	value: string
+	nested: TItem[]
 	el?: HTMLElement
 }
 
