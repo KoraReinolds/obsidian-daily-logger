@@ -37,6 +37,11 @@ export class LoggerSetting extends PluginSettingTab {
 		this.settings = this.plugin.settings
 		this.tabs.list = [
 			{
+				name: 'General',
+				type: ELoggerType.GENERAL,
+				render: this.displayGeneralTab.bind(this)
+			},
+			{
 				name: 'Logs',
 				type: ELoggerType.LOGGER,
 				render: this.displayTab.bind(this),
@@ -75,6 +80,7 @@ export class LoggerSetting extends PluginSettingTab {
 			type: 'text',
 			name: '',
 			value: '',
+			nested: [],
 			...params
 		}
 
@@ -474,6 +480,12 @@ export class LoggerSetting extends PluginSettingTab {
 		})
 	}
 
+	displayGeneralTab(containerEl: HTMLElement) {
+		containerEl.empty()
+
+		containerEl.innerHTML = 'General settings'
+	}
+
 	displayTab(containerEl: HTMLElement) {
 		containerEl.empty()
 
@@ -486,18 +498,17 @@ export class LoggerSetting extends PluginSettingTab {
 
 		logsContent.classList.add('daily-logger-blocks')
 
-		new Setting(logsContent)
-			.addButton((btn) =>
-				btn
-					.setButtonText(
-						activeTab.data.settings.header.btnText
-					)
-					.onClick(() => {
+		const header = activeTab.data?.settings.header
+
+		if (header)
+			new Setting(logsContent)
+				.addButton((btn) =>
+					btn.setButtonText(header.btnText).onClick(() => {
 						this.addNewBlock(blocks, activeTab.type)
 						this.display()
 					})
-			)
-			.setClass('daily-logger-blocks-header')
+				)
+				.setClass('daily-logger-blocks-header')
 
 		const blocksContent = logsContent.createDiv()
 		blocksContent.classList.add(

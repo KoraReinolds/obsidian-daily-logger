@@ -40,7 +40,7 @@ export default class LoggerPlugin extends Plugin {
 		const ribbonIconEl = this.addRibbonIcon(
 			'dice',
 			'Sample Plugin',
-			(evt: MouseEvent) => {
+			() => {
 				// Called when the user clicks the icon.
 				new Notice('This is a notice!')
 			}
@@ -64,10 +64,7 @@ export default class LoggerPlugin extends Plugin {
 		this.addCommand({
 			id: 'sample-editor-command',
 			name: 'Sample editor command',
-			editorCallback: (
-				editor: Editor,
-				view: MarkdownView
-			) => {
+			editorCallback: (editor: Editor) => {
 				console.log(editor.getSelection())
 				editor.replaceSelection('Sample Editor Command')
 			}
@@ -100,11 +97,7 @@ export default class LoggerPlugin extends Plugin {
 
 		// If the plugin hooks up any global DOM events (on parts of the app that doesn't belong to this plugin)
 		// Using this function will automatically remove the event listener when this plugin is disabled.
-		this.registerDomEvent(
-			document,
-			'click',
-			(evt: MouseEvent) => {}
-		)
+		this.registerDomEvent(document, 'click', () => {})
 
 		// When registering intervals, this function will automatically clear the interval when the plugin is disabled.
 		this.registerInterval(
@@ -421,7 +414,6 @@ export default class LoggerPlugin extends Plugin {
 
 	injectCSS(cssContent: string) {
 		const style = document.createElement('style')
-		style.type = 'text/css'
 		style.id = `plugin-styles-${this.manifest.id}`
 		document
 			.querySelectorAll(`#${style.id}`)

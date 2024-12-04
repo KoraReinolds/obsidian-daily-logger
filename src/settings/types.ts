@@ -15,7 +15,7 @@ export const DEFAUTL_ITEM_DATA = {
 export type TTab = {
 	name: string
 	render?: (el: HTMLElement) => void
-	data: ITabData
+	data?: ITabData
 	type: ELoggerType
 }
 
@@ -28,7 +28,8 @@ export type TTabs = {
 
 export enum ELoggerType {
 	TEMPLATE = 'template',
-	LOGGER = 'logger'
+	LOGGER = 'logger',
+	GENERAL = 'general'
 }
 
 export type TItem = {

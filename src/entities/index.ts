@@ -38,7 +38,7 @@ export const itemData: Record<EItemType, TItemData> = {
 			).open()
 		},
 		defaultValue: '',
-		toRegexpr: async (item) => `\\[\\[([^\\]]+)\\]\\]`,
+		toRegexpr: async () => `\\[\\[([^\\]]+)\\]\\]`,
 		isDisabled: false
 	},
 	[EItemType.text]: {
