@@ -218,7 +218,15 @@ export default class LoggerPlugin extends Plugin {
 							)
 						).join('')
 
-						console.log(log, await this.parseLog(log))
+						const file =
+							this.app.vault.getAbstractFileByPath(
+								'Journal/Daily/2024-12-04.md'
+							)
+
+						if (file instanceof TFile) {
+							console.log(await this.parseFile(file))
+						}
+						//console.log(log, await this.parseLog(log))
 
 						//console.log(
 						//	await new FindOrCreateNoteModal(
@@ -227,7 +235,7 @@ export default class LoggerPlugin extends Plugin {
 						//	).open()
 						//)
 						//
-						// editor.replaceSelection(log)
+						editor.replaceSelection(log.trim())
 					}
 				})
 			)
@@ -265,8 +273,6 @@ export default class LoggerPlugin extends Plugin {
 		return items.flat()
 	}
 
-	//async parseLogForItems(items: TItem[]) {}
-
 	getDataFromItems(
 		items: TItem[],
 		matches: RegExpMatchArray,
@@ -275,7 +281,6 @@ export default class LoggerPlugin extends Plugin {
 		return items.reduce(
 			(r, item) => {
 				if (item.name) {
-					debugger
 					if (item.nested?.length) {
 						r[item.name] = this.getDataFromItems(
 							item.nested,
@@ -316,6 +321,22 @@ export default class LoggerPlugin extends Plugin {
 		})
 	}
 
+	async parseFile(file: TFile) {
+		const app = this.app
+		const vault = app.vault
+		const content = await vault.cachedRead(file)
+
+		const lines = content.split('\n')
+
+		const logs = (
+			await Promise.all(
+				lines.map((line) => this.parseLog(line))
+			)
+		).filter((log) => !!log)
+
+		return logs
+	}
+
 	async parseLog(log: string) {
 		const blocks = this.settings.blocks.filter(
 			(block) => block.type === ELoggerType.LOGGER
@@ -333,7 +354,7 @@ export default class LoggerPlugin extends Plugin {
 
 		const matchArr = regArr.map((reg) => {
 			const match = log.match(reg)
-			console.log(log, reg, match)
+			//console.log(log, reg, match)
 			return match
 		})
 
@@ -343,7 +364,7 @@ export default class LoggerPlugin extends Plugin {
 
 		const matches = matchArr[firstMatch]
 
-		if (!matches || firstMatch < 0) return {}
+		if (!matches || firstMatch < 0) return null
 
 		const res = this.getDataFromItems(
 			itemsArr[firstMatch],
