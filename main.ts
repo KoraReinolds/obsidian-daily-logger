@@ -213,11 +213,14 @@ export default class LoggerPlugin extends Plugin {
 
 						const file =
 							this.app.vault.getAbstractFileByPath(
-								'Journal/Daily/2024-12-04.md'
+								[
+									this.settings.global.folderPath,
+									'2024-12-06.md'
+								].join('/')
 							)
 
 						if (file instanceof TFile) {
-							console.log(await this.parseFile(file))
+							console.log(file, await this.parseFile(file))
 						}
 						//console.log(log, await this.parseLog(log))
 

@@ -483,7 +483,21 @@ export class LoggerSetting extends PluginSettingTab {
 	displayGeneralTab(containerEl: HTMLElement) {
 		containerEl.empty()
 
-		containerEl.innerHTML = 'General settings'
+		containerEl.classList.add('daily-logger-block')
+
+		new Setting(containerEl)
+			.setName('Folder path')
+			.setDesc('Specify filder for logs')
+			.addText((text) =>
+				text
+					.setPlaceholder('Type folder path')
+					.setValue(this.settings.global.folderPath)
+					.onChange((value) => {
+						this.settings.global.folderPath = value
+
+						this.plugin.saveSettings()
+					})
+			)
 	}
 
 	displayTab(containerEl: HTMLElement) {

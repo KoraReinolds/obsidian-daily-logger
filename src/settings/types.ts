@@ -51,11 +51,17 @@ export type TBlock = {
 }
 
 export interface ILoggerSettings {
+	global: {
+		folderPath: string
+	}
 	items: Record<string, TItem>
 	blocks: TBlock[]
 }
 
 export const DEFAULT_SETTINGS: ILoggerSettings = {
+	global: {
+		folderPath: ''
+	},
 	items: {},
 	blocks: [
 		{
