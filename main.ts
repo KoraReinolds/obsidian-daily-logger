@@ -10,6 +10,8 @@ import {
 	generateDynamicRegExp,
 	itemData
 } from 'src/entities'
+import { getFilesByPath } from 'src/lib/files'
+import { FindOrCreateNoteModal } from 'src/lib/fuzzyModal'
 import { LoggerSetting } from 'src/settings'
 import {
 	DEFAULT_SETTINGS,
@@ -211,17 +213,7 @@ export default class LoggerPlugin extends Plugin {
 							)
 						).join('')
 
-						const file =
-							this.app.vault.getAbstractFileByPath(
-								[
-									this.settings.global.folderPath,
-									'2024-12-06.md'
-								].join('/')
-							)
-
-						if (file instanceof TFile) {
-							console.log(file, await this.parseFile(file))
-						}
+						this.getAllLogs()
 						//console.log(log, await this.parseLog(log))
 
 						//console.log(
@@ -230,13 +222,36 @@ export default class LoggerPlugin extends Plugin {
 						//		'Tasks'
 						//	).open()
 						//)
-						//
+
 						editor.replaceSelection(log.trim())
 					}
 				})
 			)
 
 		new Notice('Successful save')
+	}
+
+	async getAllLogs() {
+		const files = getFilesByPath(
+			this.app,
+			this.settings.global.folderPath
+		)
+		const filesData = (
+			await Promise.all(
+				files.map((file) => {
+					if (file instanceof TFile) {
+						return this.parseFile(file)
+					}
+					return []
+				})
+			)
+		)
+			.filter((data) => !!data.length)
+			.flat()
+
+		console.log(filesData)
+
+		return filesData
 	}
 
 	async getItemsFromBlock(

@@ -3,6 +3,7 @@ import {
 	App,
 	FuzzyMatch
 } from 'obsidian'
+import { getFilesByPath } from './files'
 
 export class FindOrCreateNoteModal extends FuzzySuggestModal<string> {
 	private folderPath: string
@@ -42,13 +43,7 @@ export class FindOrCreateNoteModal extends FuzzySuggestModal<string> {
 	}
 
 	getItems(): string[] {
-		return this.app.vault
-			.getFiles()
-			.filter(
-				(file) =>
-					file.path.startsWith(this.folderPath) &&
-					file.path.endsWith('.md')
-			)
+		return getFilesByPath(this.app, this.folderPath)
 			.map((file) =>
 				file.path.replace(this.folderPath + '/', '')
 			)
