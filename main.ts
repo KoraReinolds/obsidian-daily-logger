@@ -225,9 +225,9 @@ export default class LoggerPlugin extends Plugin {
 						//	console.log(file, await this.parseFile(file))
 						//}
 
-						this.getAllLogs()
+						//this.getAllLogs()
 
-						//console.log(log, await this.parseLog(log))
+						console.log(log, await this.parseLog(log))
 
 						//console.log(
 						//	await new FindOrCreateNoteModal(
