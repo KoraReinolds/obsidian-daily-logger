@@ -213,7 +213,20 @@ export default class LoggerPlugin extends Plugin {
 							)
 						).join('')
 
+						//const file =
+						//	this.app.vault.getAbstractFileByPath(
+						//		[
+						//			this.settings.global.folderPath,
+						//			'2024-12-06.md'
+						//		].join('/')
+						//	)
+						//
+						//if (file instanceof TFile) {
+						//	console.log(file, await this.parseFile(file))
+						//}
+
 						this.getAllLogs()
+
 						//console.log(log, await this.parseLog(log))
 
 						//console.log(
@@ -298,6 +311,7 @@ export default class LoggerPlugin extends Plugin {
 							matches,
 							i
 						)
+						i += Object.keys(r[item.name]).length
 					} else {
 						r[item.name] = (matches[i] || '').trim()
 						i += 1
