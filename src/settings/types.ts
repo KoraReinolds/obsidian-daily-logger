@@ -38,6 +38,7 @@ export type TItem = {
 	type: string
 	value: string
 	nested: TItem[]
+	delimiter: string
 	el?: HTMLElement
 }
 
@@ -53,6 +54,7 @@ export type TBlock = {
 export interface ILoggerSettings {
 	global: {
 		folderPath: string
+		delimiter: string
 	}
 	items: Record<string, TItem>
 	blocks: TBlock[]
@@ -60,7 +62,8 @@ export interface ILoggerSettings {
 
 export const DEFAULT_SETTINGS: ILoggerSettings = {
 	global: {
-		folderPath: ''
+		folderPath: '',
+		delimiter: ' '
 	},
 	items: {},
 	blocks: [

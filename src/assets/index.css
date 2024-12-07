@@ -73,3 +73,7 @@
 .daily-logger-block-item-data {
 	border: 0px;
 }
+
+.daily-logger-block-item-header input {
+	width: 48px;
+}

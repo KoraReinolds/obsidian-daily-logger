@@ -113,42 +113,30 @@ export class LoggerSetting extends PluginSettingTab {
 			.map((id) => this.settings.items[id])
 			.filter((item) => !!item)
 			.map((item) => this.getValueFromItem(item))
-			.join(' ')
+			.join(this.settings.global.delimiter)
 	}
 
 	displayPreview() {
 		this.settings.blocks.forEach((block) => {
 			if (!block.headerEl) return
 
-			const desc = block.order
-				.map((itemId) => this.settings.items[itemId])
-				.filter((item) => !!item)
-				.map((item) => this.getValueFromItem(item))
-				.join('')
+			const desc = this.calculateText(block)
 
 			block.headerEl.setDesc(desc)
 			block.headerEl.setName(block.name)
 		})
 	}
 
-	displayItems(
-		params: {
-			order: string[]
-			name: string
-			id: string
-			type: string
-		},
-		containerEl: HTMLElement
-	) {
+	displayItems(block: TBlock, containerEl: HTMLElement) {
 		new Setting(containerEl)
 			.setName('Command name')
 			.setDesc('Name of command for call this log')
 			.addText((text) =>
 				text
 					.setPlaceholder('Type name')
-					.setValue(params.name)
+					.setValue(block.name)
 					.onChange((value) => {
-						params.name = value
+						block.name = value
 
 						this.plugin.saveSettings()
 						this.displayPreview()
@@ -156,7 +144,7 @@ export class LoggerSetting extends PluginSettingTab {
 			)
 			.setClass('daily-logger-block-item-header')
 
-		const { order } = params
+		const { order } = block
 		const items = this.settings.items
 
 		order.forEach((id, i) => {
@@ -177,8 +165,25 @@ export class LoggerSetting extends PluginSettingTab {
 			)
 				.map((item) => [item.id, item.name])
 				.filter(([id]) => {
-					return id !== params.id
+					return id !== block.id
 				})
+
+			// item delimiter
+			const itemData = EItemType[item.type]
+			if (!itemData) {
+				blockItem.addText((text) =>
+					text
+						.setPlaceholder('Delimiter')
+						.setValue(item.delimiter)
+						.onChange((value) => {
+							console.log(item)
+							item.delimiter = value
+
+							this.plugin.saveSettings()
+							this.displayPreview()
+						})
+				)
+			}
 
 			// item type
 			if (item.type !== EItemType.key && templates.length) {
@@ -217,17 +222,17 @@ export class LoggerSetting extends PluginSettingTab {
 			// move item up
 			blockItem.addButton((btn) => {
 				btn.setIcon('move-up').onClick(() => {
-					const item = params.order[i]
-					const newOrder = [...params.order]
+					const item = block.order[i]
+					const newOrder = [...block.order]
 
 					newOrder.splice(i, 1)
 					newOrder.splice(
-						i ? i - 1 : params.order.length,
+						i ? i - 1 : block.order.length,
 						0,
 						item
 					)
 
-					params.order = newOrder
+					block.order = newOrder
 
 					this.plugin.saveSettings()
 					this.display()
@@ -237,17 +242,17 @@ export class LoggerSetting extends PluginSettingTab {
 			// move item down
 			blockItem.addButton((btn) => {
 				btn.setIcon('move-down').onClick(() => {
-					const item = params.order[i]
-					const newOrder = [...params.order]
+					const item = block.order[i]
+					const newOrder = [...block.order]
 
 					newOrder.splice(i, 1)
 					newOrder.splice(
-						i === params.order.length - 1 ? 0 : i + 1,
+						i === block.order.length - 1 ? 0 : i + 1,
 						0,
 						item
 					)
 
-					params.order = newOrder
+					block.order = newOrder
 
 					this.plugin.saveSettings()
 					this.display()
@@ -275,7 +280,7 @@ export class LoggerSetting extends PluginSettingTab {
 				btn.setIcon('trash-2').onClick(() => {
 					delete this.settings.items[id]
 
-					params.order = order.filter(
+					block.order = order.filter(
 						(blockId) => blockId !== id
 					)
 
@@ -341,7 +346,7 @@ export class LoggerSetting extends PluginSettingTab {
 				return block.order
 					.map((id) => this.settings.items[id])
 					.map((item) => this.getValueFromItem(item))
-					.join('')
+					.join(item.delimiter)
 			}
 		}
 	}
@@ -491,7 +496,7 @@ export class LoggerSetting extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName('Folder path')
-			.setDesc('Specify filder for logs')
+			.setDesc('Specify folder for logs')
 			.addText((text) =>
 				text
 					.setPlaceholder('Type folder path')
@@ -502,6 +507,28 @@ export class LoggerSetting extends PluginSettingTab {
 						this.plugin.saveSettings()
 					})
 			)
+
+		const globalDeimiter = new Setting(containerEl)
+			.setDesc('Specify delimiter for logs')
+			.addText((text) =>
+				text
+					.setPlaceholder('Type delimiter')
+					.setValue(this.settings.global.delimiter)
+					.onChange((value) => {
+						this.settings.global.delimiter = value
+
+						setDelimiter(value)
+
+						this.plugin.saveSettings()
+						this.displayPreview()
+					})
+			)
+
+		const setDelimiter = (value: string) => {
+			globalDeimiter.setName(`Delimiter - "${value}"`)
+		}
+
+		setDelimiter(this.settings.global.delimiter)
 	}
 
 	displayTab(containerEl: HTMLElement) {

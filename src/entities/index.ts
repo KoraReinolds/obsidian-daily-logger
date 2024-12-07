@@ -65,20 +65,24 @@ export const itemData: Record<EItemType, TItemData> = {
 	}
 }
 
-export const generateDynamicRegExp = async (
-	items: TItem[],
-	deep = false,
-	wrapToGroup = true
-): Promise<RegExp | string> => {
+export const generateDynamicRegExp = async (params: {
+	items: TItem[]
+	deep: boolean
+	wrapToGroup: boolean
+	delimiter: string
+}): Promise<RegExp | string> => {
+	const { items, deep, wrapToGroup, delimiter } = params
+
 	const combinedPattern = (
 		await Promise.all(
 			items.map((item) => {
 				if (item.nested?.length) {
-					return generateDynamicRegExp(
-						item.nested,
-						true,
-						!!item.name
-					)
+					return generateDynamicRegExp({
+						items: item.nested,
+						deep: true,
+						wrapToGroup: !!item.name,
+						delimiter: item.delimiter
+					})
 				}
 				const data = itemData[item.type as EItemType]
 				if (!data) {
@@ -97,7 +101,8 @@ export const generateDynamicRegExp = async (
 				? `(${str})`
 				: str
 		})
-		.join(`\\s*`)
+		.join(delimiter)
+	//.join(deep ? `\\s*` : delimiter)
 
 	return deep
 		? combinedPattern

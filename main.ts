@@ -161,6 +161,7 @@ export default class LoggerPlugin extends Plugin {
 
 	async saveSettings() {
 		console.log(this.settings, this.lastSettings)
+
 		await this.saveData({
 			settings: this.getSettingsCopy(this.settings),
 			lastSettings: this.getSettingsCopy(this.lastSettings)
@@ -200,7 +201,7 @@ export default class LoggerPlugin extends Plugin {
 					editorCallback: async (editor: Editor) => {
 						const log = await this.getLogFromBlock(
 							block.id,
-							' '
+							this.settings.global.delimiter
 						)
 
 						//const file =
@@ -269,7 +270,10 @@ export default class LoggerPlugin extends Plugin {
 				if (data) {
 					return data.toValue(item)
 				} else {
-					return this.getLogFromBlock(item.type)
+					return this.getLogFromBlock(
+						item.type,
+						item.delimiter
+					)
 				}
 			})
 		)
@@ -384,7 +388,14 @@ export default class LoggerPlugin extends Plugin {
 		)
 
 		const regArr = await Promise.all(
-			itemsArr.map((items) => generateDynamicRegExp(items))
+			itemsArr.map((items) =>
+				generateDynamicRegExp({
+					items,
+					deep: false,
+					wrapToGroup: true,
+					delimiter: this.settings.global.delimiter
+				})
+			)
 		)
 
 		const matchArr = regArr.map((reg) => {
