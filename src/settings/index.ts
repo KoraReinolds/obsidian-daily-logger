@@ -68,7 +68,7 @@ export class LoggerSetting extends PluginSettingTab {
 		]
 
 		if (!this.tabs.active) {
-			this.tabs.active = this.tabs.list[0]
+			this.tabs.active = this.tabs.list[1]
 		}
 	}
 
@@ -375,7 +375,11 @@ export class LoggerSetting extends PluginSettingTab {
 			if (block.type === ELoggerType.LOGGER) {
 				header.addButton((btn) => {
 					btn.setIcon('layout-template').onClick(() => {
-						const blockCopy = { ...block, id: uuidv4() }
+						const blockCopy: TBlock = {
+							...block,
+							id: uuidv4(),
+							headerEl: undefined
+						}
 						const orderCopy: string[] = []
 
 						blockCopy.order
@@ -386,7 +390,7 @@ export class LoggerSetting extends PluginSettingTab {
 							.forEach((item) => {
 								const id = uuidv4()
 								this.settings.items[id] = {
-									...item,
+									...JSON.parse(JSON.stringify(item)),
 									id
 								}
 								orderCopy.push(id)
