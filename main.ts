@@ -198,20 +198,10 @@ export default class LoggerPlugin extends Plugin {
 					id: block.id,
 					name: block.name,
 					editorCallback: async (editor: Editor) => {
-						const log = (
-							await Promise.all(
-								(
-									await this.getItemsFromBlock(
-										block.id,
-										true
-									)
-								).map((item) =>
-									itemData[
-										item.type as keyof typeof EItemType
-									].toValue(item)
-								)
-							)
-						).join('')
+						const log = await this.getLogFromBlock(
+							block.id,
+							' '
+						)
 
 						//const file =
 						//	this.app.vault.getAbstractFileByPath(
@@ -265,6 +255,26 @@ export default class LoggerPlugin extends Plugin {
 		console.log(filesData)
 
 		return filesData
+	}
+
+	async getLogFromBlock(
+		blockId: string,
+		delimiter = ''
+	): Promise<string> {
+		const items = await this.getItemsFromBlock(blockId)
+		const values = await Promise.all(
+			items.map((item) => {
+				const data =
+					itemData[item.type as keyof typeof EItemType]
+				if (data) {
+					return data.toValue(item)
+				} else {
+					return this.getLogFromBlock(item.type)
+				}
+			})
+		)
+
+		return values.join(delimiter)
 	}
 
 	async getItemsFromBlock(

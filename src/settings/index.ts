@@ -113,7 +113,7 @@ export class LoggerSetting extends PluginSettingTab {
 			.map((id) => this.settings.items[id])
 			.filter((item) => !!item)
 			.map((item) => this.getValueFromItem(item))
-			.join('')
+			.join(' ')
 	}
 
 	displayPreview() {
