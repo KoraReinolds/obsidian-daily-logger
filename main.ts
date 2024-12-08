@@ -316,16 +316,15 @@ export default class LoggerPlugin extends Plugin {
 		matches: RegExpMatchArray,
 		i = 0
 	) {
-		return items.reduce(
+		const itemsData = items.reduce(
 			(r, item) => {
 				if (item.name) {
 					if (item.nested?.length) {
-						r[item.name] = this.getDataFromItems(
-							item.nested,
-							matches,
-							i
-						)
-						i += Object.keys(r[item.name]).length
+						debugger
+						const { index, itemsData } =
+							this.getDataFromItems(item.nested, matches, i)
+						r[item.name] = itemsData
+						i = index
 					} else {
 						r[item.name] = (matches[i] || '').trim()
 						i += 1
@@ -335,6 +334,11 @@ export default class LoggerPlugin extends Plugin {
 			},
 			{} as Record<string, any>
 		)
+
+		return {
+			index: i,
+			itemsData
+		}
 	}
 
 	async getItemsForBlockId(id: string): Promise<any> {
@@ -416,7 +420,7 @@ export default class LoggerPlugin extends Plugin {
 			itemsArr[firstMatch],
 			matches,
 			1
-		)
+		).itemsData
 
 		return res
 	}
