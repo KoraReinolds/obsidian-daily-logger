@@ -81,6 +81,7 @@ export class LoggerSetting extends PluginSettingTab {
 			name: '',
 			value: '',
 			nested: [],
+			delimiter: '',
 			...params
 		}
 
@@ -169,8 +170,7 @@ export class LoggerSetting extends PluginSettingTab {
 				})
 
 			// item delimiter
-			const itemData = EItemType[item.type]
-			if (!itemData) {
+			if (!EItemType[item.type]) {
 				blockItem.addText((text) =>
 					text
 						.setPlaceholder('Delimiter')
