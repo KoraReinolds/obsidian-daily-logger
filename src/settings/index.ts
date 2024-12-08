@@ -335,6 +335,7 @@ export class LoggerSetting extends PluginSettingTab {
 			case EItemType.hours:
 			case EItemType.minutes:
 			case EItemType.key:
+			case EItemType.link:
 				return item.value
 			default: {
 				const block = this.settings.blocks.find(

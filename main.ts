@@ -320,7 +320,6 @@ export default class LoggerPlugin extends Plugin {
 			(r, item) => {
 				if (item.name) {
 					if (item.nested?.length) {
-						debugger
 						const { index, itemsData } =
 							this.getDataFromItems(item.nested, matches, i)
 						r[item.name] = itemsData
