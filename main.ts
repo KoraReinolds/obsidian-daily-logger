@@ -6,6 +6,7 @@ import {
 	TFile,
 	TFolder
 } from 'obsidian'
+import { createMany, getAll } from 'src/assets/storage'
 import {
 	generateDynamicRegExp,
 	itemData
@@ -216,9 +217,9 @@ export default class LoggerPlugin extends Plugin {
 						//	console.log(file, await this.parseFile(file))
 						//}
 
-						//this.getAllLogs()
+						console.log(await this.getAllLogs())
 
-						console.log(log, await this.parseLog(log))
+						console.log(log, 123, await this.parseLog(log))
 
 						//console.log(
 						//	await new FindOrCreateNoteModal(
@@ -235,7 +236,7 @@ export default class LoggerPlugin extends Plugin {
 		new Notice('Successful save')
 	}
 
-	async getAllLogs() {
+	async saveAllLogs() {
 		const files = getFilesByPath(
 			this.app,
 			this.settings.global.folderPath
@@ -253,9 +254,14 @@ export default class LoggerPlugin extends Plugin {
 			.filter((data) => !!data.length)
 			.flat()
 
-		console.log(filesData)
+		await createMany(filesData)
+	}
 
-		return filesData
+	async getAllLogs() {
+		console.time()
+		const res = await getAll()
+		console.timeEnd()
+		return res
 	}
 
 	async getLogFromBlock(
@@ -376,7 +382,10 @@ export default class LoggerPlugin extends Plugin {
 			)
 		).filter((log) => !!log)
 
-		return logs
+		return logs.map((data) => ({
+			path: file.path,
+			data
+		}))
 	}
 
 	async parseLog(log: string) {
