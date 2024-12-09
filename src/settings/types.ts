@@ -54,6 +54,7 @@ export type TBlock = {
 export interface ILoggerSettings {
 	global: {
 		folderPath: string
+		header: string
 		delimiter: string
 	}
 	items: Record<string, TItem>
@@ -63,6 +64,7 @@ export interface ILoggerSettings {
 export const DEFAULT_SETTINGS: ILoggerSettings = {
 	global: {
 		folderPath: '',
+		header: '',
 		delimiter: ' '
 	},
 	items: {},

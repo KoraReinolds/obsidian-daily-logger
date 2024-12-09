@@ -6,7 +6,7 @@ import {
 	TFile,
 	TFolder
 } from 'obsidian'
-import { createMany, getAll } from 'src/assets/storage'
+import { db } from 'src/assets/storage'
 import {
 	generateDynamicRegExp,
 	itemData
@@ -109,8 +109,6 @@ export default class LoggerPlugin extends Plugin {
 				5 * 60 * 1000
 			)
 		)
-
-		this.saveAll()
 	}
 
 	onunload() {}
@@ -179,7 +177,10 @@ export default class LoggerPlugin extends Plugin {
 
 	async saveAll() {
 		this.lastSettings = this.getSettingsCopy(this.settings)
+
 		await this.saveSettings()
+
+		await this.saveAllLogs()
 
 		const commands = (this.app as any).commands as any
 
@@ -237,6 +238,8 @@ export default class LoggerPlugin extends Plugin {
 	}
 
 	async saveAllLogs() {
+		await db.clear()
+
 		const files = getFilesByPath(
 			this.app,
 			this.settings.global.folderPath
@@ -254,12 +257,12 @@ export default class LoggerPlugin extends Plugin {
 			.filter((data) => !!data.length)
 			.flat()
 
-		await createMany(filesData)
+		await db.createMany(filesData)
 	}
 
 	async getAllLogs() {
 		console.time()
-		const res = await getAll()
+		const res = await db.getAll()
 		console.timeEnd()
 		return res
 	}

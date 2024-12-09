@@ -14,24 +14,32 @@ class LoggerStorage extends Dexie {
 			data: '++id, path, data'
 		})
 	}
-}
 
-const db = new LoggerStorage()
+	async clear() {
+		try {
+			await this.data.clear()
+		} catch (e) {
+			console.error('Error during clear:', e)
+		}
+	}
 
-export const createMany = async (data: LogData[]) => {
-	try {
-		await db.data.bulkPut(data)
-	} catch (e) {
-		console.error('Error during create:', e)
-		return []
+	async createMany(data: LogData[]) {
+		try {
+			await this.data.bulkPut(data)
+		} catch (e) {
+			console.error('Error during create:', e)
+			return []
+		}
+	}
+
+	async getAll(): Promise<LogData[]> {
+		try {
+			return await this.data.toArray()
+		} catch (e) {
+			console.error('Error during get:', e)
+			return []
+		}
 	}
 }
 
-export const getAll = async (): Promise<LogData[]> => {
-	try {
-		return await db.data.toArray()
-	} catch (e) {
-		console.error('Error during get:', e)
-		return []
-	}
-}
+export const db = new LoggerStorage()
