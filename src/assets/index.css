@@ -64,6 +64,11 @@
 		var(--background-primary);
 }
 
+.daily-logger-block-item-list {
+	margin: 0;
+	padding: 0;
+}
+
 .daily-logger-block-item-header {
 	background: linear-gradient(
 			rgba(0, 0, 0, 0.2),

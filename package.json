@@ -28,6 +28,7 @@
 	},
 	"dependencies": {
 		"dexie": "^4.0.10",
+		"sortablejs": "^1.15.3",
 		"uuid": "^10.0.0"
 	}
 }

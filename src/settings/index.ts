@@ -1,4 +1,5 @@
 import LoggerPlugin from 'main'
+import Sortable from 'sortablejs'
 import {
 	App,
 	Notice,
@@ -240,22 +241,25 @@ export class LoggerSetting extends PluginSettingTab {
 		const { order } = block
 		const items = this.settings.items
 
+		const ul = containerEl.createEl('ul')
+		ul.classList.add('daily-logger-block-item-list')
+
 		order.forEach((id, i) => {
 			const item = items[id]
 
 			if (!item) return
 
-			const itemEl = containerEl.createDiv()
+			const itemEl = ul.createEl('li')
 			itemEl.classList.add('daily-logger-block-item')
 
-			const blockItem = new Setting(itemEl)
+			const blockHeader = new Setting(itemEl)
 				.setName(item.name)
 				.setDesc(this.getValueFromItem(item))
 				.setClass('daily-logger-block-item-header')
 
 			// copy item
 			if (item.type !== 'key')
-				blockItem.addButton((btn) => {
+				blockHeader.addButton((btn) => {
 					btn.setIcon('copy').onClick(() => {
 						this.blockCopy = item
 						this.plugin.saveSettings()
@@ -265,48 +269,8 @@ export class LoggerSetting extends PluginSettingTab {
 					})
 				})
 
-			// move item up
-			blockItem.addButton((btn) => {
-				btn.setIcon('move-up').onClick(() => {
-					const item = block.order[i]
-					const newOrder = [...block.order]
-
-					newOrder.splice(i, 1)
-					newOrder.splice(
-						i ? i - 1 : block.order.length,
-						0,
-						item
-					)
-
-					block.order = newOrder
-
-					this.plugin.saveSettings()
-					this.display()
-				})
-			})
-
-			// move item down
-			blockItem.addButton((btn) => {
-				btn.setIcon('move-down').onClick(() => {
-					const item = block.order[i]
-					const newOrder = [...block.order]
-
-					newOrder.splice(i, 1)
-					newOrder.splice(
-						i === block.order.length - 1 ? 0 : i + 1,
-						0,
-						item
-					)
-
-					block.order = newOrder
-
-					this.plugin.saveSettings()
-					this.display()
-				})
-			})
-
 			// show/hide item
-			blockItem.addButton((btn) => {
+			blockHeader.addButton((btn) => {
 				const hidden = !(this.openedItemId === id)
 
 				btn
@@ -322,7 +286,7 @@ export class LoggerSetting extends PluginSettingTab {
 			})
 
 			// remove item
-			blockItem.addButton((btn) => {
+			blockHeader.addButton((btn) => {
 				btn.setIcon('trash-2').onClick(() => {
 					delete this.settings.items[id]
 
@@ -337,9 +301,35 @@ export class LoggerSetting extends PluginSettingTab {
 				if (item.type === 'key') btn.setDisabled(true)
 			})
 
+			// drag block
+			blockHeader.addButton((btn) => {
+				btn
+					.setIcon('grip-vertical')
+					.setClass('daily-logger-item-drag')
+			})
+
 			if (this.openedItemId !== id) return
 
-			this.displayItemDetails(blockItem, item, itemEl)
+			this.displayItemDetails(blockHeader, item, itemEl)
+		})
+
+		Sortable.create(ul, {
+			handle: '.daily-logger-item-drag',
+			onEnd: (evt: {
+				oldIndex: number
+				newIndex: number
+			}) => {
+				;[
+					[block.order[evt.oldIndex]],
+					[block.order[evt.newIndex]]
+				] = [
+					[block.order[evt.newIndex]],
+					[block.order[evt.oldIndex]]
+				]
+
+				this.plugin.saveSettings()
+				this.displayPreview()
+			}
 		})
 	}
 
