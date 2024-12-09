@@ -25,7 +25,8 @@ export class LoggerSetting extends PluginSettingTab {
 	settings: ILoggerSettings
 	expandedBlocks: Record<string, boolean> = {}
 	globalBlockCopy: TItem
-	blockCopy: TItem
+	itemCopy: TItem
+	blockCopy: TBlock
 	openedBlockId?: string
 	openedItemId?: string
 	tabs: TTabs = {
@@ -260,13 +261,16 @@ export class LoggerSetting extends PluginSettingTab {
 			// copy item
 			if (item.type !== 'key')
 				blockHeader.addButton((btn) => {
-					btn.setIcon('copy').onClick(() => {
-						this.blockCopy = item
-						this.plugin.saveSettings()
+					btn
+						.setIcon('copy')
+						.onClick(() => {
+							this.itemCopy = item
+							this.plugin.saveSettings()
 
-						this.display()
-						new Notice('Copy block')
-					})
+							this.display()
+							new Notice('Copy item')
+						})
+						.setTooltip('Copy item')
 				})
 
 			// show/hide item
@@ -384,37 +388,16 @@ export class LoggerSetting extends PluginSettingTab {
 			// block template
 			if (block.type === ELoggerType.LOGGER) {
 				header.addButton((btn) => {
-					btn.setIcon('layout-template').onClick(() => {
-						const blockCopy: TBlock = {
-							...block,
-							id: uuidv4(),
-							headerEl: undefined
-						}
-						const orderCopy: string[] = []
+					btn
+						.setIcon('copy')
+						.onClick(() => {
+							this.blockCopy = block
+							this.plugin.saveSettings()
 
-						blockCopy.order
-							.map((id) => this.settings.items[id])
-							.filter(
-								(block) => block && block.type !== 'key'
-							)
-							.forEach((item) => {
-								const id = uuidv4()
-								this.settings.items[id] = {
-									...JSON.parse(JSON.stringify(item)),
-									id
-								}
-								orderCopy.push(id)
-							})
-
-						blockCopy.order = orderCopy
-						blockCopy.type = ELoggerType.TEMPLATE
-
-						this.settings.blocks.push(blockCopy)
-						this.plugin.saveSettings()
-
-						this.display()
-						new Notice('Template created')
-					})
+							this.display()
+							new Notice('Copy block')
+						})
+						.setTooltip('Copy block')
 				})
 			}
 
@@ -422,18 +405,19 @@ export class LoggerSetting extends PluginSettingTab {
 			header.addButton((btn) => {
 				btn
 					.setIcon('clipboard-paste')
+					.setTooltip('Paste item')
 					.onClick(() => {
-						this.blockCopy
+						this.itemCopy
 						block
-						const id = this.addNewItem(this.blockCopy)
+						const id = this.addNewItem(this.itemCopy)
 						block.order.push(id)
 						this.plugin.saveSettings()
 						this.display()
 					})
 					.setDisabled(
 						!!block.locked ||
-							!this.blockCopy ||
-							this.blockCopy.type === block.id // same template
+							!this.itemCopy ||
+							this.itemCopy.type === block.id // same template
 					)
 			})
 
@@ -550,8 +534,48 @@ export class LoggerSetting extends PluginSettingTab {
 
 		const header = activeTab.data?.settings.header
 
-		if (header)
-			new Setting(logsContent)
+		if (header) {
+			const blockHeader = new Setting(logsContent)
+				.addButton((btn) => {
+					btn
+						.setIcon('clipboard-paste')
+						.setTooltip('Paste block')
+						.onClick(() => {
+							if (!this.tabs.active) return
+
+							const blockCopy: TBlock = {
+								...this.blockCopy,
+								id: uuidv4(),
+								headerEl: undefined
+							}
+							const orderCopy: string[] = []
+
+							blockCopy.order
+								.map((id) => this.settings.items[id])
+								.filter(
+									(block) => block && block.type !== 'key'
+								)
+								.forEach((item) => {
+									const id = uuidv4()
+									this.settings.items[id] = {
+										...JSON.parse(JSON.stringify(item)),
+										id
+									}
+									orderCopy.push(id)
+								})
+
+							blockCopy.order = orderCopy
+							blockCopy.type = this.tabs.active?.type
+
+							this.settings.blocks.push(blockCopy)
+							this.plugin.saveSettings()
+
+							this.display()
+						})
+				})
+				.setDisabled(!this.blockCopy)
+
+			blockHeader
 				.addButton((btn) =>
 					btn.setButtonText(header.btnText).onClick(() => {
 						this.addNewBlock(blocks, activeTab.type)
@@ -559,6 +583,7 @@ export class LoggerSetting extends PluginSettingTab {
 					})
 				)
 				.setClass('daily-logger-blocks-header')
+		}
 
 		const blocksContent = logsContent.createDiv()
 		blocksContent.classList.add(
