@@ -133,6 +133,39 @@ export class LoggerSetting extends PluginSettingTab {
 		item: TItem,
 		containerEl: HTMLElement
 	) {
+		const templates = this.getListByType(
+			ELoggerType.TEMPLATE
+		)
+			.map((item) => [item.id, item.name])
+			.filter(([id]) => {
+				return id !== this.openedBlockId
+			})
+
+		// item type
+		if (item.type !== EItemType.key && templates.length) {
+			new Setting(containerEl)
+				.setName('Type')
+				.addDropdown((dd) =>
+					dd
+						.addOptions(Object.fromEntries(templates))
+						.setValue(item.type)
+						.onChange((value) => {
+							item.type = value
+
+							const data: TItemData =
+								(itemData[
+									item.type as EItemType
+								] as TItemData) || DEFAUTL_ITEM_DATA
+
+							item.value = data.defaultValue
+
+							this.plugin.saveSettings()
+							this.display()
+						})
+				)
+				.setClass('daily-logger-block-item-data')
+		}
+
 		// item key
 		new Setting(containerEl)
 			.setName('Key')
@@ -219,36 +252,6 @@ export class LoggerSetting extends PluginSettingTab {
 				.setName(item.name)
 				.setDesc(this.getValueFromItem(item))
 				.setClass('daily-logger-block-item-header')
-
-			const templates = this.getListByType(
-				ELoggerType.TEMPLATE
-			)
-				.map((item) => [item.id, item.name])
-				.filter(([id]) => {
-					return id !== block.id
-				})
-
-			// item type
-			if (item.type !== EItemType.key && templates.length) {
-				blockItem.addDropdown((dd) =>
-					dd
-						.addOptions(Object.fromEntries(templates))
-						.setValue(item.type)
-						.onChange((value) => {
-							item.type = value
-
-							const data: TItemData =
-								(itemData[
-									item.type as EItemType
-								] as TItemData) || DEFAUTL_ITEM_DATA
-
-							item.value = data.defaultValue
-
-							this.plugin.saveSettings()
-							this.display()
-						})
-				)
-			}
 
 			// copy item
 			if (item.type !== 'key')
