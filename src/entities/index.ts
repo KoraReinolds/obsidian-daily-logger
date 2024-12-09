@@ -23,12 +23,6 @@ export const momentPatternToRegex = (pattern: EMoment) => {
 }
 
 export const itemData: Record<EItemType, TItemData> = {
-	[EItemType.key]: {
-		toValue: async (item) => item.value,
-		defaultValue: '',
-		toRegexpr: async (item) => item.value.trim(),
-		isDisabled: false
-	},
 	[EItemType.link]: {
 		toValue: async (item) => {
 			return await new FindOrCreateNoteModal(

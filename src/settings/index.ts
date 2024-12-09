@@ -93,19 +93,12 @@ export class LoggerSetting extends PluginSettingTab {
 	addNewBlock(list: TBlock[], type: ELoggerType) {
 		const id = uuidv4()
 		const name = 'New log'
-		const keyId =
-			type === ELoggerType.LOGGER
-				? this.addNewItem({
-						type: 'key',
-						name: 'key'
-					})
-				: ''
 
 		list.push({
 			id,
 			type,
 			name,
-			order: keyId ? [keyId] : []
+			order: []
 		})
 
 		this.plugin.saveSettings()
@@ -144,7 +137,7 @@ export class LoggerSetting extends PluginSettingTab {
 			})
 
 		// item type
-		if (item.type !== EItemType.key && templates.length) {
+		if (templates.length) {
 			new Setting(containerEl)
 				.setName('Type')
 				.addDropdown((dd) =>
@@ -259,19 +252,18 @@ export class LoggerSetting extends PluginSettingTab {
 				.setClass('daily-logger-block-item-header')
 
 			// copy item
-			if (item.type !== 'key')
-				blockHeader.addButton((btn) => {
-					btn
-						.setIcon('copy')
-						.onClick(() => {
-							this.itemCopy = item
-							this.plugin.saveSettings()
+			blockHeader.addButton((btn) => {
+				btn
+					.setIcon('copy')
+					.onClick(() => {
+						this.itemCopy = item
+						this.plugin.saveSettings()
 
-							this.display()
-							new Notice('Copy item')
-						})
-						.setTooltip('Copy item')
-				})
+						this.display()
+						new Notice('Copy item')
+					})
+					.setTooltip('Copy item')
+			})
 
 			// show/hide item
 			blockHeader.addButton((btn) => {
@@ -302,7 +294,7 @@ export class LoggerSetting extends PluginSettingTab {
 					this.display()
 				})
 
-				if (item.type === 'key') btn.setDisabled(true)
+				btn.setDisabled(true)
 			})
 
 			// drag block
@@ -342,7 +334,6 @@ export class LoggerSetting extends PluginSettingTab {
 			case EItemType.text:
 			case EItemType.hours:
 			case EItemType.minutes:
-			case EItemType.key:
 			case EItemType.link:
 				return item.value
 			default: {
@@ -552,9 +543,6 @@ export class LoggerSetting extends PluginSettingTab {
 
 							blockCopy.order
 								.map((id) => this.settings.items[id])
-								.filter(
-									(block) => block && block.type !== 'key'
-								)
 								.forEach((item) => {
 									const id = uuidv4()
 									this.settings.items[id] = {

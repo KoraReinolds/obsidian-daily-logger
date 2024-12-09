@@ -1,7 +1,6 @@
 import { Setting } from 'obsidian'
 
 export enum EItemType {
-	key = 'key',
 	hours = 'hours',
 	minutes = 'minutes',
 	link = 'link',
