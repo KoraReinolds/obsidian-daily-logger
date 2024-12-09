@@ -46,34 +46,37 @@
 .daily-logger-block {
 	padding-top: 16px;
 	background-color: var(--background-primary);
-	border-top: 2px solid var(--background-modifier-border);
+	border-top: 1px solid var(--background-modifier-border);
 }
 
-.daily-logger-blocks .setting-item-info .setting-item-info {
-	margin-left: 16px;
-}
-
-.daily-logger-block-item .setting-item-info {
-	margin-left: 16px;
+.setting-item {
+	padding-left: 16px;
+	padding-right: 16px;
 }
 
 .daily-logger-block-item {
 	padding-top: 16px;
 	border-top: 1px solid var(--background-modifier-border);
+	background: linear-gradient(
+			rgba(0, 0, 0, 0.2),
+			rgba(0, 0, 0, 0.2)
+		),
+		var(--background-primary);
 }
 
-.daily-logger-block-item-header .setting-item-info {
-	margin-left: 16px;
-}
-
-.daily-logger-block-item-data .setting-item-info {
-	margin-left: 32px;
+.daily-logger-block-item-header {
+	background: linear-gradient(
+			rgba(0, 0, 0, 0.2),
+			rgba(0, 0, 0, 0.2)
+		),
+		var(--background-primary);
 }
 
 .daily-logger-block-item-data {
 	border: 0px;
-}
-
-.daily-logger-block-item-header input {
-	width: 48px;
+	background: linear-gradient(
+			rgba(0, 0, 0, 0.4),
+			rgba(0, 0, 0, 0.4)
+		),
+		var(--background-primary);
 }

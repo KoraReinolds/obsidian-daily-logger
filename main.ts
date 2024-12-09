@@ -240,6 +240,7 @@ export default class LoggerPlugin extends Plugin {
 	async saveAllLogs() {
 		await db.clear()
 
+		console.time()
 		const files = getFilesByPath(
 			this.app,
 			this.settings.global.folderPath
@@ -256,6 +257,7 @@ export default class LoggerPlugin extends Plugin {
 		)
 			.filter((data) => !!data.length)
 			.flat()
+		console.timeEnd()
 
 		await db.createMany(filesData)
 	}
