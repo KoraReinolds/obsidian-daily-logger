@@ -128,6 +128,65 @@ export class LoggerSetting extends PluginSettingTab {
 		})
 	}
 
+	displayItemDetails(
+		header: Setting,
+		item: TItem,
+		containerEl: HTMLElement
+	) {
+		// item key
+		new Setting(containerEl)
+			.setName('Key')
+			.addText((text) =>
+				text
+					.setPlaceholder('Type key')
+					.setValue(item.name)
+					.onChange(async (value) => {
+						item.name = value
+						header.setName(value)
+						await this.plugin.saveSettings()
+					})
+			)
+			.setClass('daily-logger-block-item-data')
+
+		const data = itemData[item.type as EItemType]
+		// item value
+		new Setting(containerEl)
+			.setName('Value')
+			.addText((text) =>
+				text
+					.setPlaceholder('Type value')
+					.setValue(this.getValueFromItem(item))
+					.onChange(async (value) => {
+						item.value = value
+						header.setDesc(value)
+						await this.plugin.saveSettings()
+						this.settings = this.plugin.settings
+						this.displayPreview()
+					})
+					.setDisabled(data ? data.isDisabled : true)
+			)
+			.setClass('daily-logger-block-item-data')
+
+		// item delimiter
+		if (!EItemType[item.type]) {
+			new Setting(containerEl)
+				.setName('Delimiter')
+				.addText((text) =>
+					text
+						.setPlaceholder('Overwrite global delimiter')
+						.setValue(item.delimiter)
+						.onChange((value) => {
+							item.delimiter = value
+
+							this.plugin.saveSettings()
+							this.displayPreview()
+							header.setDesc(this.getValueFromItem(item))
+						})
+				)
+				.setClass('daily-logger-block-item-data')
+		}
+	}
+
 	displayItems(block: TBlock, containerEl: HTMLElement) {
 		new Setting(containerEl)
 			.setName('Command name')
@@ -168,22 +227,6 @@ export class LoggerSetting extends PluginSettingTab {
 				.filter(([id]) => {
 					return id !== block.id
 				})
-
-			// item delimiter
-			if (!EItemType[item.type]) {
-				blockItem.addText((text) =>
-					text
-						.setPlaceholder('Delimiter')
-						.setValue(item.delimiter)
-						.onChange((value) => {
-							console.log(item)
-							item.delimiter = value
-
-							this.plugin.saveSettings()
-							this.displayPreview()
-						})
-				)
-			}
 
 			// item type
 			if (item.type !== EItemType.key && templates.length) {
@@ -293,39 +336,7 @@ export class LoggerSetting extends PluginSettingTab {
 
 			if (this.openedItemId !== id) return
 
-			// item key
-			new Setting(itemEl)
-				.setName('Key')
-				.addText((text) =>
-					text
-						.setPlaceholder('Type key')
-						.setValue(item.name)
-						.onChange(async (value) => {
-							item.name = value
-							blockItem.setName(value)
-							await this.plugin.saveSettings()
-						})
-				)
-				.setClass('daily-logger-block-item-data')
-
-			const data = itemData[item.type as EItemType]
-			// item value
-			new Setting(itemEl)
-				.setName('Value')
-				.addText((text) =>
-					text
-						.setPlaceholder('Type value')
-						.setValue(this.getValueFromItem(item))
-						.onChange(async (value) => {
-							item.value = value
-							blockItem.setDesc(value)
-							await this.plugin.saveSettings()
-							this.settings = this.plugin.settings
-							this.displayPreview()
-						})
-						.setDisabled(data ? data.isDisabled : true)
-				)
-				.setClass('daily-logger-block-item-data')
+			this.displayItemDetails(blockItem, item, itemEl)
 		})
 	}
 
