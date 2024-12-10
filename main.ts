@@ -140,9 +140,13 @@ export default class LoggerPlugin extends Plugin {
 			}
 		)
 
-		this.onDelete = this.app.vault.on('delete', (file) => {
-			console.log(`File deleted: ${file.path}`)
-		})
+		this.onDelete = this.app.vault.on(
+			'delete',
+			async (file) => {
+				await db.removeFileData(file.path)
+				console.log(`File deleted: ${file.path}`)
+			}
+		)
 	}
 
 	onunload() {
