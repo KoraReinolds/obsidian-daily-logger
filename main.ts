@@ -280,6 +280,7 @@ export default class LoggerPlugin extends Plugin {
 	}
 
 	async getDataByPath(path: string) {
+		console.time()
 		const files = getFilesByPath(this.app, path)
 		const filesData = (
 			await Promise.all(
@@ -304,6 +305,7 @@ export default class LoggerPlugin extends Plugin {
 		const filesData = await this.getDataByPath(
 			this.settings.global.folderPath
 		)
+		console.timeEnd()
 
 		await db.createMany(filesData)
 	}
@@ -423,9 +425,38 @@ export default class LoggerPlugin extends Plugin {
 	async parseFile(file: TFile) {
 		const app = this.app
 		const vault = app.vault
+		const cache = app.metadataCache.getFileCache(file)
 		const content = await vault.cachedRead(file)
+		const sectionContent = (cache?.sections || [])
+			.filter(
+				(sec) =>
+					sec.type === this.settings.global.sectionType
+			)
+			.map((sec) => {
+				const startIndex = sec.position.start.offset
+				const endIndex = content.indexOf('\n', startIndex)
+				const substring = content.slice(
+					startIndex,
+					endIndex !== -1
+						? endIndex
+						: sec.position.end.offset
+				)
 
-		const lines = content.split('\n')
+				const regex = new RegExp(
+					this.settings.global.sectionName
+				)
+				const match = regex.exec(substring)
+
+				return match
+					? content.slice(endIndex, sec.position.end.offset)
+					: null
+			})
+			.filter((item) => !!item)
+			.at(-1)
+
+		if (!sectionContent) return []
+
+		const lines = sectionContent.split('\n')
 
 		const logs = (
 			await Promise.all(
@@ -461,19 +492,19 @@ export default class LoggerPlugin extends Plugin {
 			)
 		)
 
-		const matchArr = regArr.map((reg) => {
+		let firstMatch = -1
+		let matches: RegExpMatchArray | null = null
+
+		regArr.forEach((reg, i) => {
 			const match = log.match(reg)
-			//console.log(log, reg, match)
-			return match
+			if (match) {
+				firstMatch = i
+				matches = match
+				return
+			}
 		})
 
-		const firstMatch = matchArr.findIndex(
-			(match) => !!match
-		)
-
-		const matches = matchArr[firstMatch]
-
-		if (!matches || firstMatch < 0) return null
+		if (firstMatch < 0 || !matches) return
 
 		const res = this.getDataFromItems(
 			itemsArr[firstMatch],

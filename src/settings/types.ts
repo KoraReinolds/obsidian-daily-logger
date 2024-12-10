@@ -55,6 +55,8 @@ export interface ILoggerSettings {
 		folderPath: string
 		header: string
 		delimiter: string
+		sectionType: string
+		sectionName: string
 	}
 	items: Record<string, TItem>
 	blocks: TBlock[]
@@ -64,7 +66,9 @@ export const DEFAULT_SETTINGS: ILoggerSettings = {
 	global: {
 		folderPath: '',
 		header: '',
-		delimiter: ' '
+		delimiter: ' ',
+		sectionType: '',
+		sectionName: ''
 	},
 	items: {},
 	blocks: [

@@ -507,6 +507,43 @@ export class LoggerSetting extends PluginSettingTab {
 		}
 
 		setDelimiter(this.settings.global.delimiter)
+
+		new Setting(containerEl)
+			.setName('Section type')
+			.addDropdown((dd) =>
+				dd
+					.addOptions({
+						heading: 'heading',
+						callout: 'callout'
+					})
+					.setValue(this.settings.global.sectionType)
+					.onChange((value) => {
+						this.settings.global.sectionType = value
+						//item.type = value
+						//
+						//const data: TItemData =
+						//	(itemData[
+						//		item.type as EItemType
+						//	] as TItemData) || DEFAUTL_ITEM_DATA
+						//
+						//item.value = data.defaultValue
+						//
+						this.plugin.saveSettings()
+					})
+			)
+
+		new Setting(containerEl)
+			.setName('Section name')
+			.addText((text) =>
+				text
+					.setPlaceholder('Type section name')
+					.setValue(this.settings.global.sectionName)
+					.onChange((value) => {
+						this.settings.global.sectionName = value
+
+						this.plugin.saveSettings()
+					})
+			)
 	}
 
 	displayTab(containerEl: HTMLElement) {
