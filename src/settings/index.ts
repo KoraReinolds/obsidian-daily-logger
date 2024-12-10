@@ -293,8 +293,6 @@ export class LoggerSetting extends PluginSettingTab {
 					this.plugin.saveSettings()
 					this.display()
 				})
-
-				btn.setDisabled(true)
 			})
 
 			// drag block

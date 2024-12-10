@@ -19,7 +19,22 @@ class LoggerStorage extends Dexie {
 		try {
 			await this.data.clear()
 		} catch (e) {
-			console.error('Error during clear:', e)
+			console.error(`Error during ${this.clear.name}:`, e)
+		}
+	}
+
+	async removeFileData(filePath: string) {
+		try {
+			await this.data
+				.where('path')
+				.equals(filePath)
+				.delete()
+		} catch (e) {
+			console.error(
+				`Error during ${this.removeFileData.name}:`,
+				e
+			)
+			return []
 		}
 	}
 
@@ -27,7 +42,10 @@ class LoggerStorage extends Dexie {
 		try {
 			await this.data.bulkPut(data)
 		} catch (e) {
-			console.error('Error during create:', e)
+			console.error(
+				`Error during ${this.createMany.name}:`,
+				e
+			)
 			return []
 		}
 	}
@@ -36,7 +54,7 @@ class LoggerStorage extends Dexie {
 		try {
 			return await this.data.toArray()
 		} catch (e) {
-			console.error('Error during get:', e)
+			console.error(`Error during ${this.getAll.name}:`, e)
 			return []
 		}
 	}

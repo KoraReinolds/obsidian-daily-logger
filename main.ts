@@ -1,5 +1,6 @@
 import {
 	Editor,
+	EventRef,
 	MarkdownView,
 	Notice,
 	Plugin,
@@ -26,6 +27,9 @@ export default class LoggerPlugin extends Plugin {
 	settings: ILoggerSettings
 	lastSettings: ILoggerSettings
 	tp: any
+	createQueue: Set<string> = new Set()
+	onModify: null | EventRef
+	onDelete: null | EventRef
 
 	async onload() {
 		const cssContent = await this.loadCSSFile(
@@ -109,9 +113,43 @@ export default class LoggerPlugin extends Plugin {
 				5 * 60 * 1000
 			)
 		)
+
+		this.onModify = this.app.vault.on(
+			'modify',
+			async (file) => {
+				if (!this.createQueue) return
+
+				const isFileCreating = this.createQueue.has(
+					file.path
+				)
+
+				if (isFileCreating) return
+				else {
+					this.createQueue.add(file.path)
+
+					setTimeout(async () => {
+						await db.removeFileData(file.path)
+
+						const data = await this.getDataByPath(file.path)
+						await db.createMany(data)
+
+						this.createQueue.delete(file.path)
+						console.log(`File modified: ${file.path}`)
+					}, 2000)
+				}
+			}
+		)
+
+		this.onDelete = this.app.vault.on('delete', (file) => {
+			console.log(`File deleted: ${file.path}`)
+		})
 	}
 
-	onunload() {}
+	onunload() {
+		console.log('unref')
+		if (this.onModify) this.app.vault.offref(this.onModify)
+		if (this.onDelete) this.app.vault.offref(this.onDelete)
+	}
 
 	async loadSettings() {
 		const loadData = await this.loadData()
@@ -220,7 +258,7 @@ export default class LoggerPlugin extends Plugin {
 
 						console.log(await this.getAllLogs())
 
-						console.log(log, 123, await this.parseLog(log))
+						console.log(log, await this.parseLog(log))
 
 						//console.log(
 						//	await new FindOrCreateNoteModal(
@@ -237,14 +275,8 @@ export default class LoggerPlugin extends Plugin {
 		new Notice('Successful save')
 	}
 
-	async saveAllLogs() {
-		await db.clear()
-
-		console.time()
-		const files = getFilesByPath(
-			this.app,
-			this.settings.global.folderPath
-		)
+	async getDataByPath(path: string) {
+		const files = getFilesByPath(this.app, path)
 		const filesData = (
 			await Promise.all(
 				files.map((file) => {
@@ -257,7 +289,17 @@ export default class LoggerPlugin extends Plugin {
 		)
 			.filter((data) => !!data.length)
 			.flat()
-		console.timeEnd()
+
+		return filesData
+	}
+
+	async saveAllLogs() {
+		await db.clear()
+
+		console.time()
+		const filesData = await this.getDataByPath(
+			this.settings.global.folderPath
+		)
 
 		await db.createMany(filesData)
 	}
