@@ -47,13 +47,28 @@ export class FileContent {
 
 	getEndOfSectionByName(name: string): Loc | undefined {
 		const index = this._getSectionIndexByName(name)
-		const section = this._sections[index + 1]
+		const section = this._sections[index]
+		const nextSection = this._sections[index + 1]
 
-		if (!~index || !section) {
-			return this._sections.at(-1)?.position.end
+		let loc: Loc = { line: 0, col: 0, offset: 0 }
+
+		if (section.type === 'heading') {
+			if (nextSection) {
+				loc = nextSection.position.end
+			} else {
+				loc = section.position.end
+			}
 		}
 
-		return section.position.start
+		if (section.type === 'callout' || !nextSection) {
+			loc = section.position.end
+		}
+
+		return {
+			...loc,
+			line: loc.line + 1,
+			col: 0
+		}
 	}
 
 	getSectionContentByName(name: string) {

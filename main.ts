@@ -150,6 +150,7 @@ export default class LoggerPlugin extends Plugin {
 					this.app,
 					view.file
 				).init()
+				console.log(content)
 
 				const endLoc = content.getEndOfSectionByName(
 					this.settings.global.sectionName
@@ -164,7 +165,7 @@ export default class LoggerPlugin extends Plugin {
 
 				editor.setSelection(position, position)
 
-				editor.replaceSelection(`\n${log.trim()}`)
+				editor.replaceSelection(`${log.trim()}\n`)
 			}
 		})
 
