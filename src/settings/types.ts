@@ -37,6 +37,7 @@ export type TItem = {
 	type: string
 	value: string
 	defaultValue: string
+	isOptional: boolean
 	nested: TItem[]
 	delimiter: string
 	el?: HTMLElement
