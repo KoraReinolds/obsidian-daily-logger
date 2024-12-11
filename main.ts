@@ -1,6 +1,8 @@
 import {
 	Editor,
+	EditorPosition,
 	EventRef,
+	MarkdownView,
 	Notice,
 	Plugin,
 	TFile,
@@ -11,6 +13,7 @@ import {
 	generateDynamicRegExp,
 	itemData
 } from 'src/entities'
+import { FileContent } from 'src/entities/file'
 import { getFilesByPath } from 'src/lib/files'
 import { LoggerListModal } from 'src/lib/fuzzyModal'
 import { LoggerSetting } from 'src/settings'
@@ -58,50 +61,67 @@ export default class LoggerPlugin extends Plugin {
 		const statusBarItemEl = this.addStatusBarItem()
 		statusBarItemEl.setText('Status Bar Text')
 
-		//// This adds a simple command that can be triggered anywhere
-		//this.addCommand({
-		//	id: 'open-sample-modal-simple',
-		//	name: 'Open sample modal (simple)',
-		//	callback: () => {
-		//		//
-		//	}
-		//})
-		//// This adds an editor command that can perform some operation on the current editor instance
-		//this.addCommand({
-		//	id: 'sample-editor-command',
-		//	name: 'Sample editor command',
-		//	editorCallback: (editor: Editor) => {
-		//		console.log(editor.getSelection())
-		//		editor.replaceSelection('Sample Editor Command')
-		//	}
-		//})
-		//// This adds a complex command that can check whether the current state of the app allows execution of the command
-		//this.addCommand({
-		//	id: 'open-sample-modal-complex',
-		//	name: 'Open sample modal (complex)',
-		//	checkCallback: (checking: boolean) => {
-		//		// Conditions to check
-		//		const markdownView =
-		//			this.app.workspace.getActiveViewOfType(
-		//				MarkdownView
-		//			)
-		//		if (markdownView) {
-		//			// If checking is true, we're simply "checking" if the command can be run.
-		//			// If checking is false, then we want to actually perform the operation.
-		//			if (!checking) {
-		//				//
-		//			}
-		//
-		//			// This command will only show up in Command Palette when the check function returns true
-		//			return true
-		//		}
-		//	}
-		//})
+		// This adds a simple command that can be triggered anywhere
+		this.addCommand({
+			id: 'open-sample-modal-simple',
+			name: 'Open sample modal (simple)',
+			callback: async () => {
+				//const file =
+				//	this.app.vault.getAbstractFileByPath(
+				//		[
+				//			this.settings.global.folderPath,
+				//			'2024-12-06.md'
+				//		].join('/')
+				//	)
+				//
+				//if (file instanceof TFile) {
+				//	console.log(file, await this.parseFile(file))
+				//}
+
+				console.log(await this.getAllLogs())
+			}
+		})
+
+		// This adds an editor command that can perform some operation on the current editor instance
+		this.addCommand({
+			id: 'sample-editor-command',
+			name: 'Sample editor command',
+			editorCallback: (editor: Editor) => {
+				console.log(editor.getSelection())
+				editor.replaceSelection('Sample Editor Command')
+			}
+		})
+
+		// This adds a complex command that can check whether the current state of the app allows execution of the command
+		this.addCommand({
+			id: 'open-sample-modal-complex',
+			name: 'Open sample modal (complex)',
+			checkCallback: (checking: boolean) => {
+				// Conditions to check
+				const markdownView =
+					this.app.workspace.getActiveViewOfType(
+						MarkdownView
+					)
+				if (markdownView) {
+					// If checking is true, we're simply "checking" if the command can be run.
+					// If checking is false, then we want to actually perform the operation.
+					if (!checking) {
+						//
+					}
+
+					// This command will only show up in Command Palette when the check function returns true
+					return true
+				}
+			}
+		})
 
 		this.addCommand({
 			id: 'daily-logger-show-list',
-			name: 'Daily logger: show list',
-			editorCallback: async (editor: Editor) => {
+			name: 'Show list',
+			editorCallback: async (
+				editor: Editor,
+				view: MarkdownView
+			) => {
 				const list = this.settings.blocks
 					.filter(
 						(block) => block.type === ELoggerType.LOGGER
@@ -117,31 +137,34 @@ export default class LoggerPlugin extends Plugin {
 					(block) => block.name === commandName
 				)
 
-				console.log(block)
-				if (!block) return
+				if (!block || !view.file) return
 
 				const log = await this.getLogFromBlock(
 					block.id,
 					this.settings.global.delimiter
 				)
 
-				//const file =
-				//	this.app.vault.getAbstractFileByPath(
-				//		[
-				//			this.settings.global.folderPath,
-				//			'2024-12-06.md'
-				//		].join('/')
-				//	)
-				//
-				//if (file instanceof TFile) {
-				//	console.log(file, await this.parseFile(file))
-				//}
-
-				console.log(await this.getAllLogs())
-
 				console.log(log, await this.parseLog(log))
 
-				editor.replaceSelection(log.trim())
+				const content = await new FileContent(
+					this.app,
+					view.file
+				).init()
+
+				const endLoc = content.getEndOfSectionByName(
+					this.settings.global.sectionName
+				)
+
+				if (!endLoc) return
+
+				const position: EditorPosition = {
+					line: endLoc.line,
+					ch: endLoc.col
+				}
+
+				editor.setSelection(position, position)
+
+				editor.replaceSelection(`\n${log.trim()}`)
 			}
 		})
 
@@ -418,36 +441,14 @@ export default class LoggerPlugin extends Plugin {
 	}
 
 	async parseFile(file: TFile) {
-		const app = this.app
-		const vault = app.vault
-		const cache = app.metadataCache.getFileCache(file)
-		const content = await vault.cachedRead(file)
-		const sectionContent = (cache?.sections || [])
-			.filter(
-				(sec) =>
-					sec.type === this.settings.global.sectionType
-			)
-			.map((sec) => {
-				const startIndex = sec.position.start.offset
-				const endIndex = content.indexOf('\n', startIndex)
-				const substring = content.slice(
-					startIndex,
-					endIndex !== -1
-						? endIndex
-						: sec.position.end.offset
-				)
+		const content = await new FileContent(
+			this.app,
+			file
+		).init()
 
-				const regex = new RegExp(
-					this.settings.global.sectionName
-				)
-				const match = regex.exec(substring)
-
-				return match
-					? content.slice(endIndex, sec.position.end.offset)
-					: null
-			})
-			.filter((item) => !!item)
-			.at(-1)
+		const sectionContent = content.getSectionContentByName(
+			this.settings.global.sectionName
+		)
 
 		if (!sectionContent) return []
 
