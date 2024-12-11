@@ -195,6 +195,21 @@ export class LoggerSetting extends PluginSettingTab {
 			)
 			.setClass('daily-logger-block-item-data')
 
+		// item default value
+		new Setting(containerEl)
+			.setName('Default value')
+			.addText((text) =>
+				text
+					.setPlaceholder('Type default value')
+					.setValue(item.defaultValue)
+					.onChange(async (value) => {
+						item.defaultValue = value
+						await this.plugin.saveSettings()
+					})
+					.setDisabled(data ? data.isDisabled : true)
+			)
+			.setClass('daily-logger-block-item-data')
+
 		// item delimiter
 		if (!EItemType[item.type]) {
 			new Setting(containerEl)

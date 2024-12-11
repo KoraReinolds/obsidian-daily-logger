@@ -150,7 +150,6 @@ export default class LoggerPlugin extends Plugin {
 					this.app,
 					view.file
 				).init()
-				console.log(content)
 
 				const endLoc = content.getEndOfSectionByName(
 					this.settings.global.sectionName
@@ -501,7 +500,12 @@ export default class LoggerPlugin extends Plugin {
 			}
 		})
 
-		if (firstMatch < 0 || !matches) return
+		if (firstMatch < 0 || !matches) {
+			if (log.startsWith('>>')) {
+				console.log(log)
+			}
+			return
+		}
 
 		const res = this.getDataFromItems(
 			itemsArr[firstMatch],
