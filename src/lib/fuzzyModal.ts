@@ -5,6 +5,38 @@ import {
 } from 'obsidian'
 import { getFilesByPath } from './files'
 
+export class LoggerListModal extends FuzzySuggestModal<string> {
+	_list: string[]
+	resolve: (value: string) => void
+	reject: (reason?: any) => void
+
+	constructor(app: App, list: string[]) {
+		super(app)
+		this.setPlaceholder('Input logger name...')
+		this._list = list
+	}
+
+	open(): Promise<string> {
+		return new Promise((resolve, reject) => {
+			this.resolve = resolve
+			this.reject = reject
+			super.open()
+		})
+	}
+
+	getItems(): string[] {
+		return this._list
+	}
+
+	getItemText(item: string): string {
+		return item
+	}
+
+	async onChooseItem(item: string) {
+		return this.resolve(item)
+	}
+}
+
 export class FindOrCreateNoteModal extends FuzzySuggestModal<string> {
 	private folderPath: string
 	resolve: (value: string) => void

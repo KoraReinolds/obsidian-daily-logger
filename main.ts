@@ -1,7 +1,6 @@
 import {
 	Editor,
 	EventRef,
-	MarkdownView,
 	Notice,
 	Plugin,
 	TFile,
@@ -13,7 +12,7 @@ import {
 	itemData
 } from 'src/entities'
 import { getFilesByPath } from 'src/lib/files'
-import { FindOrCreateNoteModal } from 'src/lib/fuzzyModal'
+import { LoggerListModal } from 'src/lib/fuzzyModal'
 import { LoggerSetting } from 'src/settings'
 import {
 	DEFAULT_SETTINGS,
@@ -59,43 +58,90 @@ export default class LoggerPlugin extends Plugin {
 		const statusBarItemEl = this.addStatusBarItem()
 		statusBarItemEl.setText('Status Bar Text')
 
-		// This adds a simple command that can be triggered anywhere
-		this.addCommand({
-			id: 'open-sample-modal-simple',
-			name: 'Open sample modal (simple)',
-			callback: () => {
-				//
-			}
-		})
-		// This adds an editor command that can perform some operation on the current editor instance
-		this.addCommand({
-			id: 'sample-editor-command',
-			name: 'Sample editor command',
-			editorCallback: (editor: Editor) => {
-				console.log(editor.getSelection())
-				editor.replaceSelection('Sample Editor Command')
-			}
-		})
-		// This adds a complex command that can check whether the current state of the app allows execution of the command
-		this.addCommand({
-			id: 'open-sample-modal-complex',
-			name: 'Open sample modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView =
-					this.app.workspace.getActiveViewOfType(
-						MarkdownView
-					)
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-						//
-					}
+		//// This adds a simple command that can be triggered anywhere
+		//this.addCommand({
+		//	id: 'open-sample-modal-simple',
+		//	name: 'Open sample modal (simple)',
+		//	callback: () => {
+		//		//
+		//	}
+		//})
+		//// This adds an editor command that can perform some operation on the current editor instance
+		//this.addCommand({
+		//	id: 'sample-editor-command',
+		//	name: 'Sample editor command',
+		//	editorCallback: (editor: Editor) => {
+		//		console.log(editor.getSelection())
+		//		editor.replaceSelection('Sample Editor Command')
+		//	}
+		//})
+		//// This adds a complex command that can check whether the current state of the app allows execution of the command
+		//this.addCommand({
+		//	id: 'open-sample-modal-complex',
+		//	name: 'Open sample modal (complex)',
+		//	checkCallback: (checking: boolean) => {
+		//		// Conditions to check
+		//		const markdownView =
+		//			this.app.workspace.getActiveViewOfType(
+		//				MarkdownView
+		//			)
+		//		if (markdownView) {
+		//			// If checking is true, we're simply "checking" if the command can be run.
+		//			// If checking is false, then we want to actually perform the operation.
+		//			if (!checking) {
+		//				//
+		//			}
+		//
+		//			// This command will only show up in Command Palette when the check function returns true
+		//			return true
+		//		}
+		//	}
+		//})
 
-					// This command will only show up in Command Palette when the check function returns true
-					return true
-				}
+		this.addCommand({
+			id: 'daily-logger-show-list',
+			name: 'Daily logger: show list',
+			editorCallback: async (editor: Editor) => {
+				const list = this.settings.blocks
+					.filter(
+						(block) => block.type === ELoggerType.LOGGER
+					)
+					.map((block) => block.name)
+
+				const commandName = await new LoggerListModal(
+					this.app,
+					list
+				).open()
+
+				const block = this.settings.blocks.find(
+					(block) => block.name === commandName
+				)
+
+				console.log(block)
+				if (!block) return
+
+				const log = await this.getLogFromBlock(
+					block.id,
+					this.settings.global.delimiter
+				)
+
+				//const file =
+				//	this.app.vault.getAbstractFileByPath(
+				//		[
+				//			this.settings.global.folderPath,
+				//			'2024-12-06.md'
+				//		].join('/')
+				//	)
+				//
+				//if (file instanceof TFile) {
+				//	console.log(file, await this.parseFile(file))
+				//}
+
+				console.log(await this.getAllLogs())
+
+				console.log(log, await this.parseLog(log))
+
+				editor.replaceSelection(log.trim())
 			}
 		})
 
@@ -223,58 +269,7 @@ export default class LoggerPlugin extends Plugin {
 		await this.saveSettings()
 
 		await this.saveAllLogs()
-
-		const commands = (this.app as any).commands as any
-
-		const pluginCommands = Object.keys(
-			commands.commands
-		).filter((commandId) =>
-			commandId.startsWith('obsidian-daily-logger')
-		)
-
-		pluginCommands.forEach((id) =>
-			commands.removeCommand(id)
-		)
-
-		this.settings.blocks
-			.filter((block) => block.type === ELoggerType.LOGGER)
-			.forEach((block) =>
-				this.addCommand({
-					id: block.id,
-					name: block.name,
-					editorCallback: async (editor: Editor) => {
-						const log = await this.getLogFromBlock(
-							block.id,
-							this.settings.global.delimiter
-						)
-
-						//const file =
-						//	this.app.vault.getAbstractFileByPath(
-						//		[
-						//			this.settings.global.folderPath,
-						//			'2024-12-06.md'
-						//		].join('/')
-						//	)
-						//
-						//if (file instanceof TFile) {
-						//	console.log(file, await this.parseFile(file))
-						//}
-
-						console.log(await this.getAllLogs())
-
-						console.log(log, await this.parseLog(log))
-
-						//console.log(
-						//	await new FindOrCreateNoteModal(
-						//		this.app,
-						//		'Tasks'
-						//	).open()
-						//)
-
-						editor.replaceSelection(log.trim())
-					}
-				})
-			)
+		console.log(await db.getAll())
 
 		new Notice('Successful save')
 	}
