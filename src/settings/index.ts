@@ -385,10 +385,12 @@ export class LoggerSetting extends PluginSettingTab {
 
 		Sortable.create(ul, {
 			handle: '.daily-logger-item-drag',
-			onEnd: (evt: {
-				oldIndex: number
-				newIndex: number
-			}) => {
+			onEnd: (evt) => {
+				if (
+					evt.oldIndex === undefined ||
+					evt.newIndex === undefined
+				)
+					return
 				;[
 					[block.order[evt.oldIndex]],
 					[block.order[evt.newIndex]]
@@ -685,7 +687,9 @@ export class LoggerSetting extends PluginSettingTab {
 
 		mount(Component, {
 			target: containerEl,
-			props: { variable: 1 }
+			props: {
+				tabs: this.tabs
+			}
 		})
 
 		new Setting(containerEl)
@@ -714,7 +718,6 @@ export class LoggerSetting extends PluginSettingTab {
 					.setCta()
 			)
 
-		console.log(this.settings)
 		displayTabs(containerEl, this.tabs)
 		this.displayPreview()
 	}

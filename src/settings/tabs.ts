@@ -1,4 +1,4 @@
-import { TTabs } from './types'
+import { type TTabs } from './types'
 
 export const displayTab = (tabs: TTabs) => {
 	if (!tabs.active) return
