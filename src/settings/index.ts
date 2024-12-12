@@ -214,10 +214,13 @@ export class LoggerSetting extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName('Optional value')
 			.addToggle((comp) =>
-				comp.onChange(async (val) => {
-					item.isOptional = val
-					await this.plugin.saveSettings()
-				})
+				comp
+					.setValue(item.isOptional)
+					.onChange(async (val) => {
+						item.isOptional = val
+
+						await this.plugin.saveSettings()
+					})
 			)
 			.setClass('daily-logger-block-item-data')
 

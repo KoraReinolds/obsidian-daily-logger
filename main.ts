@@ -78,7 +78,12 @@ export default class LoggerPlugin extends Plugin {
 				//	console.log(file, await this.parseFile(file))
 				//}
 
-				console.log(await this.getAllLogs())
+				//console.log(await this.getAllLogs())
+				console.log(
+					await this.parseLog(
+						`>> - 19:34 - 19:53 ⚡🔄 [[5 - add eslint rules]] 📎`
+					)
+				)
 			}
 		})
 
@@ -394,7 +399,8 @@ export default class LoggerPlugin extends Plugin {
 		i = 0
 	) {
 		const itemsData = items.reduce(
-			(r, item) => {
+			(r, item, index) => {
+				if (item.isOptional && index > 0) i += 1
 				if (item.name) {
 					if (item.nested?.length) {
 						const { index, itemsData } =

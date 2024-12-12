@@ -32,7 +32,7 @@ export const itemData: Record<EItemType, TItemData> = {
 			).open()
 		},
 		defaultValue: '',
-		toRegexpr: async () => `\\[\\[([^\\]]+)\\]\\]`,
+		toRegexpr: async () => `\\[\\[[^\\]]+\\]\\]`,
 		isDisabled: false
 	},
 	[EItemType.text]: {
@@ -67,7 +67,7 @@ export const generateDynamicRegExp = async (params: {
 }): Promise<RegExp | string> => {
 	const { items, deep, wrapToGroup, delimiter } = params
 
-	const combinedPattern = (
+	const combinedPatternParts = (
 		await Promise.all(
 			items.map((item) => {
 				if (item.nested?.length) {
@@ -89,14 +89,33 @@ export const generateDynamicRegExp = async (params: {
 	)
 		.filter((str) => !!str)
 		.map((str, i) => {
+			const opt = items[i].isOptional ? '?' : ''
+
 			return items[i].name &&
 				!items[i].nested?.length &&
 				wrapToGroup
-				? `(${str})`
-				: str
+				? `(${str})${opt}`
+				: `${str}${opt}`
 		})
-		.join(delimiter)
-	//.join(deep ? `\\s*` : delimiter)
+
+	let combinedPattern = combinedPatternParts[0]
+
+	for (
+		let i = 2;
+		i < combinedPatternParts.length + 1;
+		i++
+	) {
+		const part = combinedPatternParts[i - 1]
+		const prevItem = items[i - 1]
+
+		if (prevItem) {
+			combinedPattern += prevItem.isOptional
+				? `(${delimiter})?`
+				: delimiter
+		}
+
+		combinedPattern += part
+	}
 
 	return deep
 		? combinedPattern
