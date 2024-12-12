@@ -19,6 +19,8 @@ import {
 	TTabs,
 	DEFAUTL_ITEM_DATA
 } from './types'
+import Component from '../components/test.svelte'
+import { mount } from 'svelte'
 
 export class LoggerSetting extends PluginSettingTab {
 	plugin: LoggerPlugin
@@ -680,6 +682,11 @@ export class LoggerSetting extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this
 		containerEl.empty()
+
+		const app = mount(Component, {
+			target: containerEl,
+			props: { variable: 1 }
+		})
 
 		new Setting(containerEl)
 			.addButton((btn) =>

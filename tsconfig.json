@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+	"types": ["svelte", "node"],
+	"verbatimModuleSyntax": true,
     "baseUrl": ".",
     "inlineSourceMap": true,
     "inlineSources": true,
