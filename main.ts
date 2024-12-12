@@ -77,13 +77,8 @@ export default class LoggerPlugin extends Plugin {
 				//if (file instanceof TFile) {
 				//	console.log(file, await this.parseFile(file))
 				//}
-
 				//console.log(await this.getAllLogs())
-				console.log(
-					await this.parseLog(
-						`>> - 19:34 - 19:53 ⚡🔄 [[5 - add eslint rules]] 📎`
-					)
-				)
+				//console.log(await this.parseLog(''))
 			}
 		})
 

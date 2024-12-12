@@ -38,7 +38,10 @@ export const itemData: Record<EItemType, TItemData> = {
 	[EItemType.text]: {
 		toValue: async (item) => item.value,
 		defaultValue: '',
-		toRegexpr: async (item) => item.value.trim(),
+		toRegexpr: async (item) => {
+			if (item.anyText) return `.+?`
+			return item.value.trim()
+		},
 		isDisabled: false
 	},
 	[EItemType.hours]: {
