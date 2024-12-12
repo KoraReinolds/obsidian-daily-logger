@@ -82,6 +82,9 @@ export class LoggerSetting extends PluginSettingTab {
 			type: 'text',
 			name: '',
 			value: '',
+			anyText: false,
+			isOptional: false,
+			defaultValue: '',
 			nested: [],
 			delimiter: '',
 			...params
