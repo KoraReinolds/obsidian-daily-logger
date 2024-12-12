@@ -1,26 +1,26 @@
 import LoggerPlugin from 'main'
-import Sortable from 'sortablejs'
 import {
 	App,
 	Notice,
 	PluginSettingTab,
 	Setting
 } from 'obsidian'
+import Sortable from 'sortablejs'
 import { itemData } from 'src/entities'
-import { TItemData } from 'src/entities/types'
+import { type TItemData } from 'src/entities/types'
+import { mount } from 'svelte'
 import { v4 as uuidv4 } from 'uuid'
+import Component from '../components/settings.svelte'
 import { displayTabs } from './tabs'
 import {
-	ELoggerType,
-	ILoggerSettings,
+	DEFAUTL_ITEM_DATA,
 	EItemType,
-	TItem,
-	TBlock,
-	TTabs,
-	DEFAUTL_ITEM_DATA
+	ELoggerType,
+	type ILoggerSettings,
+	type TBlock,
+	type TItem,
+	type TTabs
 } from './types'
-import Component from '../components/test.svelte'
-import { mount } from 'svelte'
 
 export class LoggerSetting extends PluginSettingTab {
 	plugin: LoggerPlugin
@@ -314,7 +314,7 @@ export class LoggerSetting extends PluginSettingTab {
 		const ul = containerEl.createEl('ul')
 		ul.classList.add('daily-logger-block-item-list')
 
-		order.forEach((id, i) => {
+		order.forEach((id) => {
 			const item = items[id]
 
 			if (!item) return
@@ -683,7 +683,7 @@ export class LoggerSetting extends PluginSettingTab {
 		const { containerEl } = this
 		containerEl.empty()
 
-		const app = mount(Component, {
+		mount(Component, {
 			target: containerEl,
 			props: { variable: 1 }
 		})

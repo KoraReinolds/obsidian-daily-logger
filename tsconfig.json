@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
 	"types": ["svelte", "node"],
+	"allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
 	"verbatimModuleSyntax": true,
     "baseUrl": ".",
     "inlineSourceMap": true,

@@ -1,7 +1,7 @@
 import {
 	Editor,
-	EditorPosition,
-	EventRef,
+	type EditorPosition,
+	type EventRef,
 	MarkdownView,
 	Notice,
 	Plugin,
@@ -21,8 +21,8 @@ import {
 	DEFAULT_SETTINGS,
 	EItemType,
 	ELoggerType,
-	ILoggerSettings,
-	TItem
+	type ILoggerSettings,
+	type TItem
 } from 'src/settings/types'
 
 export default class LoggerPlugin extends Plugin {

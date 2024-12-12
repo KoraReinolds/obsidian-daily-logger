@@ -1,4 +1,9 @@
-import { App, Loc, SectionCache, TFile } from 'obsidian'
+import {
+	App,
+	type Loc,
+	type SectionCache,
+	TFile
+} from 'obsidian'
 
 export class FileContent {
 	_file: TFile
