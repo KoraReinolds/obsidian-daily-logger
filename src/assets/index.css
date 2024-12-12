@@ -85,3 +85,7 @@
 		),
 		var(--background-primary);
 }
+
+.daily-logger-block-item-data-hidden {
+	display: none;
+}

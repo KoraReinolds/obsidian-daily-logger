@@ -38,6 +38,7 @@ export type TItem = {
 	value: string
 	defaultValue: string
 	isOptional: boolean
+	anyText: boolean
 	nested: TItem[]
 	delimiter: string
 	el?: HTMLElement

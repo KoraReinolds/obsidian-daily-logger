@@ -104,6 +104,30 @@ export class LoggerSetting extends PluginSettingTab {
 		this.plugin.saveSettings()
 	}
 
+	getValueFromItem(item: TItem): string {
+		switch (item.type) {
+			case EItemType.text:
+			case EItemType.hours:
+			case EItemType.minutes:
+			case EItemType.link: {
+				if (item.anyText) return '...'
+				return item.value
+			}
+			default: {
+				const block = this.settings.blocks.find(
+					(block) => block.id === item.type
+				)
+
+				if (!block) return ''
+
+				return block.order
+					.map((id) => this.settings.items[id])
+					.map((item) => this.getValueFromItem(item))
+					.join(item.delimiter)
+			}
+		}
+	}
+
 	calculateText(block: TBlock) {
 		return block.order
 			.map((id) => this.settings.items[id])
@@ -176,24 +200,42 @@ export class LoggerSetting extends PluginSettingTab {
 			)
 			.setClass('daily-logger-block-item-data')
 
+		// item any text
+		if (item.type === EItemType.text)
+			new Setting(containerEl)
+				.setName('Any text')
+				.addToggle((comp) =>
+					comp
+						.setValue(item.anyText)
+						.onChange(async (val) => {
+							item.anyText = val
+
+							await this.plugin.saveSettings()
+							this.displayPreview()
+							this.display()
+						})
+				)
+				.setClass('daily-logger-block-item-data')
+
 		const data = itemData[item.type as EItemType]
 		// item value
-		new Setting(containerEl)
-			.setName('Value')
-			.addText((text) =>
-				text
-					.setPlaceholder('Type value')
-					.setValue(this.getValueFromItem(item))
-					.onChange(async (value) => {
-						item.value = value
-						header.setDesc(value)
-						await this.plugin.saveSettings()
-						this.settings = this.plugin.settings
-						this.displayPreview()
-					})
-					.setDisabled(data ? data.isDisabled : true)
-			)
-			.setClass('daily-logger-block-item-data')
+		if (!item.anyText)
+			new Setting(containerEl)
+				.setName('Value')
+				.addText((text) =>
+					text
+						.setPlaceholder('Type value')
+						.setValue(this.getValueFromItem(item))
+						.onChange(async (value) => {
+							item.value = value
+							header.setDesc(value)
+							await this.plugin.saveSettings()
+							this.settings = this.plugin.settings
+							this.displayPreview()
+						})
+						.setDisabled(data ? data.isDisabled : true)
+				)
+				.setClass('daily-logger-block-item-data')
 
 		// item default value
 		new Setting(containerEl)
@@ -354,28 +396,6 @@ export class LoggerSetting extends PluginSettingTab {
 				this.displayPreview()
 			}
 		})
-	}
-
-	getValueFromItem(item: TItem): string {
-		switch (item.type) {
-			case EItemType.text:
-			case EItemType.hours:
-			case EItemType.minutes:
-			case EItemType.link:
-				return item.value
-			default: {
-				const block = this.settings.blocks.find(
-					(block) => block.id === item.type
-				)
-
-				if (!block) return ''
-
-				return block.order
-					.map((id) => this.settings.items[id])
-					.map((item) => this.getValueFromItem(item))
-					.join(item.delimiter)
-			}
-		}
 	}
 
 	displayBlocks(containerEl: HTMLElement, list: TBlock[]) {
