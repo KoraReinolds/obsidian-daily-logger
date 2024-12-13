@@ -1,13 +1,16 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte'
+	import { onMount } from 'svelte'
 	import { Setting } from 'obsidian'
 	import type { ILoggerSettings } from 'src/settings/types'
 
 	let containerEl: HTMLElement
-	const { settings }: { settings: ILoggerSettings } =
-		$props()
-
-	const dispatch = createEventDispatcher()
+	const {
+		settings,
+		save
+	}: {
+		settings: ILoggerSettings
+		save: (settings: ILoggerSettings) => Promise<void>
+	} = $props()
 
 	onMount(() => {
 		if (containerEl) {
@@ -18,12 +21,16 @@
 					text
 						.setPlaceholder('Type folder path')
 						.onChange((value) => {
-							settings.global.folderPath = value
+							const copy: ILoggerSettings = JSON.parse(
+								JSON.stringify(settings)
+							)
+							copy.global.folderPath = value
 
-							dispatch('save')
+							save(copy)
 						})
 
 					$effect(() => {
+						console.log('call effect')
 						text.setValue(settings.global.folderPath)
 					})
 
@@ -36,9 +43,12 @@
 					text
 						.setPlaceholder('Type delimiter')
 						.onChange((value) => {
-							settings.global.delimiter = value
+							const copy: ILoggerSettings = JSON.parse(
+								JSON.stringify(settings)
+							)
+							copy.global.delimiter = value
 
-							dispatch('save')
+							save(copy)
 						})
 
 					$effect(() => {
@@ -60,9 +70,12 @@
 							callout: 'callout'
 						})
 						.onChange((value) => {
-							settings.global.sectionType = value
+							const copy: ILoggerSettings = JSON.parse(
+								JSON.stringify(settings)
+							)
+							copy.global.sectionType = value
 
-							dispatch('save')
+							save(copy)
 						})
 
 					$effect(() => {
@@ -78,9 +91,12 @@
 					text
 						.setPlaceholder('Type section name')
 						.onChange((value) => {
-							settings.global.sectionName = value
+							const copy: ILoggerSettings = JSON.parse(
+								JSON.stringify(settings)
+							)
+							copy.global.sectionName = value
 
-							dispatch('save')
+							save(copy)
 						})
 
 					$effect(() => {

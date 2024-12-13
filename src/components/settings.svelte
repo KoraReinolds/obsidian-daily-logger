@@ -12,7 +12,7 @@
 	} = $props()
 
 	const tabs: TTabs = $state(props.tabs)
-	const settings: ILoggerSettings = $state(props.settings)
+	let settings: ILoggerSettings = $state(props.settings)
 	tabs.active = tabs.list[1]
 
 	const setactivetab = (tab: TTab) => {
@@ -20,9 +20,7 @@
 		activeComponent = tab.component
 	}
 
-	let activeComponent: any = $state()
-
-	const save = () => props.save(settings)
+	let activeComponent: any = $state(tabs.active.component)
 </script>
 
 <div>
@@ -42,7 +40,12 @@
 			<svelte:component
 				this={activeComponent}
 				{settings}
-				on:save={save}
+				{tabs}
+				save={(set) => {
+					settings = set
+					debugger
+					props.save(set)
+				}}
 			/>
 		{/if}
 	</div>

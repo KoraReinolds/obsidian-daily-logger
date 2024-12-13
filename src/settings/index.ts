@@ -622,9 +622,11 @@ export class LoggerSetting extends PluginSettingTab {
 			target: containerEl,
 			props: {
 				tabs: this.tabs,
+				//settings: JSON.parse(JSON.stringify(this.settings)),
 				settings: this.settings,
 				save: (settings: ILoggerSettings) => {
-					this.settings = settings
+					debugger
+					this.plugin.settings = settings
 					this.plugin.saveSettings()
 				}
 			}
