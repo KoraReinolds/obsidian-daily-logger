@@ -12,8 +12,7 @@ import { mount } from 'svelte'
 import { v4 as uuidv4 } from 'uuid'
 import Component from '../components/settings.svelte'
 import General from '../components/settingsGeneral.svelte'
-import Logger from '../components/settingsLogger.svelte'
-import Template from '../components/settingsTemplate.svelte'
+import Blocks from '../components/settingsBlocks.svelte'
 import { displayTabs } from './tabs'
 import {
 	DEFAUTL_ITEM_DATA,
@@ -53,7 +52,7 @@ export class LoggerSetting extends PluginSettingTab {
 				name: 'Logs',
 				type: ELoggerType.LOGGER,
 				render: this.displayTab.bind(this),
-				component: Logger,
+				component: Blocks,
 				data: {
 					settings: {
 						header: {
@@ -66,7 +65,7 @@ export class LoggerSetting extends PluginSettingTab {
 				name: 'Templates',
 				type: ELoggerType.TEMPLATE,
 				render: this.displayTab.bind(this),
-				component: Template,
+				component: Blocks,
 				data: {
 					settings: {
 						header: {
@@ -618,20 +617,6 @@ export class LoggerSetting extends PluginSettingTab {
 		const { containerEl } = this
 		containerEl.empty()
 
-		mount(Component, {
-			target: containerEl,
-			props: {
-				tabs: this.tabs,
-				//settings: JSON.parse(JSON.stringify(this.settings)),
-				settings: this.settings,
-				save: (settings: ILoggerSettings) => {
-					debugger
-					this.plugin.settings = settings
-					this.plugin.saveSettings()
-				}
-			}
-		})
-
 		new Setting(containerEl)
 			.addButton((btn) =>
 				btn.setButtonText('Default').onClick(async () => {
@@ -657,6 +642,19 @@ export class LoggerSetting extends PluginSettingTab {
 					})
 					.setCta()
 			)
+
+		mount(Component, {
+			target: containerEl,
+			props: {
+				tabs: this.tabs,
+				//settings: JSON.parse(JSON.stringify(this.settings)),
+				settings: this.settings,
+				save: (settings: ILoggerSettings) => {
+					this.plugin.settings = settings
+					this.plugin.saveSettings()
+				}
+			}
+		})
 
 		displayTabs(containerEl, this.tabs)
 		this.displayPreview()

@@ -37,16 +37,17 @@
 
 	<div class="daily-logger-block">
 		{#if activeComponent}
-			<svelte:component
-				this={activeComponent}
-				{settings}
-				{tabs}
-				save={(set) => {
-					settings = set
-					debugger
-					props.save(set)
-				}}
-			/>
+			{@const Component = activeComponent}
+			{#key tabs.active?.type}
+				<Component
+					{settings}
+					{tabs}
+					save={(newSettings: ILoggerSettings) => {
+						settings = newSettings
+						props.save(newSettings)
+					}}
+				/>
+			{/key}
 		{/if}
 	</div>
 </div>

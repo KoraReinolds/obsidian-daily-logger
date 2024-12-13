@@ -30,7 +30,6 @@
 						})
 
 					$effect(() => {
-						console.log('call effect')
 						text.setValue(settings.global.folderPath)
 					})
 
