@@ -19,6 +19,7 @@
 	} = $props()
 
 	let blockCopy: TBlock | null = $state(null)
+	let openedBlockId: string = $state('')
 
 	const blocks = $derived(
 		settings.blocks.filter(
@@ -90,10 +91,13 @@
 {/if}
 
 <div class="daily-logger-blocks-content">
-	{#each blocks as block}
+	{#each blocks as block (block.id)}
 		<Block
 			{block}
 			{settings}
+			{openedBlockId}
+			{save}
+			openBlock={(id) => (openedBlockId = id)}
 			copyBlock={(block: TBlock) => (blockCopy = block)}
 		/>
 	{/each}

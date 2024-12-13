@@ -12,13 +12,19 @@
 	let blockEl: HTMLElement
 
 	const {
+		openedBlockId,
+		openBlock,
 		settings,
 		block,
-		copyBlock
+		copyBlock,
+		save
 	}: {
+		openedBlockId: string
+		openBlock: (id: string) => void
 		settings: ILoggerSettings
 		block: TBlock
 		copyBlock: (block: TBlock) => void
+		save: (settings: ILoggerSettings) => Promise<void>
 	} = $props()
 
 	const getValueFromItem = (item: TItem): string => {
@@ -102,29 +108,24 @@
 				.setIcon('plus')
 				.setDisabled(!!block.locked)
 				.onClick(() => {
-					this.settings
-
 					block.order.push(this.addNewItem())
-					this.openedBlockId = id
-					this.display()
+					openBlock(id)
 				})
 		})
 
 		// show/hide block
 		header.addButton((btn) => {
-			const hidden = !(this.openedBlockId === id)
+			const hidden = $derived(openedBlockId !== id)
 
-			btn
-				.setIcon(hidden ? 'eye' : 'eye-off')
-				.setDisabled(!!block.locked)
-				.onClick(() => {
-					this.openedBlockId = hidden ? id : undefined
+			btn.setDisabled(!!block.locked).onClick(() => {
+				openBlock(hidden ? id : '')
+			})
 
-					this.display()
-				})
-			btn.buttonEl.innerHTML += `<span style=margin-left:8px;>${
-				hidden ? 'Show' : 'Hide'
-			}</span>`
+			$effect(() => {
+				btn.setIcon(
+					openedBlockId === id ? 'eye-off' : 'eye'
+				)
+			})
 		})
 
 		// remove block
@@ -133,17 +134,17 @@
 				.setIcon('trash-2')
 				.setDisabled(!!block.locked)
 				.onClick(() => {
-					block.order.forEach(
-						(id) => delete this.settings.items[id]
+					const copy: ILoggerSettings = JSON.parse(
+						JSON.stringify(settings)
 					)
 
-					this.settings.blocks =
-						this.settings.blocks.filter(
-							(item) => item.id !== id
-						)
+					block.order.forEach((id) => delete copy.items[id])
 
-					this.plugin.saveSettings()
-					this.display()
+					copy.blocks = copy.blocks.filter(
+						(item) => item.id !== id
+					)
+
+					save(copy)
 				})
 		})
 	})
