@@ -1,14 +1,28 @@
 <script lang="ts">
-	import type { TTab, TTabs } from 'src/settings/types'
+	import type {
+		ILoggerSettings,
+		TTab,
+		TTabs
+	} from 'src/settings/types'
 
-	const props: { tabs: TTabs } = $props()
+	const props: {
+		tabs: TTabs
+		settings: ILoggerSettings
+		save: (settings: ILoggerSettings) => Promise<void>
+	} = $props()
 
 	const tabs: TTabs = $state(props.tabs)
+	const settings: ILoggerSettings = $state(props.settings)
 	tabs.active = tabs.list[1]
 
 	const setactivetab = (tab: TTab) => {
 		tabs.active = tab
+		activeComponent = tab.component
 	}
+
+	let activeComponent: any = $state()
+
+	const save = () => props.save(settings)
 </script>
 
 <div>
@@ -22,4 +36,14 @@
 			</li>
 		{/each}
 	</ul>
+
+	<div class="daily-logger-block">
+		{#if activeComponent}
+			<svelte:component
+				this={activeComponent}
+				{settings}
+				on:save={save}
+			/>
+		{/if}
+	</div>
 </div>

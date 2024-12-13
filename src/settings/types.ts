@@ -14,6 +14,7 @@ export const DEFAUTL_ITEM_DATA = {
 export type TTab = {
 	name: string
 	render?: (el: HTMLElement) => void
+	component: any
 	data?: ITabData
 	type: ELoggerType
 }

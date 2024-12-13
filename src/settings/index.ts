@@ -11,6 +11,9 @@ import { type TItemData } from 'src/entities/types'
 import { mount } from 'svelte'
 import { v4 as uuidv4 } from 'uuid'
 import Component from '../components/settings.svelte'
+import General from '../components/settingsGeneral.svelte'
+import Logger from '../components/settingsLogger.svelte'
+import Template from '../components/settingsTemplate.svelte'
 import { displayTabs } from './tabs'
 import {
 	DEFAUTL_ITEM_DATA,
@@ -43,12 +46,14 @@ export class LoggerSetting extends PluginSettingTab {
 			{
 				name: 'General',
 				type: ELoggerType.GENERAL,
-				render: this.displayGeneralTab.bind(this)
+				render: this.displayGeneralTab.bind(this),
+				component: General
 			},
 			{
 				name: 'Logs',
 				type: ELoggerType.LOGGER,
 				render: this.displayTab.bind(this),
+				component: Logger,
 				data: {
 					settings: {
 						header: {
@@ -61,6 +66,7 @@ export class LoggerSetting extends PluginSettingTab {
 				name: 'Templates',
 				type: ELoggerType.TEMPLATE,
 				render: this.displayTab.bind(this),
+				component: Template,
 				data: {
 					settings: {
 						header: {
@@ -527,79 +533,6 @@ export class LoggerSetting extends PluginSettingTab {
 		containerEl.empty()
 
 		containerEl.classList.add('daily-logger-block')
-
-		new Setting(containerEl)
-			.setName('Folder path')
-			.setDesc('Specify folder for logs')
-			.addText((text) =>
-				text
-					.setPlaceholder('Type folder path')
-					.setValue(this.settings.global.folderPath)
-					.onChange((value) => {
-						this.settings.global.folderPath = value
-
-						this.plugin.saveSettings()
-					})
-			)
-
-		const globalDeimiter = new Setting(containerEl)
-			.setDesc('Specify delimiter for logs')
-			.addText((text) =>
-				text
-					.setPlaceholder('Type delimiter')
-					.setValue(this.settings.global.delimiter)
-					.onChange((value) => {
-						this.settings.global.delimiter = value
-
-						setDelimiter(value)
-
-						this.plugin.saveSettings()
-						this.displayPreview()
-					})
-			)
-
-		const setDelimiter = (value: string) => {
-			globalDeimiter.setName(`Delimiter - "${value}"`)
-		}
-
-		setDelimiter(this.settings.global.delimiter)
-
-		new Setting(containerEl)
-			.setName('Section type')
-			.addDropdown((dd) =>
-				dd
-					.addOptions({
-						heading: 'heading',
-						callout: 'callout'
-					})
-					.setValue(this.settings.global.sectionType)
-					.onChange((value) => {
-						this.settings.global.sectionType = value
-						//item.type = value
-						//
-						//const data: TItemData =
-						//	(itemData[
-						//		item.type as EItemType
-						//	] as TItemData) || DEFAUTL_ITEM_DATA
-						//
-						//item.value = data.defaultValue
-						//
-						this.plugin.saveSettings()
-					})
-			)
-
-		new Setting(containerEl)
-			.setName('Section name')
-			.addText((text) =>
-				text
-					.setPlaceholder('Type section name')
-					.setValue(this.settings.global.sectionName)
-					.onChange((value) => {
-						this.settings.global.sectionName = value
-
-						this.plugin.saveSettings()
-					})
-			)
 	}
 
 	displayTab(containerEl: HTMLElement) {
@@ -688,7 +621,12 @@ export class LoggerSetting extends PluginSettingTab {
 		mount(Component, {
 			target: containerEl,
 			props: {
-				tabs: this.tabs
+				tabs: this.tabs,
+				settings: this.settings,
+				save: (settings: ILoggerSettings) => {
+					this.settings = settings
+					this.plugin.saveSettings()
+				}
 			}
 		})
 
