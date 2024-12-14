@@ -21,6 +21,14 @@
 	}
 
 	let activeComponent: any = $state(tabs.active.component)
+
+	const getTabCount = (tab: TTab) => {
+		const count = settings.blocks.filter(
+			(block) => block.type === tab.type
+		).length
+
+		return count ? `(${count})` : ''
+	}
 </script>
 
 <div>
@@ -31,6 +39,7 @@
 				onclick={() => setactivetab(tab)}
 			>
 				{tab.name}
+				{getTabCount(tab)}
 			</li>
 		{/each}
 	</ul>
