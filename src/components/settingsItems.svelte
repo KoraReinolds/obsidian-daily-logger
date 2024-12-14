@@ -52,27 +52,31 @@
 		Sortable.create(listEl, {
 			handle: '.daily-logger-item-drag',
 			onEnd: (evt) => {
+				//setTimeout(() => {
 				save([
 					(s) => {
 						const changedBlock = s.blocks.find(
 							(b) => b.id === block.id
 						)
+						const oldIndex = evt.oldDraggableIndex
+						const newIndex = evt.newDraggableIndex
 
 						if (
 							!changedBlock ||
-							evt.oldIndex === undefined ||
-							evt.newIndex === undefined
+							oldIndex === undefined ||
+							newIndex === undefined
 						)
 							return
 						;[
-							[changedBlock.order[evt.oldIndex]],
-							[changedBlock.order[evt.newIndex]]
+							[changedBlock.order[oldIndex]],
+							[changedBlock.order[newIndex]]
 						] = [
-							[changedBlock.order[evt.newIndex]],
-							[changedBlock.order[evt.oldIndex]]
+							[changedBlock.order[newIndex]],
+							[changedBlock.order[oldIndex]]
 						]
 					}
 				])
+				//}, 1000)
 			}
 		})
 	})
@@ -82,14 +86,17 @@
 	class="daily-logger-block-item"
 	bind:this={containerEl}
 ></div>
+
 <ul bind:this={listEl} class="daily-logger-block-item-list">
 	{#each block.order as id}
-		<Item
-			{settings}
-			item={settings.items[id]}
-			{copyItem}
-			{save}
-			{block}
-		/>
+		{#key block.order}
+			<Item
+				{settings}
+				item={settings.items[id]}
+				{copyItem}
+				{save}
+				{block}
+			/>
+		{/key}
 	{/each}
 </ul>

@@ -103,18 +103,16 @@
 	})
 </script>
 
-<li class="daily-logger-block-item" bind:this={itemEl}></li>
-
-<ul class="daily-logger-block-item-list">
-	{#each block.order as id}
-		{#if openedItemId === id}
+<li class="daily-logger-block-item" bind:this={itemEl}>
+	{#if openedItemId === item.id}
+		<ul class="daily-logger-block-item-list">
 			<ItemDetails
 				{settings}
-				item={settings.items[id]}
+				item={settings.items[openedItemId]}
 				{copyItem}
 				{save}
 				{block}
 			/>
-		{/if}
-	{/each}
-</ul>
+		</ul>
+	{/if}
+</li>
