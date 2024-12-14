@@ -2,10 +2,11 @@
 	import { v4 as uuidv4 } from 'uuid'
 	import Header from './settingsHeader.svelte'
 	import Block from './settingsBlock.svelte'
-	import type {
-		ILoggerSettings,
-		TBlock,
-		TTabs
+	import {
+		ELoggerType,
+		type ILoggerSettings,
+		type TBlock,
+		type TTabs
 	} from 'src/settings/types'
 
 	const {
@@ -24,9 +25,11 @@
 	let openedBlockId: string = $state('')
 
 	const blocks = $derived(
-		settings.blocks.filter(
-			(block) => block.type === tabs.active?.type
-		)
+		settings.blocks
+			.filter((block) => block.type === tabs.active?.type)
+			.sort((a) => {
+				return a.type === ELoggerType.LOGGER ? 1 : -1
+			})
 	)
 
 	const pasteBlock = (block: TBlock | null) => {
