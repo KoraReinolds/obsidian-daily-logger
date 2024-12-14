@@ -64,12 +64,16 @@
 		const id = block.id
 
 		// block header
-		const header = new Setting(blockEl)
-			.setDesc(blockPreview)
-			.setClass('daily-logger-block-header')
+		const header = new Setting(blockEl).setClass(
+			'daily-logger-block-header'
+		)
 
 		$effect(() => {
 			header.setName(block.name)
+		})
+
+		$effect(() => {
+			header.setDesc(blockPreview)
 		})
 
 		// block copy
