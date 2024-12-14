@@ -161,6 +161,12 @@
 ></div>
 <ul class="daily-logger-block-item-list">
 	{#each block.order as id}
-		<Item {settings} item={settings.items[id]} {copyItem} />
+		<Item
+			{settings}
+			item={settings.items[id]}
+			{copyItem}
+			{save}
+			{block}
+		/>
 	{/each}
 </ul>

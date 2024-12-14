@@ -18,19 +18,21 @@
 		//openedBlockId,
 		//openBlock,
 		settings,
-		//block,
+		block,
 		//changeBlock
-		copyItem
-		//save
+		copyItem,
+		save
 	}: {
 		item: TItem
 		//openedBlockId: string
 		//openBlock: (id: string) => void
 		//changeBlock: (block: TBlock) => void
 		settings: ILoggerSettings
-		//block: TBlock
+		block: TBlock
 		copyItem: (item: TItem) => void
-		//save: (settings: ILoggerSettings) => Promise<void>
+		save: (
+			changes: ((s: ILoggerSettings) => void)[]
+		) => Promise<void>
 	} = $props()
 
 	onMount(() => {
@@ -69,21 +71,27 @@
 		//		hidden ? 'Show' : 'Hide'
 		//	}</span>`
 		//})
-		//
-		//// remove item
-		//blockHeader.addButton((btn) => {
-		//	btn.setIcon('trash-2').onClick(() => {
-		//		delete this.settings.items[id]
-		//
-		//		block.order = order.filter(
-		//			(blockId) => blockId !== id
-		//		)
-		//
-		//		this.plugin.saveSettings()
-		//		this.display()
-		//	})
-		//})
-		//
+
+		// remove item
+		blockHeader.addButton((btn) => {
+			btn.setIcon('trash-2').onClick(() => {
+				save([
+					(s) => {
+						delete s.items[item.id]
+						const changedBlock = s.blocks.find(
+							(b) => b.id === block.id
+						)
+						if (changedBlock) {
+							changedBlock.order =
+								changedBlock.order.filter(
+									(blockId) => blockId === item.id
+								)
+						}
+					}
+				])
+			})
+		})
+
 		//// drag block
 		//blockHeader.addButton((btn) => {
 		//	btn
