@@ -1,6 +1,10 @@
 import { TItemData } from 'src/entities/types'
 import { FindOrCreateNoteModal } from 'src/lib/fuzzyModal'
-import { EItemType, TItem } from 'src/settings/types'
+import {
+	EItemType,
+	type TItem,
+	type ILoggerSettings
+} from 'src/settings/types'
 
 enum EMoment {
 	YYYY = 'YYYY',
@@ -8,6 +12,33 @@ enum EMoment {
 	DD = 'DD',
 	HH = 'HH',
 	mm = 'mm'
+}
+
+export const getValueFromItem = (
+	settings: ILoggerSettings,
+	item: TItem
+): string => {
+	switch (item.type) {
+		case EItemType.text:
+		case EItemType.hours:
+		case EItemType.minutes:
+		case EItemType.link: {
+			if (item.anyText) return '...'
+			return item.value
+		}
+		default: {
+			const block = settings.blocks.find(
+				(block) => block.id === item.type
+			)
+
+			if (!block) return ''
+
+			return block.order
+				.map((id) => settings.items[id])
+				.map((item) => getValueFromItem(settings, item))
+				.join(item.delimiter)
+		}
+	}
 }
 
 export const momentPatternToRegex = (pattern: EMoment) => {

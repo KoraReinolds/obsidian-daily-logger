@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
+	import { v4 as uuidv4 } from 'uuid'
 	import {
-		EItemType,
 		ELoggerType,
 		type ILoggerSettings,
 		type TBlock,
 		type TItem
 	} from 'src/settings/types'
 	import { Notice, Setting } from 'obsidian'
+	import Items from './settingsItems.svelte'
+	import { getValueFromItem } from 'src/entities'
 
 	let blockEl: HTMLElement
 
@@ -24,40 +26,37 @@
 		settings: ILoggerSettings
 		block: TBlock
 		copyBlock: (block: TBlock) => void
-		save: (settings: ILoggerSettings) => Promise<void>
+		save: (
+			changes: ((s: ILoggerSettings) => void)[]
+		) => Promise<void>
 	} = $props()
 
-	const getValueFromItem = (item: TItem): string => {
-		switch (item.type) {
-			case EItemType.text:
-			case EItemType.hours:
-			case EItemType.minutes:
-			case EItemType.link: {
-				if (item.anyText) return '...'
-				return item.value
-			}
-			default: {
-				const block = settings.blocks.find(
-					(block) => block.id === item.type
-				)
-
-				if (!block) return ''
-
-				return block.order
-					.map((id) => settings.items[id])
-					.map((item) => getValueFromItem(item))
-					.join(item.delimiter)
-			}
-		}
-	}
+	let itemCopy: TItem | null = $state(null)
 
 	const blockPreview = $derived(
 		block.order
 			.map((id) => settings.items[id])
 			.filter((item) => !!item)
-			.map((item) => getValueFromItem(item))
+			.map((item) => getValueFromItem(settings, item))
 			.join(settings.global.delimiter)
 	)
+
+	const getNewItem = (params: Partial<TItem> = {}) => {
+		const id = uuidv4()
+
+		return {
+			id: id,
+			type: 'text',
+			name: '',
+			value: '',
+			anyText: false,
+			isOptional: false,
+			defaultValue: '',
+			nested: [],
+			delimiter: '',
+			...params
+		}
+	}
 
 	onMount(() => {
 		if (!blockEl) return
@@ -66,9 +65,12 @@
 
 		// block header
 		const header = new Setting(blockEl)
-			.setName(block.name)
 			.setDesc(blockPreview)
 			.setClass('daily-logger-block-header')
+
+		$effect(() => {
+			header.setName(block.name)
+		})
 
 		// block copy
 		if (block.type === ELoggerType.LOGGER) {
@@ -89,17 +91,28 @@
 				.setIcon('clipboard-paste')
 				.setTooltip('Paste item')
 				.onClick(() => {
-					const id = this.addNewItem(this.itemCopy)
+					if (!itemCopy) return
 
-					block.order.push(id)
-					this.plugin.saveSettings()
-					this.display()
+					const item = getNewItem(itemCopy)
+
+					save([
+						(s) => {
+							const block = s.blocks.find(
+								(b) => b.id === openedBlockId
+							)
+							block?.order.push(item.id)
+							s.items[item.id] = item
+						}
+					])
 				})
-				.setDisabled(
+
+			$effect(() => {
+				btn.setDisabled(
 					!!block.locked ||
-						!this.itemCopy ||
-						this.itemCopy.type === block.id // same template
+						!itemCopy ||
+						itemCopy.type === block.id // same template
 				)
+			})
 		})
 
 		// add item to block
@@ -134,20 +147,31 @@
 				.setIcon('trash-2')
 				.setDisabled(!!block.locked)
 				.onClick(() => {
-					const copy: ILoggerSettings = JSON.parse(
-						JSON.stringify(settings)
-					)
-
-					block.order.forEach((id) => delete copy.items[id])
-
-					copy.blocks = copy.blocks.filter(
-						(item) => item.id !== id
-					)
-
-					save(copy)
+					save([
+						(s) => {
+							const changedBlock = s.blocks.find(
+								(b) => b.id === block.id
+							)
+							changedBlock?.order.forEach(
+								(id) => delete s.items[id]
+							)
+							s.blocks = s.blocks.filter(
+								(b) => b.id !== block.id
+							)
+						}
+					])
 				})
 		})
 	})
 </script>
 
 <div class="daily-logger-block" bind:this={blockEl}></div>
+
+{#if block.id === openedBlockId}
+	<Items
+		{block}
+		{settings}
+		{save}
+		copyItem={(item: TItem) => (itemCopy = item)}
+	/>
+{/if}

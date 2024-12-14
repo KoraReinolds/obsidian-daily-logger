@@ -15,7 +15,9 @@
 	}: {
 		settings: ILoggerSettings
 		tabs: TTabs
-		save: (settings: ILoggerSettings) => Promise<void>
+		save: (
+			changes: ((s: ILoggerSettings) => void)[]
+		) => Promise<void>
 	} = $props()
 
 	let blockCopy: TBlock | null = $state(null)
@@ -51,33 +53,24 @@
 		blockCopy.order = orderCopy
 		blockCopy.type = tabs.active?.type
 
-		const copy: ILoggerSettings = JSON.parse(
-			JSON.stringify(settings)
-		)
-
-		copy.blocks.push(blockCopy)
-
-		save(copy)
+		save([(s) => s.blocks.push(blockCopy)])
 	}
 
 	const addNewBlock = () => {
 		const id = uuidv4()
 		const name = 'New log'
 
-		const copy: ILoggerSettings = JSON.parse(
-			JSON.stringify(settings)
-		)
-
-		if (!tabs.active) return
-
-		copy.blocks.push({
-			id,
-			type: tabs.active.type,
-			name,
-			order: []
-		})
-
-		save(copy)
+		save([
+			(s) => {
+				if (!tabs.active) return
+				s.blocks.push({
+					id,
+					type: tabs.active.type,
+					name,
+					order: []
+				})
+			}
+		])
 	}
 </script>
 
@@ -97,8 +90,8 @@
 			{settings}
 			{openedBlockId}
 			{save}
+			copyBlock={(block) => (blockCopy = block)}
 			openBlock={(id) => (openedBlockId = id)}
-			copyBlock={(block: TBlock) => (blockCopy = block)}
 		/>
 	{/each}
 </div>

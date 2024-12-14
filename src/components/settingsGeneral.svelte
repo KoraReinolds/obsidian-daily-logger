@@ -9,7 +9,9 @@
 		save
 	}: {
 		settings: ILoggerSettings
-		save: (settings: ILoggerSettings) => Promise<void>
+		save: (
+			changes: ((s: ILoggerSettings) => void)[]
+		) => Promise<void>
 	} = $props()
 
 	onMount(() => {
@@ -21,12 +23,7 @@
 					text
 						.setPlaceholder('Type folder path')
 						.onChange((value) => {
-							const copy: ILoggerSettings = JSON.parse(
-								JSON.stringify(settings)
-							)
-							copy.global.folderPath = value
-
-							save(copy)
+							save([(s) => (s.global.folderPath = value)])
 						})
 
 					$effect(() => {
@@ -42,12 +39,7 @@
 					text
 						.setPlaceholder('Type delimiter')
 						.onChange((value) => {
-							const copy: ILoggerSettings = JSON.parse(
-								JSON.stringify(settings)
-							)
-							copy.global.delimiter = value
-
-							save(copy)
+							save([(s) => (s.global.delimiter = value)])
 						})
 
 					$effect(() => {
@@ -69,12 +61,7 @@
 							callout: 'callout'
 						})
 						.onChange((value) => {
-							const copy: ILoggerSettings = JSON.parse(
-								JSON.stringify(settings)
-							)
-							copy.global.sectionType = value
-
-							save(copy)
+							save([(s) => (s.global.sectionType = value)])
 						})
 
 					$effect(() => {
@@ -90,12 +77,7 @@
 					text
 						.setPlaceholder('Type section name')
 						.onChange((value) => {
-							const copy: ILoggerSettings = JSON.parse(
-								JSON.stringify(settings)
-							)
-							copy.global.sectionName = value
-
-							save(copy)
+							save([(s) => (s.global.sectionName = value)])
 						})
 
 					$effect(() => {

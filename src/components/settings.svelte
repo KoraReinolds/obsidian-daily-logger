@@ -42,9 +42,16 @@
 				<Component
 					{settings}
 					{tabs}
-					save={(newSettings: ILoggerSettings) => {
-						settings = newSettings
-						props.save(newSettings)
+					save={(
+						changes: ((s: ILoggerSettings) => void)[]
+					) => {
+						const copy = JSON.parse(
+							JSON.stringify(settings)
+						)
+						changes.forEach((f) => f(copy))
+						settings = copy
+
+						props.save(copy)
 					}}
 				/>
 			{/key}
