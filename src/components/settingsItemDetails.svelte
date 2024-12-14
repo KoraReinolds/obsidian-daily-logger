@@ -8,27 +8,19 @@
 		type TBlock,
 		type TItem
 	} from 'src/settings/types'
-	import { Notice, Setting } from 'obsidian'
+	import { Setting } from 'obsidian'
 	import { getValueFromItem, itemData } from 'src/entities'
-	import ItemDetails from './settingsItemDetails.svelte'
 	import type { TItemData } from 'src/entities/types'
 
 	let containerEl: HTMLElement
 
 	const {
 		item,
-		//openedBlockId,
-		//openBlock,
 		settings,
 		block,
-		//changeBlock
-		copyItem,
 		save
 	}: {
 		item: TItem
-		//openedBlockId: string
-		//openBlock: (id: string) => void
-		//changeBlock: (block: TBlock) => void
 		settings: ILoggerSettings
 		block: TBlock
 		copyItem: (item: TItem) => void
@@ -37,11 +29,7 @@
 		) => Promise<void>
 	} = $props()
 
-	let openedItemId: TItem | null = $state(null)
-
 	onMount(() => {
-		//const itemEl = itemEl.createEl('li')
-		//itemEl.classList.add('daily-logger-block-item')
 		if (!containerEl) return
 
 		const templates = settings.blocks
@@ -62,124 +50,133 @@
 						.addOptions(Object.fromEntries(templates))
 						.setValue(item.type)
 						.onChange((value) => {
-							item.type = value
+							save([
+								(s) => {
+									const changedItem = s.items[item.id]
+									changedItem.type = value
 
-							const data: TItemData =
-								(itemData[
-									item.type as EItemType
-								] as TItemData) || DEFAUTL_ITEM_DATA
+									const data: TItemData =
+										(itemData[
+											changedItem.type as EItemType
+										] as TItemData) || DEFAUTL_ITEM_DATA
 
-							item.value = data.defaultValue
-
-							//this.plugin.saveSettings()
-							//this.display()
+									changedItem.value = data.defaultValue
+								}
+							])
 						})
 				)
-				.setClass('daily-logger-block-item-data')
 		}
 
-		//// item key
-		//new Setting(containerEl)
-		//	.setName('Key')
-		//	.addText((text) =>
-		//		text
-		//			.setPlaceholder('Type key')
-		//			.setValue(item.name)
-		//			.onChange(async (value) => {
-		//				item.name = value
-		//				header.setName(value)
-		//				await this.plugin.saveSettings()
-		//			})
-		//	)
-		//	.setClass('daily-logger-block-item-data')
-		//
-		//// item any text
-		//if (item.type === EItemType.text)
-		//	new Setting(containerEl)
-		//		.setName('Any text')
-		//		.addToggle((comp) =>
-		//			comp
-		//				.setValue(item.anyText)
-		//				.onChange(async (val) => {
-		//					item.anyText = val
-		//
-		//					await this.plugin.saveSettings()
-		//					this.displayPreview()
-		//					this.display()
-		//				})
-		//		)
-		//		.setClass('daily-logger-block-item-data')
-		//
-		//const data = itemData[item.type as EItemType]
-		//// item value
-		//if (!item.anyText)
-		//	new Setting(containerEl)
-		//		.setName('Value')
-		//		.addText((text) =>
-		//			text
-		//				.setPlaceholder('Type value')
-		//				.setValue(this.getValueFromItem(item))
-		//				.onChange(async (value) => {
-		//					item.value = value
-		//					header.setDesc(value)
-		//					await this.plugin.saveSettings()
-		//					this.settings = this.plugin.settings
-		//					this.displayPreview()
-		//				})
-		//				.setDisabled(data ? data.isDisabled : true)
-		//		)
-		//		.setClass('daily-logger-block-item-data')
-		//
-		//// item default value
-		//new Setting(containerEl)
-		//	.setName('Default value')
-		//	.addText((text) =>
-		//		text
-		//			.setPlaceholder('Type default value')
-		//			.setValue(item.defaultValue)
-		//			.onChange(async (value) => {
-		//				item.defaultValue = value
-		//				await this.plugin.saveSettings()
-		//			})
-		//			.setDisabled(data ? data.isDisabled : true)
-		//	)
-		//	.setClass('daily-logger-block-item-data')
-		//
-		//// item optional
-		//new Setting(containerEl)
-		//	.setName('Optional value')
-		//	.addToggle((comp) =>
-		//		comp
-		//			.setValue(item.isOptional)
-		//			.onChange(async (val) => {
-		//				item.isOptional = val
-		//
-		//				await this.plugin.saveSettings()
-		//			})
-		//	)
-		//	.setClass('daily-logger-block-item-data')
-		//
-		//// item delimiter
-		//if (!EItemType[item.type]) {
-		//	new Setting(containerEl)
-		//		.setName('Delimiter')
-		//		.addText((text) =>
-		//			text
-		//				.setPlaceholder('Overwrite global delimiter')
-		//				.setValue(item.delimiter)
-		//				.onChange((value) => {
-		//					item.delimiter = value
-		//
-		//					this.plugin.saveSettings()
-		//					this.displayPreview()
-		//					header.setDesc(this.getValueFromItem(item))
-		//				})
-		//		)
-		//		.setClass('daily-logger-block-item-data')
-		//}
+		// item key
+		new Setting(containerEl)
+			.setName('Key')
+			.addText((text) =>
+				text
+					.setPlaceholder('Type key')
+					.setValue(item.name)
+					.onChange(async (value) => {
+						save([
+							(s) => {
+								const changedItem = s.items[item.id]
+								changedItem.name = value
+							}
+						])
+					})
+			)
 
-		////this.displayItemDetails(blockHeader, item, itemEl)
+		// item any text
+		if (item.type === EItemType.text)
+			new Setting(containerEl)
+				.setName('Any text')
+				.addToggle((comp) =>
+					comp
+						.setValue(item.anyText)
+						.onChange(async (value) => {
+							save([
+								(s) => {
+									const changedItem = s.items[item.id]
+									changedItem.anyText = value
+								}
+							])
+						})
+				)
+
+		const data = itemData[item.type as EItemType]
+		// item value
+		if (!item.anyText)
+			new Setting(containerEl)
+				.setName('Value')
+				.addText((text) =>
+					text
+						.setPlaceholder('Type value')
+						.setValue(getValueFromItem(settings, item))
+						.onChange(async (value) => {
+							save([
+								(s) => {
+									const changedItem = s.items[item.id]
+									changedItem.value = value
+								}
+							])
+						})
+						.setDisabled(data ? data.isDisabled : true)
+				)
+
+		// item default value
+		new Setting(containerEl)
+			.setName('Default value')
+			.addText((text) =>
+				text
+					.setPlaceholder('Type default value')
+					.setValue(item.defaultValue)
+					.onChange(async (value) => {
+						save([
+							(s) => {
+								const changedItem = s.items[item.id]
+								changedItem.defaultValue = value
+							}
+						])
+					})
+					.setDisabled(data ? data.isDisabled : true)
+			)
+
+		// item optional
+		new Setting(containerEl)
+			.setName('Optional value')
+			.addToggle((comp) =>
+				comp
+					.setValue(item.isOptional)
+					.onChange(async (value) => {
+						save([
+							(s) => {
+								const changedItem = s.items[item.id]
+								changedItem.isOptional = value
+							}
+						])
+					})
+			)
+
+		// item delimiter
+		if (!EItemType[item.type]) {
+			new Setting(containerEl)
+				.setName('Delimiter')
+				.addText((text) =>
+					text
+						.setPlaceholder('Overwrite global delimiter')
+						.setValue(item.delimiter)
+						.onChange((value) => {
+							save([
+								(s) => {
+									const changedItem = s.items[item.id]
+									changedItem.delimiter = value
+								}
+							])
+						})
+				)
+		}
 	})
 </script>
 
-<div bind:this={containerEl}></div>
+<div
+	class="daily-logger-block-item daily-logger-block-item-data"
+	bind:this={containerEl}
+></div>

@@ -13,22 +13,14 @@
 	let listEl: HTMLElement
 
 	const {
-		//openedBlockId,
-		//openBlock,
 		settings,
 		block,
-		//changeBlock,
 		copyItem,
-		//copyBlock,
 		save
 	}: {
-		//openedBlockId: string
-		//openBlock: (id: string) => void
-		//changeBlock: (block: TBlock) => void
 		settings: ILoggerSettings
 		block: TBlock
 		copyItem: (item: TItem) => void
-		//copyBlock: (block: TBlock) => void
 		save: (
 			changes: ((s: ILoggerSettings) => void)[]
 		) => Promise<void>

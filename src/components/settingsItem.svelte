@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import {
-		EItemType,
-		ELoggerType,
 		type ILoggerSettings,
 		type TBlock,
 		type TItem
@@ -15,18 +13,12 @@
 
 	const {
 		item,
-		//openedBlockId,
-		//openBlock,
 		settings,
 		block,
-		//changeBlock
 		copyItem,
 		save
 	}: {
 		item: TItem
-		//openedBlockId: string
-		//openBlock: (id: string) => void
-		//changeBlock: (block: TBlock) => void
 		settings: ILoggerSettings
 		block: TBlock
 		copyItem: (item: TItem) => void
@@ -40,10 +32,17 @@
 	onMount(() => {
 		if (!itemEl) return
 
-		const blockHeader = new Setting(itemEl)
-			.setName(item.name)
-			.setDesc(getValueFromItem(settings, item))
-			.setClass('daily-logger-block-item-header')
+		const blockHeader = new Setting(itemEl).setClass(
+			'daily-logger-block-item-header'
+		)
+
+		$effect(() => {
+			blockHeader.setName(item.name)
+		})
+
+		$effect(() => {
+			blockHeader.setDesc(getValueFromItem(settings, item))
+		})
 
 		// copy item
 		blockHeader.addButton((btn) => {
@@ -102,9 +101,9 @@
 
 <li class="daily-logger-block-item" bind:this={itemEl}></li>
 
-{#if openedItemId}
-	<ul class="daily-logger-block-item-list">
-		{#each block.order as id}
+<ul class="daily-logger-block-item-list">
+	{#each block.order as id}
+		{#if openedItemId === id}
 			<ItemDetails
 				{settings}
 				item={settings.items[id]}
@@ -112,6 +111,6 @@
 				{save}
 				{block}
 			/>
-		{/each}
-	</ul>
-{/if}
+		{/if}
+	{/each}
+</ul>
