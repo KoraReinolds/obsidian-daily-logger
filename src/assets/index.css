@@ -4,6 +4,7 @@
 	padding: 0;
 	margin: 0;
 	margin-top: 16px;
+	border-top: 1px solid var(--background-modifier-border);
 	border-bottom: 1px solid var(--background-modifier-border);
 }
 
@@ -11,14 +12,12 @@
 	padding: 10px 20px;
 	cursor: pointer;
 	border: 1px solid transparent;
-	border-bottom: none;
 	transition: background-color 0.3s ease;
 	color: var(--text-normal);
 }
 
 .daily-logger-tabs li.active {
 	border: 1px solid var(--background-modifier-border);
-	border-bottom: 2px solid var(--interactive-accent);
 	background-color: var(--background-secondary);
 	color: var(--text-accent);
 }
@@ -50,6 +49,10 @@
 	position: relative;
 }
 
+.daily-logger-blocks-header {
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
 .setting-item {
 	padding-left: 16px;
 	padding-right: 16px;
@@ -57,7 +60,6 @@
 
 .daily-logger-block-item {
 	padding-top: 16px;
-	border-bottom: 1px solid var(--background-modifier-border);
 	background: linear-gradient(
 			rgba(0, 0, 0, 0.2),
 			rgba(0, 0, 0, 0.2)
@@ -77,9 +79,12 @@
 			rgba(0, 0, 0, 0.2)
 		),
 		var(--background-primary);
+	position: relative;
+	border-bottom: 1px solid var(--background-modifier-border);
 }
 
-.daily-logger-block-item-data {
+.setting-item.daily-logger-block-item-data {
+	padding-top: 16px;
 	border: 0px;
 	background: linear-gradient(
 			rgba(0, 0, 0, 0.4),

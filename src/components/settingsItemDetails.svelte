@@ -65,6 +65,7 @@
 							])
 						})
 				)
+				.setClass('daily-logger-block-item-data')
 		}
 
 		// item key
@@ -83,6 +84,7 @@
 						])
 					})
 			)
+			.setClass('daily-logger-block-item-data')
 
 		// item any text
 		if (item.type === EItemType.text)
@@ -100,6 +102,7 @@
 							])
 						})
 				)
+				.setClass('daily-logger-block-item-data')
 
 		const data = itemData[item.type as EItemType]
 		// item value
@@ -120,6 +123,7 @@
 						})
 						.setDisabled(data ? data.isDisabled : true)
 				)
+				.setClass('daily-logger-block-item-data')
 
 		// item default value
 		new Setting(containerEl)
@@ -138,6 +142,7 @@
 					})
 					.setDisabled(data ? data.isDisabled : true)
 			)
+			.setClass('daily-logger-block-item-data')
 
 		// item optional
 		new Setting(containerEl)
@@ -154,6 +159,7 @@
 						])
 					})
 			)
+			.setClass('daily-logger-block-item-data')
 
 		// item delimiter
 		if (!EItemType[item.type]) {
@@ -172,11 +178,9 @@
 							])
 						})
 				)
+				.setClass('daily-logger-block-item-data')
 		}
 	})
 </script>
 
-<div
-	class="daily-logger-block-item daily-logger-block-item-data"
-	bind:this={containerEl}
-></div>
+<div bind:this={containerEl}></div>

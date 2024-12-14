@@ -103,7 +103,11 @@
 	})
 </script>
 
-<li class="daily-logger-block-item" bind:this={itemEl}>
+<li class="daily-logger-block-item">
+	<div
+		class="daily-logger-block-item-header"
+		bind:this={itemEl}
+	></div>
 	{#if openedItemId === item.id}
 		<ul class="daily-logger-block-item-list">
 			<ItemDetails
