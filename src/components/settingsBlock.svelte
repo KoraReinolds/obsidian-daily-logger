@@ -15,14 +15,18 @@
 
 	const {
 		openedBlockId,
+		openedItemId,
 		openBlock,
+		openItem,
 		settings,
 		block,
 		copyBlock,
 		save
 	}: {
 		openedBlockId: string
+		openedItemId: string
 		openBlock: (id: string) => void
+		openItem: (id: string) => void
 		settings: ILoggerSettings
 		block: TBlock
 		copyBlock: (block: TBlock) => void
@@ -190,6 +194,8 @@
 		{block}
 		{settings}
 		{save}
+		{openedItemId}
+		{openItem}
 		copyItem={(item: TItem) => (itemCopy = item)}
 	/>
 {/if}

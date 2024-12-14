@@ -23,6 +23,7 @@
 
 	let blockCopy: TBlock | null = $state(null)
 	let openedBlockId: string = $state('')
+	let openedItemId: string = $state('')
 
 	const blocks = $derived(
 		settings.blocks
@@ -91,9 +92,11 @@
 			{block}
 			{settings}
 			{openedBlockId}
+			{openedItemId}
 			{save}
 			copyBlock={(block) => (blockCopy = block)}
 			openBlock={(id) => (openedBlockId = id)}
+			openItem={(id) => (openedItemId = id)}
 		/>
 	{/each}
 </div>

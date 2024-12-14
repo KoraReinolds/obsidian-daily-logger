@@ -13,11 +13,15 @@
 	let listEl: HTMLElement
 
 	const {
+		openedItemId,
+		openItem,
 		settings,
 		block,
 		copyItem,
 		save
 	}: {
+		openedItemId: string
+		openItem: (id: string) => void
 		settings: ILoggerSettings
 		block: TBlock
 		copyItem: (item: TItem) => void
@@ -93,6 +97,8 @@
 			<Item
 				{settings}
 				item={settings.items[id]}
+				{openedItemId}
+				{openItem}
 				{copyItem}
 				{save}
 				{block}

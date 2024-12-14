@@ -12,12 +12,16 @@
 	let itemEl: HTMLElement
 
 	const {
+		openedItemId,
+		openItem,
 		item,
 		settings,
 		block,
 		copyItem,
 		save
 	}: {
+		openedItemId: string
+		openItem: (id: string) => void
 		item: TItem
 		settings: ILoggerSettings
 		block: TBlock
@@ -26,8 +30,6 @@
 			changes: ((s: ILoggerSettings) => void)[]
 		) => Promise<void>
 	} = $props()
-
-	let openedItemId: string | null = $state(null)
 
 	onMount(() => {
 		if (!itemEl) return
@@ -61,7 +63,7 @@
 
 			btn
 				.onClick(() => {
-					openedItemId = hidden ? item.id : ''
+					openItem(hidden ? item.id : '')
 				})
 				.setClass('daily-logger-toggle_btn')
 
