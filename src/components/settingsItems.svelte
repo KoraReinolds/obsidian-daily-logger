@@ -12,6 +12,7 @@
 	import Item from './settingsItem.svelte'
 
 	let containerEl: HTMLElement
+	let listEl: HTMLElement
 
 	const {
 		//openedBlockId,
@@ -36,7 +37,7 @@
 	} = $props()
 
 	onMount(() => {
-		if (!containerEl) return
+		if (!containerEl || !listEl) return
 
 		new Setting(containerEl)
 			.setName('Command name')
@@ -131,27 +132,33 @@
 		//	if (this.openedItemId !== id) return
 		//
 		//	this.displayItemDetails(blockHeader, item, itemEl)
-		//
-		//Sortable.create(listEl, {
-		//	handle: '.daily-logger-item-drag',
-		//	onEnd: (evt) => {
-		//		if (
-		//			evt.oldIndex === undefined ||
-		//			evt.newIndex === undefined
-		//		)
-		//			return
-		//		;[
-		//			[block.order[evt.oldIndex]],
-		//			[block.order[evt.newIndex]]
-		//		] = [
-		//			[block.order[evt.newIndex]],
-		//			[block.order[evt.oldIndex]]
-		//		]
-		//
-		//		this.plugin.saveSettings()
-		//		this.displayPreview()
-		//	}
-		//})
+
+		Sortable.create(listEl, {
+			handle: '.daily-logger-item-drag',
+			onEnd: (evt) => {
+				save([
+					(s) => {
+						const changedBlock = s.blocks.find(
+							(b) => b.id === block.id
+						)
+
+						if (
+							!changedBlock ||
+							evt.oldIndex === undefined ||
+							evt.newIndex === undefined
+						)
+							return
+						;[
+							[changedBlock.order[evt.oldIndex]],
+							[changedBlock.order[evt.newIndex]]
+						] = [
+							[changedBlock.order[evt.newIndex]],
+							[changedBlock.order[evt.oldIndex]]
+						]
+					}
+				])
+			}
+		})
 	})
 </script>
 
@@ -159,7 +166,7 @@
 	class="daily-logger-block"
 	bind:this={containerEl}
 ></div>
-<ul class="daily-logger-block-item-list">
+<ul bind:this={listEl} class="daily-logger-block-item-list">
 	{#each block.order as id}
 		<Item
 			{settings}

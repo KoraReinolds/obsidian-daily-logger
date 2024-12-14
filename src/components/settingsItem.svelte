@@ -92,13 +92,13 @@
 			})
 		})
 
-		//// drag block
-		//blockHeader.addButton((btn) => {
-		//	btn
-		//		.setIcon('grip-vertical')
-		//		.setClass('daily-logger-item-drag')
-		//})
-		//
+		// drag block
+		blockHeader.addButton((btn) => {
+			btn
+				.setIcon('grip-vertical')
+				.setClass('daily-logger-item-drag')
+		})
+
 		////if (this.openedItemId !== id) return
 		//
 		////this.displayItemDetails(blockHeader, item, itemEl)
