@@ -8,8 +8,8 @@
 		type TItem
 	} from 'src/settings/types'
 	import { Notice, Setting } from 'obsidian'
-	import Sortable from 'sortablejs'
 	import { getValueFromItem } from 'src/entities'
+	import ItemDetails from './settingsItemDetails.svelte'
 
 	let itemEl: HTMLElement
 
@@ -35,9 +35,9 @@
 		) => Promise<void>
 	} = $props()
 
+	let openedItemId: string | null = $state(null)
+
 	onMount(() => {
-		//const itemEl = itemEl.createEl('li')
-		//itemEl.classList.add('daily-logger-block-item')
 		if (!itemEl) return
 
 		const blockHeader = new Setting(itemEl)
@@ -56,21 +56,20 @@
 				.setTooltip('Copy item')
 		})
 
-		//// show/hide item
-		//blockHeader.addButton((btn) => {
-		//	const hidden = !(this.openedItemId === id)
-		//
-		//	btn
-		//		.setIcon(hidden ? 'eye' : 'eye-off')
-		//		.onClick(() => {
-		//			this.openedItemId = hidden ? id : undefined
-		//
-		//			this.display()
-		//		})
-		//	btn.buttonEl.innerHTML += `<span style=margin-left:8px;>${
-		//		hidden ? 'Show' : 'Hide'
-		//	}</span>`
-		//})
+		// show/hide item
+		blockHeader.addButton((btn) => {
+			const hidden = $derived(openedItemId !== item.id)
+
+			btn.onClick(() => {
+				openedItemId = hidden ? item.id : ''
+			})
+
+			$effect(() => {
+				btn.setIcon(
+					openedItemId === item.id ? 'eye-off' : 'eye'
+				)
+			})
+		})
 
 		// remove item
 		blockHeader.addButton((btn) => {
@@ -98,11 +97,21 @@
 				.setIcon('grip-vertical')
 				.setClass('daily-logger-item-drag')
 		})
-
-		////if (this.openedItemId !== id) return
-		//
-		////this.displayItemDetails(blockHeader, item, itemEl)
 	})
 </script>
 
 <li class="daily-logger-block-item" bind:this={itemEl}></li>
+
+{#if openedItemId}
+	<ul class="daily-logger-block-item-list">
+		{#each block.order as id}
+			<ItemDetails
+				{settings}
+				item={settings.items[id]}
+				{copyItem}
+				{save}
+				{block}
+			/>
+		{/each}
+	</ul>
+{/if}
