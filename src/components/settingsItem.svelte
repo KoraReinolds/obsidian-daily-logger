@@ -84,7 +84,7 @@
 						if (changedBlock) {
 							changedBlock.order =
 								changedBlock.order.filter(
-									(blockId) => blockId === item.id
+									(blockId) => blockId !== item.id
 								)
 						}
 					}

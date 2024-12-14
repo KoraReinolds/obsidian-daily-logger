@@ -45,7 +45,6 @@
 		const id = uuidv4()
 
 		return {
-			id: id,
 			type: 'text',
 			name: '',
 			value: '',
@@ -54,7 +53,8 @@
 			defaultValue: '',
 			nested: [],
 			delimiter: '',
-			...params
+			...params,
+			id: id
 		}
 	}
 
