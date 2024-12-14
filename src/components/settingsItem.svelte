@@ -59,13 +59,17 @@
 		blockHeader.addButton((btn) => {
 			const hidden = $derived(openedItemId !== item.id)
 
-			btn.onClick(() => {
-				openedItemId = hidden ? item.id : ''
-			})
+			btn
+				.onClick(() => {
+					openedItemId = hidden ? item.id : ''
+				})
+				.setClass('daily-logger-toggle_btn')
 
 			$effect(() => {
 				btn.setIcon(
-					openedItemId === item.id ? 'eye-off' : 'eye'
+					openedItemId === item.id
+						? 'chevron-up'
+						: 'chevron-down'
 				)
 			})
 		})
