@@ -34,8 +34,7 @@
 
 		const blockCopy: TBlock = {
 			...block,
-			id: uuidv4(),
-			headerEl: undefined
+			id: uuidv4()
 		}
 		const orderCopy: string[] = []
 

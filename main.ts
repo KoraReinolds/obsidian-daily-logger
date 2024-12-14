@@ -253,7 +253,6 @@ export default class LoggerPlugin extends Plugin {
 			...settings,
 			blocks: settings.blocks.map((block) => {
 				const blockCopy = { ...block }
-				delete blockCopy.headerEl
 
 				return blockCopy
 			}),
