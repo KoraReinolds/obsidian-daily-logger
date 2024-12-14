@@ -23,15 +23,15 @@
 
 		const blockHeader = new Setting(containerEl)
 
-		const pasteBtn = blockHeader.addButton((btn) => {
+		blockHeader.addButton((btn) => {
 			btn
 				.setIcon('clipboard-paste')
 				.setTooltip('Paste block')
 				.onClick(pasteBlock)
-		})
 
-		$effect(() => {
-			pasteBtn.setDisabled(!canPaste)
+			$effect(() => {
+				btn.setDisabled(!canPaste)
+			})
 		})
 
 		blockHeader
