@@ -125,7 +125,16 @@
 				.setIcon('plus')
 				.setDisabled(!!block.locked)
 				.onClick(() => {
-					block.order.push(this.addNewItem())
+					save([
+						(s) => {
+							const item = getNewItem()
+							const changedBlock = s.blocks.find(
+								(b) => b.id === block.id
+							)
+							changedBlock?.order.push(item.id)
+							s.items[item.id] = item
+						}
+					])
 					openBlock(id)
 				})
 		})
