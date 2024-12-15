@@ -16,8 +16,6 @@
 	} = $props()
 
 	let blockCopy: TBlock | null = $state(null)
-	let openedBlockId: string = $state('')
-	let openedItemId: string = $state('')
 
 	const blocks = $derived(
 		S.settings.blocks
@@ -84,11 +82,7 @@
 	{#each blocks as block (block.id)}
 		<Block
 			{block}
-			{openedBlockId}
-			{openedItemId}
 			copyBlock={(block) => (blockCopy = block)}
-			openBlock={(id) => (openedBlockId = id)}
-			openItem={(id) => (openedItemId = id)}
 		/>
 	{/each}
 </div>

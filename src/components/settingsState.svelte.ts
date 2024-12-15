@@ -6,7 +6,11 @@ import {
 export const S = $state<{
 	settings: ILoggerSettings
 	save: (changes: ((s: ILoggerSettings) => void)[]) => void
+	openedBlockId: string
+	openedItemId: string
 }>({
 	settings: DEFAULT_SETTINGS,
-	save: () => {}
+	save: () => {},
+	openedBlockId: '',
+	openedItemId: ''
 })

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { Setting } from 'obsidian'
-	import type { ILoggerSettings } from 'src/settings/types'
 	import { S } from './settingsState.svelte'
 
 	let containerEl: HTMLElement

@@ -15,17 +15,9 @@
 	let blockEl: HTMLElement
 
 	const {
-		openedBlockId,
-		openedItemId,
-		openBlock,
-		openItem,
 		block,
 		copyBlock
 	}: {
-		openedBlockId: string
-		openedItemId: string
-		openBlock: (id: string) => void
-		openItem: (id: string) => void
 		block: TBlock
 		copyBlock: (block: TBlock) => void
 	} = $props()
@@ -101,7 +93,7 @@
 					S.save([
 						(s) => {
 							const block = s.blocks.find(
-								(b) => b.id === openedBlockId
+								(b) => b.id === S.openedBlockId
 							)
 							block?.order.push(item.id)
 							s.items[item.id] = item
@@ -134,24 +126,24 @@
 							s.items[item.id] = item
 						}
 					])
-					openBlock(id)
+					S.openedBlockId = id
 				})
 		})
 
 		// show/hide block
 		header.addButton((btn) => {
-			const hidden = $derived(openedBlockId !== id)
+			const hidden = $derived(S.openedBlockId !== id)
 
 			btn
 				.setDisabled(!!block.locked)
 				.onClick(() => {
-					openBlock(hidden ? id : '')
+					S.openedBlockId = hidden ? id : ''
 				})
 				.setClass('daily-logger-toggle_btn')
 
 			$effect(() => {
 				btn.setIcon(
-					openedBlockId === id
+					S.openedBlockId === id
 						? 'chevron-up'
 						: 'chevron-down'
 				)
@@ -184,11 +176,9 @@
 
 <div class="daily-logger-block" bind:this={blockEl}></div>
 
-{#if block.id === openedBlockId}
+{#if block.id === S.openedBlockId}
 	<Items
 		{block}
-		{openedItemId}
-		{openItem}
 		copyItem={(item: TItem) => (itemCopy = item)}
 	/>
 {/if}

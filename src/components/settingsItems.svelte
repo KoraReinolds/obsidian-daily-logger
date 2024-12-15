@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import {
-		type ILoggerSettings,
 		type TBlock,
 		type TItem
 	} from 'src/settings/types'
@@ -14,13 +13,9 @@
 	let listEl: HTMLElement
 
 	const {
-		openedItemId,
-		openItem,
 		block,
 		copyItem
 	}: {
-		openedItemId: string
-		openItem: (id: string) => void
 		block: TBlock
 		copyItem: (item: TItem) => void
 	} = $props()
@@ -89,8 +84,6 @@
 		{#key block.order}
 			<Item
 				item={S.settings.items[id]}
-				{openedItemId}
-				{openItem}
 				{copyItem}
 				{block}
 			/>

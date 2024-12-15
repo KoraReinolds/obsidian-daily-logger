@@ -13,14 +13,10 @@
 	let itemEl: HTMLElement
 
 	const {
-		openedItemId,
-		openItem,
 		item,
 		block,
 		copyItem
 	}: {
-		openedItemId: string
-		openItem: (id: string) => void
 		item: TItem
 		block: TBlock
 		copyItem: (item: TItem) => void
@@ -56,17 +52,17 @@
 
 		// show/hide item
 		blockHeader.addButton((btn) => {
-			const hidden = $derived(openedItemId !== item.id)
+			const hidden = $derived(S.openedItemId !== item.id)
 
 			btn
 				.onClick(() => {
-					openItem(hidden ? item.id : '')
+					S.openedItemId = hidden ? item.id : ''
 				})
 				.setClass('daily-logger-toggle_btn')
 
 			$effect(() => {
 				btn.setIcon(
-					openedItemId === item.id
+					S.openedItemId === item.id
 						? 'chevron-up'
 						: 'chevron-down'
 				)
@@ -107,10 +103,10 @@
 		class="daily-logger-block-item-header"
 		bind:this={itemEl}
 	></div>
-	{#if openedItemId === item.id}
+	{#if S.openedItemId === item.id}
 		<ul class="daily-logger-block-item-list">
 			<ItemDetails
-				item={S.settings.items[openedItemId]}
+				item={S.settings.items[S.openedItemId]}
 				{copyItem}
 				{block}
 			/>

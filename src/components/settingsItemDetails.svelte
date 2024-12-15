@@ -4,7 +4,6 @@
 		DEFAUTL_ITEM_DATA,
 		EItemType,
 		ELoggerType,
-		type ILoggerSettings,
 		type TBlock,
 		type TItem
 	} from 'src/settings/types'
