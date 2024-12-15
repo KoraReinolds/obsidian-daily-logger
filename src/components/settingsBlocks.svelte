@@ -4,20 +4,15 @@
 	import Block from './settingsBlock.svelte'
 	import {
 		ELoggerType,
-		type ILoggerSettings,
 		type TBlock,
 		type TTabs
 	} from 'src/settings/types'
 	import { S } from './settingsState.svelte'
 
 	const {
-		tabs,
-		save
+		tabs
 	}: {
 		tabs: TTabs
-		save: (
-			changes: ((s: ILoggerSettings) => void)[]
-		) => Promise<void>
 	} = $props()
 
 	let blockCopy: TBlock | null = $state(null)
@@ -55,14 +50,14 @@
 		blockCopy.order = orderCopy
 		blockCopy.type = tabs.active?.type
 
-		save([(s) => s.blocks.push(blockCopy)])
+		S.save([(s) => s.blocks.push(blockCopy)])
 	}
 
 	const addNewBlock = () => {
 		const id = uuidv4()
 		const name = 'New log'
 
-		save([
+		S.save([
 			(s) => {
 				if (!tabs.active) return
 				s.blocks.push({
@@ -89,10 +84,8 @@
 	{#each blocks as block (block.id)}
 		<Block
 			{block}
-			settings={S.settings}
 			{openedBlockId}
 			{openedItemId}
-			{save}
 			copyBlock={(block) => (blockCopy = block)}
 			openBlock={(id) => (openedBlockId = id)}
 			openItem={(id) => (openedItemId = id)}

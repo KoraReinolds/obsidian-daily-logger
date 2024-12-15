@@ -14,6 +14,13 @@
 
 	const tabs: TTabs = $state(props.tabs)
 	S.settings = props.settings
+	S.save = (changes: ((s: ILoggerSettings) => void)[]) => {
+		const copy = JSON.parse(JSON.stringify(S.settings))
+		changes.forEach((f) => f(copy))
+		S.settings = copy
+
+		props.save(copy)
+	}
 
 	tabs.active = tabs.list[1]
 
@@ -50,20 +57,7 @@
 		{#if activeComponent}
 			{@const Component = activeComponent}
 			{#key tabs.active?.type}
-				<Component
-					{tabs}
-					save={(
-						changes: ((s: ILoggerSettings) => void)[]
-					) => {
-						const copy = JSON.parse(
-							JSON.stringify(S.settings)
-						)
-						changes.forEach((f) => f(copy))
-						S.settings = copy
-
-						props.save(copy)
-					}}
-				/>
+				<Component {tabs} />
 			{/key}
 		{/if}
 	</div>

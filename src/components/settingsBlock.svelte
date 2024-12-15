@@ -20,8 +20,7 @@
 		openBlock,
 		openItem,
 		block,
-		copyBlock,
-		save
+		copyBlock
 	}: {
 		openedBlockId: string
 		openedItemId: string
@@ -29,9 +28,6 @@
 		openItem: (id: string) => void
 		block: TBlock
 		copyBlock: (block: TBlock) => void
-		save: (
-			changes: ((s: ILoggerSettings) => void)[]
-		) => Promise<void>
 	} = $props()
 
 	let itemCopy: TItem | null = $state(null)
@@ -102,7 +98,7 @@
 
 					const item = getNewItem(itemCopy)
 
-					save([
+					S.save([
 						(s) => {
 							const block = s.blocks.find(
 								(b) => b.id === openedBlockId
@@ -128,7 +124,7 @@
 				.setIcon('plus')
 				.setDisabled(!!block.locked)
 				.onClick(() => {
-					save([
+					S.save([
 						(s) => {
 							const item = getNewItem()
 							const changedBlock = s.blocks.find(
@@ -168,7 +164,7 @@
 				.setIcon('trash-2')
 				.setDisabled(!!block.locked)
 				.onClick(() => {
-					save([
+					S.save([
 						(s) => {
 							const changedBlock = s.blocks.find(
 								(b) => b.id === block.id
@@ -191,7 +187,6 @@
 {#if block.id === openedBlockId}
 	<Items
 		{block}
-		{save}
 		{openedItemId}
 		{openItem}
 		copyItem={(item: TItem) => (itemCopy = item)}

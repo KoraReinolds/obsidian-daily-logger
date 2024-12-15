@@ -17,17 +17,13 @@
 		openItem,
 		item,
 		block,
-		copyItem,
-		save
+		copyItem
 	}: {
 		openedItemId: string
 		openItem: (id: string) => void
 		item: TItem
 		block: TBlock
 		copyItem: (item: TItem) => void
-		save: (
-			changes: ((s: ILoggerSettings) => void)[]
-		) => Promise<void>
 	} = $props()
 
 	onMount(() => {
@@ -80,7 +76,7 @@
 		// remove item
 		blockHeader.addButton((btn) => {
 			btn.setIcon('trash-2').onClick(() => {
-				save([
+				S.save([
 					(s) => {
 						delete s.items[item.id]
 						const changedBlock = s.blocks.find(
@@ -116,7 +112,6 @@
 			<ItemDetails
 				item={S.settings.items[openedItemId]}
 				{copyItem}
-				{save}
 				{block}
 			/>
 		</ul>

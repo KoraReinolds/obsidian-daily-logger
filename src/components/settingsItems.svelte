@@ -17,16 +17,12 @@
 		openedItemId,
 		openItem,
 		block,
-		copyItem,
-		save
+		copyItem
 	}: {
 		openedItemId: string
 		openItem: (id: string) => void
 		block: TBlock
 		copyItem: (item: TItem) => void
-		save: (
-			changes: ((s: ILoggerSettings) => void)[]
-		) => Promise<void>
 	} = $props()
 
 	onMount(() => {
@@ -40,7 +36,7 @@
 					.setPlaceholder('Type name')
 					.setValue(block.name)
 					.onChange((value) => {
-						save([
+						S.save([
 							(s) => {
 								const changedBlock = s.blocks.find(
 									(b) => block.id === b.id
@@ -55,7 +51,7 @@
 		Sortable.create(listEl, {
 			handle: '.daily-logger-item-drag',
 			onEnd: (evt) => {
-				save([
+				S.save([
 					(s) => {
 						const changedBlock = s.blocks.find(
 							(b) => b.id === block.id
@@ -96,7 +92,6 @@
 				{openedItemId}
 				{openItem}
 				{copyItem}
-				{save}
 				{block}
 			/>
 		{/key}

@@ -5,13 +5,6 @@
 	import { S } from './settingsState.svelte'
 
 	let containerEl: HTMLElement
-	const {
-		save
-	}: {
-		save: (
-			changes: ((s: ILoggerSettings) => void)[]
-		) => Promise<void>
-	} = $props()
 
 	onMount(() => {
 		if (containerEl) {
@@ -22,7 +15,7 @@
 					text
 						.setPlaceholder('Type folder path')
 						.onChange((value) => {
-							save([(s) => (s.global.folderPath = value)])
+							S.save([(s) => (s.global.folderPath = value)])
 						})
 
 					$effect(() => {
@@ -38,7 +31,7 @@
 					text
 						.setPlaceholder('Type delimiter')
 						.onChange((value) => {
-							save([(s) => (s.global.delimiter = value)])
+							S.save([(s) => (s.global.delimiter = value)])
 						})
 
 					$effect(() => {
@@ -60,7 +53,9 @@
 							callout: 'callout'
 						})
 						.onChange((value) => {
-							save([(s) => (s.global.sectionType = value)])
+							S.save([
+								(s) => (s.global.sectionType = value)
+							])
 						})
 
 					$effect(() => {
@@ -76,7 +71,9 @@
 					text
 						.setPlaceholder('Type section name')
 						.onChange((value) => {
-							save([(s) => (s.global.sectionName = value)])
+							S.save([
+								(s) => (s.global.sectionName = value)
+							])
 						})
 
 					$effect(() => {

@@ -17,15 +17,11 @@
 
 	const {
 		item,
-		block,
-		save
+		block
 	}: {
 		item: TItem
 		block: TBlock
 		copyItem: (item: TItem) => void
-		save: (
-			changes: ((s: ILoggerSettings) => void)[]
-		) => Promise<void>
 	} = $props()
 
 	onMount(() => {
@@ -49,7 +45,7 @@
 						.addOptions(Object.fromEntries(templates))
 						.setValue(item.type)
 						.onChange((value) => {
-							save([
+							S.save([
 								(s) => {
 									const changedItem = s.items[item.id]
 									changedItem.type = value
@@ -75,7 +71,7 @@
 					.setPlaceholder('Type key')
 					.setValue(item.name)
 					.onChange(async (value) => {
-						save([
+						S.save([
 							(s) => {
 								const changedItem = s.items[item.id]
 								changedItem.name = value
@@ -93,7 +89,7 @@
 					comp
 						.setValue(item.anyText)
 						.onChange(async (value) => {
-							save([
+							S.save([
 								(s) => {
 									const changedItem = s.items[item.id]
 									changedItem.anyText = value
@@ -113,7 +109,7 @@
 						.setPlaceholder('Type value')
 						.setValue(getValueFromItem(S.settings, item))
 						.onChange(async (value) => {
-							save([
+							S.save([
 								(s) => {
 									const changedItem = s.items[item.id]
 									changedItem.value = value
@@ -132,7 +128,7 @@
 					.setPlaceholder('Type default value')
 					.setValue(item.defaultValue)
 					.onChange(async (value) => {
-						save([
+						S.save([
 							(s) => {
 								const changedItem = s.items[item.id]
 								changedItem.defaultValue = value
@@ -150,7 +146,7 @@
 				comp
 					.setValue(item.isOptional)
 					.onChange(async (value) => {
-						save([
+						S.save([
 							(s) => {
 								const changedItem = s.items[item.id]
 								changedItem.isOptional = value
@@ -169,7 +165,7 @@
 						.setPlaceholder('Overwrite global delimiter')
 						.setValue(item.delimiter)
 						.onChange((value) => {
-							save([
+							S.save([
 								(s) => {
 									const changedItem = s.items[item.id]
 									changedItem.delimiter = value

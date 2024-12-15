@@ -5,6 +5,8 @@ import {
 
 export const S = $state<{
 	settings: ILoggerSettings
+	save: (changes: ((s: ILoggerSettings) => void)[]) => void
 }>({
-	settings: DEFAULT_SETTINGS
+	settings: DEFAULT_SETTINGS,
+	save: () => {}
 })
