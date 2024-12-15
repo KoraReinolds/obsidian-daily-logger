@@ -1,7 +1,8 @@
-import Dexie, { Table } from 'dexie'
+import Dexie, { type Table } from 'dexie'
 
 interface LogData {
 	path: string
+	blockId: string
 	data: any
 }
 
@@ -11,7 +12,7 @@ class LoggerStorage extends Dexie {
 	constructor() {
 		super('LoggerStorage')
 		this.version(1).stores({
-			data: '++id, path, data'
+			data: '++id, path, data, blockId'
 		})
 	}
 

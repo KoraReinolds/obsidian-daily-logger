@@ -37,6 +37,21 @@
 		])
 	}
 
+	const removeMetaItem = (id: string) => {
+		S.save([
+			(s) => {
+				const changedBlock = s.blocks.find(
+					(b) => b.id === block.id
+				)
+
+				if (changedBlock)
+					changedBlock.meta = changedBlock.meta.filter(
+						(m) => m.id === id
+					)
+			}
+		])
+	}
+
 	onMount(() => {
 		if (!containerEl || !listEl || !metaEl) return
 
@@ -84,7 +99,7 @@
 								const changedBlock = s.blocks.find(
 									(b) => b.id === block.id
 								)
-								debugger
+
 								changedBlock?.meta.push({
 									id: uuidv4(),
 									key: '',
@@ -146,7 +161,11 @@
 <ul bind:this={metaEl} class="daily-logger-block-item-list">
 	{#if openedMeta}
 		{#each block.meta as meta}
-			<BlockMeta {meta} change={changeMeta} />
+			<BlockMeta
+				{meta}
+				change={changeMeta}
+				remove={() => removeMetaItem(meta.id)}
+			/>
 		{/each}
 	{/if}
 </ul>

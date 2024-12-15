@@ -7,11 +7,11 @@
 
 	const {
 		meta,
-		//remove,
+		remove,
 		change
 	}: {
 		meta: TMeta
-		//remove: () => void
+		remove: () => void
 		change: (meta: TMeta) => void
 	} = $props()
 
@@ -27,7 +27,6 @@
 						change({ ...meta, key: value })
 					})
 			)
-
 			.addText((text) =>
 				text
 					.setPlaceholder('Type value')
@@ -36,6 +35,12 @@
 						change({ ...meta, value })
 					})
 			)
+			.addButton((btn) => {
+				btn.setIcon('trash-2').onClick(() => {
+					remove()
+				})
+			})
+
 			.setClass('daily-logger-block-item-data')
 
 		$effect(() => {

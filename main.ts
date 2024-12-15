@@ -77,7 +77,7 @@ export default class LoggerPlugin extends Plugin {
 				//if (file instanceof TFile) {
 				//	console.log(file, await this.parseFile(file))
 				//}
-				//console.log(await this.getAllLogs())
+				console.log(await this.getAllLogs())
 				//console.log(await this.parseLog(''))
 			}
 		})
@@ -219,7 +219,6 @@ export default class LoggerPlugin extends Plugin {
 	}
 
 	onunload() {
-		console.log('unref')
 		if (this.onModify) this.app.vault.offref(this.onModify)
 		if (this.onDelete) this.app.vault.offref(this.onDelete)
 	}
@@ -290,7 +289,7 @@ export default class LoggerPlugin extends Plugin {
 		await this.saveSettings()
 
 		await this.saveAllLogs()
-		console.log(await db.getAll())
+		console.log(await this.getAllLogs())
 
 		new Notice('Successful save')
 	}
@@ -328,7 +327,20 @@ export default class LoggerPlugin extends Plugin {
 
 	async getAllLogs() {
 		console.time()
-		const res = await db.getAll()
+		const blocksMeta = Object.fromEntries(
+			this.settings.blocks.map((block) => {
+				const meta = Object.fromEntries(
+					block.meta.map((b) => [b.key, b.value])
+				)
+				return [block.id, meta]
+			})
+		)
+		const res = (await db.getAll()).map((data) => {
+			return {
+				data: data.data,
+				meta: blocksMeta[data.blockId]
+			}
+		})
 		console.timeEnd()
 		return res
 	}
@@ -461,11 +473,14 @@ export default class LoggerPlugin extends Plugin {
 
 		return logs.map((data) => ({
 			path: file.path,
-			data
+			...data
 		}))
 	}
 
-	async parseLog(log: string) {
+	async parseLog(log: string): Promise<{
+		blockId: string
+		data: Record<string, string>
+	} | null> {
 		const blocks = this.settings.blocks.filter(
 			(block) => block.type === ELoggerType.LOGGER
 		)
@@ -495,7 +510,7 @@ export default class LoggerPlugin extends Plugin {
 			if (match) {
 				firstMatch = i
 				matches = match
-				return
+				return null
 			}
 		})
 
@@ -503,7 +518,7 @@ export default class LoggerPlugin extends Plugin {
 			if (log.startsWith('>>')) {
 				console.log(log)
 			}
-			return
+			return null
 		}
 
 		const res = this.getDataFromItems(
@@ -512,7 +527,10 @@ export default class LoggerPlugin extends Plugin {
 			1
 		).itemsData
 
-		return res
+		return {
+			blockId: blocks[firstMatch].id,
+			data: res
+		}
 	}
 
 	isFile(file: any): file is TFile {
