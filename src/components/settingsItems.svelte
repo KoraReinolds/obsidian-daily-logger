@@ -1,9 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import {
-		type TBlock,
-		type TItem
-	} from 'src/settings/types'
+	import { type TBlock } from 'src/settings/types'
 	import { Setting } from 'obsidian'
 	import Sortable from 'sortablejs'
 	import Item from './settingsItem.svelte'
@@ -13,11 +10,9 @@
 	let listEl: HTMLElement
 
 	const {
-		block,
-		copyItem
+		block
 	}: {
 		block: TBlock
-		copyItem: (item: TItem) => void
 	} = $props()
 
 	onMount(() => {
@@ -82,11 +77,7 @@
 <ul bind:this={listEl} class="daily-logger-block-item-list">
 	{#each block.order as id}
 		{#key block.order}
-			<Item
-				item={S.settings.items[id]}
-				{copyItem}
-				{block}
-			/>
+			<Item item={S.settings.items[id]} {block} />
 		{/key}
 	{/each}
 </ul>

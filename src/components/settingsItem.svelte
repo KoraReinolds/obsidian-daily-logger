@@ -14,12 +14,10 @@
 
 	const {
 		item,
-		block,
-		copyItem
+		block
 	}: {
 		item: TItem
 		block: TBlock
-		copyItem: (item: TItem) => void
 	} = $props()
 
 	onMount(() => {
@@ -44,7 +42,7 @@
 			btn
 				.setIcon('copy')
 				.onClick(() => {
-					copyItem(item)
+					S.itemCopy = item
 					new Notice('Copy item')
 				})
 				.setTooltip('Copy item')
@@ -107,7 +105,6 @@
 		<ul class="daily-logger-block-item-list">
 			<ItemDetails
 				item={S.settings.items[S.openedItemId]}
-				{copyItem}
 				{block}
 			/>
 		</ul>

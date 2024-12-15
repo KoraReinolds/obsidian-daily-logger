@@ -15,14 +15,10 @@
 	let blockEl: HTMLElement
 
 	const {
-		block,
-		copyBlock
+		block
 	}: {
 		block: TBlock
-		copyBlock: (block: TBlock) => void
 	} = $props()
-
-	let itemCopy: TItem | null = $state(null)
 
 	const blockPreview = $derived(
 		block.order
@@ -73,7 +69,7 @@
 				btn
 					.setIcon('copy')
 					.onClick(() => {
-						copyBlock(block)
+						S.blockCopy = block
 						new Notice('Copy block')
 					})
 					.setTooltip('Copy block')
@@ -86,9 +82,9 @@
 				.setIcon('clipboard-paste')
 				.setTooltip('Paste item')
 				.onClick(() => {
-					if (!itemCopy) return
+					if (!S.itemCopy) return
 
-					const item = getNewItem(itemCopy)
+					const item = getNewItem(S.itemCopy)
 
 					S.save([
 						(s) => {
@@ -104,8 +100,8 @@
 			$effect(() => {
 				btn.setDisabled(
 					!!block.locked ||
-						!itemCopy ||
-						itemCopy.type === block.id // same template
+						!S.itemCopy ||
+						S.itemCopy.type === block.id // same template
 				)
 			})
 		})
@@ -177,8 +173,5 @@
 <div class="daily-logger-block" bind:this={blockEl}></div>
 
 {#if block.id === S.openedBlockId}
-	<Items
-		{block}
-		copyItem={(item: TItem) => (itemCopy = item)}
-	/>
+	<Items {block} />
 {/if}

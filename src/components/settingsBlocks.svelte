@@ -15,8 +15,6 @@
 		tabs: TTabs
 	} = $props()
 
-	let blockCopy: TBlock | null = $state(null)
-
 	const blocks = $derived(
 		S.settings.blocks
 			.filter((block) => block.type === tabs.active?.type)
@@ -72,17 +70,13 @@
 {#if tabs.active}
 	<Header
 		{addNewBlock}
-		pasteBlock={() => pasteBlock(blockCopy)}
-		canPaste={!!blockCopy}
+		pasteBlock={() => pasteBlock(S.blockCopy)}
 		activeTab={tabs.active}
 	/>
 {/if}
 
 <div class="daily-logger-blocks-content">
 	{#each blocks as block (block.id)}
-		<Block
-			{block}
-			copyBlock={(block) => (blockCopy = block)}
-		/>
+		<Block {block} />
 	{/each}
 </div>

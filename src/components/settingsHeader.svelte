@@ -2,17 +2,16 @@
 	import { onMount } from 'svelte'
 	import { Setting } from 'obsidian'
 	import type { TTab } from 'src/settings/types'
+	import { S } from './settingsState.svelte'
 
 	let containerEl: HTMLElement
 	const {
 		addNewBlock,
 		pasteBlock,
-		canPaste,
 		activeTab
 	}: {
 		addNewBlock: () => void
 		pasteBlock: () => void
-		canPaste: boolean
 		activeTab: TTab
 	} = $props()
 
@@ -30,7 +29,7 @@
 				.onClick(pasteBlock)
 
 			$effect(() => {
-				btn.setDisabled(!canPaste)
+				btn.setDisabled(!S.blockCopy)
 			})
 		})
 

@@ -20,7 +20,6 @@
 	}: {
 		item: TItem
 		block: TBlock
-		copyItem: (item: TItem) => void
 	} = $props()
 
 	onMount(() => {
