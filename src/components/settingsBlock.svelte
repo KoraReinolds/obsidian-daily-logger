@@ -10,6 +10,7 @@
 	import { Notice, Setting } from 'obsidian'
 	import Items from './settingsItems.svelte'
 	import { getValueFromItem } from 'src/entities'
+	import { S } from './settingsState.svelte'
 
 	let blockEl: HTMLElement
 
@@ -18,7 +19,6 @@
 		openedItemId,
 		openBlock,
 		openItem,
-		settings,
 		block,
 		copyBlock,
 		save
@@ -27,7 +27,6 @@
 		openedItemId: string
 		openBlock: (id: string) => void
 		openItem: (id: string) => void
-		settings: ILoggerSettings
 		block: TBlock
 		copyBlock: (block: TBlock) => void
 		save: (
@@ -39,10 +38,10 @@
 
 	const blockPreview = $derived(
 		block.order
-			.map((id) => settings.items[id])
+			.map((id) => S.settings.items[id])
 			.filter((item) => !!item)
-			.map((item) => getValueFromItem(settings, item))
-			.join(settings.global.delimiter)
+			.map((item) => getValueFromItem(S.settings, item))
+			.join(S.settings.global.delimiter)
 	)
 
 	const getNewItem = (params: Partial<TItem> = {}) => {
@@ -192,7 +191,6 @@
 {#if block.id === openedBlockId}
 	<Items
 		{block}
-		{settings}
 		{save}
 		{openedItemId}
 		{openItem}

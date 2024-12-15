@@ -8,6 +8,7 @@
 	import { Setting } from 'obsidian'
 	import Sortable from 'sortablejs'
 	import Item from './settingsItem.svelte'
+	import { S } from './settingsState.svelte'
 
 	let containerEl: HTMLElement
 	let listEl: HTMLElement
@@ -15,14 +16,12 @@
 	const {
 		openedItemId,
 		openItem,
-		settings,
 		block,
 		copyItem,
 		save
 	}: {
 		openedItemId: string
 		openItem: (id: string) => void
-		settings: ILoggerSettings
 		block: TBlock
 		copyItem: (item: TItem) => void
 		save: (
@@ -56,7 +55,6 @@
 		Sortable.create(listEl, {
 			handle: '.daily-logger-item-drag',
 			onEnd: (evt) => {
-				//setTimeout(() => {
 				save([
 					(s) => {
 						const changedBlock = s.blocks.find(
@@ -80,7 +78,6 @@
 						]
 					}
 				])
-				//}, 1000)
 			}
 		})
 	})
@@ -95,8 +92,7 @@
 	{#each block.order as id}
 		{#key block.order}
 			<Item
-				{settings}
-				item={settings.items[id]}
+				item={S.settings.items[id]}
 				{openedItemId}
 				{openItem}
 				{copyItem}

@@ -11,17 +11,16 @@
 	import { Setting } from 'obsidian'
 	import { getValueFromItem, itemData } from 'src/entities'
 	import type { TItemData } from 'src/entities/types'
+	import { S } from './settingsState.svelte'
 
 	let containerEl: HTMLElement
 
 	const {
 		item,
-		settings,
 		block,
 		save
 	}: {
 		item: TItem
-		settings: ILoggerSettings
 		block: TBlock
 		copyItem: (item: TItem) => void
 		save: (
@@ -32,7 +31,7 @@
 	onMount(() => {
 		if (!containerEl) return
 
-		const templates = settings.blocks
+		const templates = S.settings.blocks
 			.filter(
 				(block) => block.type === ELoggerType.TEMPLATE
 			)
@@ -112,7 +111,7 @@
 				.addText((text) =>
 					text
 						.setPlaceholder('Type value')
-						.setValue(getValueFromItem(settings, item))
+						.setValue(getValueFromItem(S.settings, item))
 						.onChange(async (value) => {
 							save([
 								(s) => {

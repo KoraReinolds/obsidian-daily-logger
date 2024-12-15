@@ -8,6 +8,7 @@
 	import { Notice, Setting } from 'obsidian'
 	import { getValueFromItem } from 'src/entities'
 	import ItemDetails from './settingsItemDetails.svelte'
+	import { S } from './settingsState.svelte'
 
 	let itemEl: HTMLElement
 
@@ -15,7 +16,6 @@
 		openedItemId,
 		openItem,
 		item,
-		settings,
 		block,
 		copyItem,
 		save
@@ -23,7 +23,6 @@
 		openedItemId: string
 		openItem: (id: string) => void
 		item: TItem
-		settings: ILoggerSettings
 		block: TBlock
 		copyItem: (item: TItem) => void
 		save: (
@@ -43,7 +42,9 @@
 		})
 
 		$effect(() => {
-			blockHeader.setDesc(getValueFromItem(settings, item))
+			blockHeader.setDesc(
+				getValueFromItem(S.settings, item)
+			)
 		})
 
 		// copy item
@@ -113,8 +114,7 @@
 	{#if openedItemId === item.id}
 		<ul class="daily-logger-block-item-list">
 			<ItemDetails
-				{settings}
-				item={settings.items[openedItemId]}
+				item={S.settings.items[openedItemId]}
 				{copyItem}
 				{save}
 				{block}

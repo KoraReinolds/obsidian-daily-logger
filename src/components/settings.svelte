@@ -4,6 +4,7 @@
 		TTab,
 		TTabs
 	} from 'src/settings/types'
+	import { S } from './settingsState.svelte'
 
 	const props: {
 		tabs: TTabs
@@ -12,7 +13,8 @@
 	} = $props()
 
 	const tabs: TTabs = $state(props.tabs)
-	let settings: ILoggerSettings = $state(props.settings)
+	S.settings = props.settings
+
 	tabs.active = tabs.list[1]
 
 	const setactivetab = (tab: TTab) => {
@@ -23,7 +25,7 @@
 	let activeComponent: any = $state(tabs.active.component)
 
 	const getTabCount = (tab: TTab) => {
-		const count = settings.blocks.filter(
+		const count = S.settings.blocks.filter(
 			(block) => block.type === tab.type
 		).length
 
@@ -49,16 +51,15 @@
 			{@const Component = activeComponent}
 			{#key tabs.active?.type}
 				<Component
-					{settings}
 					{tabs}
 					save={(
 						changes: ((s: ILoggerSettings) => void)[]
 					) => {
 						const copy = JSON.parse(
-							JSON.stringify(settings)
+							JSON.stringify(S.settings)
 						)
 						changes.forEach((f) => f(copy))
-						settings = copy
+						S.settings = copy
 
 						props.save(copy)
 					}}

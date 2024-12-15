@@ -2,13 +2,12 @@
 	import { onMount } from 'svelte'
 	import { Setting } from 'obsidian'
 	import type { ILoggerSettings } from 'src/settings/types'
+	import { S } from './settingsState.svelte'
 
 	let containerEl: HTMLElement
 	const {
-		settings,
 		save
 	}: {
-		settings: ILoggerSettings
 		save: (
 			changes: ((s: ILoggerSettings) => void)[]
 		) => Promise<void>
@@ -27,7 +26,7 @@
 						})
 
 					$effect(() => {
-						text.setValue(settings.global.folderPath)
+						text.setValue(S.settings.global.folderPath)
 					})
 
 					return text
@@ -43,7 +42,7 @@
 						})
 
 					$effect(() => {
-						const value = settings.global.delimiter
+						const value = S.settings.global.delimiter
 
 						text.setValue(value)
 						globalDeimiter.setName(`Delimiter - "${value}"`)
@@ -65,7 +64,7 @@
 						})
 
 					$effect(() => {
-						type.setValue(settings.global.sectionType)
+						type.setValue(S.settings.global.sectionType)
 					})
 
 					return type
@@ -81,7 +80,7 @@
 						})
 
 					$effect(() => {
-						text.setValue(settings.global.sectionName)
+						text.setValue(S.settings.global.sectionName)
 					})
 
 					return text

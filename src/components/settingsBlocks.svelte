@@ -8,13 +8,12 @@
 		type TBlock,
 		type TTabs
 	} from 'src/settings/types'
+	import { S } from './settingsState.svelte'
 
 	const {
-		settings,
 		tabs,
 		save
 	}: {
-		settings: ILoggerSettings
 		tabs: TTabs
 		save: (
 			changes: ((s: ILoggerSettings) => void)[]
@@ -26,7 +25,7 @@
 	let openedItemId: string = $state('')
 
 	const blocks = $derived(
-		settings.blocks
+		S.settings.blocks
 			.filter((block) => block.type === tabs.active?.type)
 			.sort((a) => {
 				return a.type === ELoggerType.LOGGER ? 1 : -1
@@ -43,10 +42,10 @@
 		const orderCopy: string[] = []
 
 		blockCopy.order
-			.map((id) => settings.items[id])
+			.map((id) => S.settings.items[id])
 			.forEach((item) => {
 				const id = uuidv4()
-				settings.items[id] = {
+				S.settings.items[id] = {
 					...JSON.parse(JSON.stringify(item)),
 					id
 				}
@@ -90,7 +89,7 @@
 	{#each blocks as block (block.id)}
 		<Block
 			{block}
-			{settings}
+			settings={S.settings}
 			{openedBlockId}
 			{openedItemId}
 			{save}
