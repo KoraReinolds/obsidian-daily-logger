@@ -337,6 +337,7 @@ export default class LoggerPlugin extends Plugin {
 		)
 		const res = (await db.getAll()).map((data) => {
 			return {
+				path: data.path,
 				data: data.data,
 				meta: blocksMeta[data.blockId]
 			}
