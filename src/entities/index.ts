@@ -1,9 +1,10 @@
-import { TItemData } from 'src/entities/types'
+import type { TItemData } from 'src/entities/types'
 import { FindOrCreateNoteModal } from 'src/lib/fuzzyModal'
 import {
 	EItemType,
 	type TItem,
-	type ILoggerSettings
+	type ILoggerSettings,
+	type TBlock
 } from 'src/settings/types'
 
 enum EMoment {
@@ -12,6 +13,16 @@ enum EMoment {
 	DD = 'DD',
 	HH = 'HH',
 	mm = 'mm'
+}
+export const getValueFromBlock = (
+	settings: ILoggerSettings,
+	block: TBlock
+) => {
+	return block.order
+		.map((id) => settings.items[id])
+		.filter((item) => !!item)
+		.map((item) => getValueFromItem(settings, item))
+		.join(settings.global.delimiter)
 }
 
 export const getValueFromItem = (

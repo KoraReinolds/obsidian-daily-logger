@@ -3,13 +3,12 @@
 	import { v4 as uuidv4 } from 'uuid'
 	import {
 		ELoggerType,
-		type ILoggerSettings,
 		type TBlock,
 		type TItem
 	} from 'src/settings/types'
 	import { Notice, Setting } from 'obsidian'
 	import Items from './settingsItems.svelte'
-	import { getValueFromItem } from 'src/entities'
+	import { getValueFromBlock } from 'src/entities'
 	import { S } from './settingsState.svelte'
 
 	let blockEl: HTMLElement
@@ -21,11 +20,7 @@
 	} = $props()
 
 	const blockPreview = $derived(
-		block.order
-			.map((id) => S.settings.items[id])
-			.filter((item) => !!item)
-			.map((item) => getValueFromItem(S.settings, item))
-			.join(S.settings.global.delimiter)
+		getValueFromBlock(S.settings, block)
 	)
 
 	const getNewItem = (params: Partial<TItem> = {}) => {
