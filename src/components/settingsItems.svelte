@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
-	import { type TBlock } from 'src/settings/types'
+	import {
+		type TBlock,
+		type TMeta
+	} from 'src/settings/types'
 	import { Setting } from 'obsidian'
 	import Sortable from 'sortablejs'
 	import Item from './settingsItem.svelte'
 	import { S } from './settingsState.svelte'
 	import { v4 as uuidv4 } from 'uuid'
+	import BlockMeta from './settingsMeta.svelte'
 
 	let containerEl: HTMLElement
 	let listEl: HTMLElement
@@ -17,6 +21,21 @@
 	}: {
 		block: TBlock
 	} = $props()
+
+	const changeMeta = (newMeta: TMeta) => {
+		S.save([
+			(s) => {
+				const changedBlock = s.blocks.find(
+					(b) => b.id === block.id
+				)
+
+				if (changedBlock)
+					changedBlock.meta = changedBlock.meta.map((m) =>
+						m.id === newMeta.id ? newMeta : m
+					)
+			}
+		])
+	}
 
 	onMount(() => {
 		if (!containerEl || !listEl || !metaEl) return
@@ -81,7 +100,9 @@
 		$effect(() => {
 			metaSettings.setDesc(
 				block.meta.length
-					? block.meta.map((m) => m.key).join(',')
+					? block.meta
+							.map((m) => `(${m.key} - ${m.value})`)
+							.join(' ')
 					: 'No meta'
 			)
 		})
@@ -125,7 +146,7 @@
 <ul bind:this={metaEl} class="daily-logger-block-item-list">
 	{#if openedMeta}
 		{#each block.meta as meta}
-			{meta.id}
+			<BlockMeta {meta} change={changeMeta} />
 		{/each}
 	{/if}
 </ul>
