@@ -59,6 +59,35 @@ class LoggerStorage extends Dexie {
 			return []
 		}
 	}
+
+	async getBy(
+		data: Record<string, string>
+	): Promise<LogData[]> {
+		try {
+			const isItemMatched = (item: LogData) => {
+				return Object.entries(data).every(([key, val]) => {
+					const keys = key.split('.')
+					let value: any = item
+
+					if (value === val) return true
+
+					while (value && keys.length) {
+						const key = keys.shift()
+						if (key) value = value[key]
+
+						if (value === val) return true
+					}
+
+					return false
+				})
+			}
+
+			return this.data.filter(isItemMatched).toArray()
+		} catch (e) {
+			console.error(`Error during ${this.getBy.name}:`, e)
+			return []
+		}
+	}
 }
 
 export const db = new LoggerStorage()

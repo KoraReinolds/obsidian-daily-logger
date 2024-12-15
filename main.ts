@@ -32,6 +32,9 @@ export default class LoggerPlugin extends Plugin {
 	createQueue: Set<string> = new Set()
 	onModify: null | EventRef
 	onDelete: null | EventRef
+	api = {
+		getBy: (data: any) => db.getBy(data)
+	}
 
 	async onload() {
 		const cssContent = await this.loadCSSFile(
