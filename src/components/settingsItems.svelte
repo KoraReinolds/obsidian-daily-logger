@@ -94,6 +94,7 @@
 					.setIcon('plus')
 					.setTooltip('Add meta info')
 					.onClick(() => {
+						openedMeta = true
 						S.save([
 							(s) => {
 								const changedBlock = s.blocks.find(
