@@ -259,7 +259,6 @@ export default class LoggerPlugin extends Plugin {
 			items: Object.fromEntries(
 				Object.entries(settings.items).map(([key, val]) => {
 					const copyVal = { ...val }
-					delete copyVal.el
 
 					return [key, copyVal]
 				})

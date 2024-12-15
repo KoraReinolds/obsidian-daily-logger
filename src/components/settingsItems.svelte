@@ -5,9 +5,12 @@
 	import Sortable from 'sortablejs'
 	import Item from './settingsItem.svelte'
 	import { S } from './settingsState.svelte'
+	import { v4 as uuidv4 } from 'uuid'
 
 	let containerEl: HTMLElement
 	let listEl: HTMLElement
+	let metaEl: HTMLElement
+	let openedMeta = $state(false)
 
 	const {
 		block
@@ -16,11 +19,10 @@
 	} = $props()
 
 	onMount(() => {
-		if (!containerEl || !listEl) return
+		if (!containerEl || !listEl || !metaEl) return
 
 		new Setting(containerEl)
-			.setName('Command name')
-			.setDesc('Name of command for call this log')
+			.setName('Name')
 			.addText((text) =>
 				text
 					.setPlaceholder('Type name')
@@ -37,6 +39,52 @@
 					})
 			)
 			.setClass('daily-logger-block-item-header')
+
+		const metaSettings = new Setting(containerEl)
+			.setName('Meta')
+			.addButton((btn) => {
+				btn
+					.onClick(() => {
+						openedMeta = !openedMeta
+					})
+					.setClass('daily-logger-toggle_btn')
+
+				$effect(() => {
+					btn.setIcon(
+						openedMeta ? 'chevron-up' : 'chevron-down'
+					)
+				})
+			})
+			.addButton((btn) => {
+				btn
+					.setIcon('plus')
+					.setTooltip('Add meta info')
+					.onClick(() => {
+						S.save([
+							(s) => {
+								const changedBlock = s.blocks.find(
+									(b) => b.id === block.id
+								)
+								debugger
+								changedBlock?.meta.push({
+									id: uuidv4(),
+									key: '',
+									value: ''
+								})
+							}
+						])
+					})
+			})
+
+			.setClass('daily-logger-block-item-header')
+
+		$effect(() => {
+			metaSettings.setDesc(
+				block.meta.length
+					? block.meta.map((m) => m.key).join(',')
+					: 'No meta'
+			)
+		})
 
 		Sortable.create(listEl, {
 			handle: '.daily-logger-item-drag',
@@ -73,6 +121,14 @@
 	class="daily-logger-block-item"
 	bind:this={containerEl}
 ></div>
+
+<ul bind:this={metaEl} class="daily-logger-block-item-list">
+	{#if openedMeta}
+		{#each block.meta as meta}
+			{meta.id}
+		{/each}
+	{/if}
+</ul>
 
 <ul bind:this={listEl} class="daily-logger-block-item-list">
 	{#each block.order as id}

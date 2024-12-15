@@ -1,5 +1,3 @@
-import { Setting } from 'obsidian'
-
 export enum EItemType {
 	hours = 'hours',
 	minutes = 'minutes',
@@ -41,7 +39,12 @@ export type TItem = {
 	anyText: boolean
 	nested: TItem[]
 	delimiter: string
-	el?: HTMLElement
+}
+
+export type TMeta = {
+	id: string
+	key: string
+	value: string
 }
 
 export type TBlock = {
@@ -49,6 +52,7 @@ export type TBlock = {
 	type: ELoggerType
 	name: string
 	order: string[]
+	meta: TMeta[]
 	locked?: boolean
 }
 
@@ -76,6 +80,7 @@ export const DEFAULT_SETTINGS: ILoggerSettings = {
 	blocks: [
 		{
 			id: EItemType.text,
+			meta: {},
 			type: ELoggerType.TEMPLATE,
 			order: [],
 			name: 'Text',
@@ -83,6 +88,7 @@ export const DEFAULT_SETTINGS: ILoggerSettings = {
 		},
 		{
 			id: EItemType.hours,
+			meta: {},
 			type: ELoggerType.TEMPLATE,
 			order: [],
 			name: 'Hours',
@@ -90,6 +96,7 @@ export const DEFAULT_SETTINGS: ILoggerSettings = {
 		},
 		{
 			id: EItemType.minutes,
+			meta: {},
 			type: ELoggerType.TEMPLATE,
 			order: [],
 			name: 'Minutes',
@@ -97,6 +104,7 @@ export const DEFAULT_SETTINGS: ILoggerSettings = {
 		},
 		{
 			id: EItemType.link,
+			meta: {},
 			type: ELoggerType.TEMPLATE,
 			order: [],
 			name: 'Link',

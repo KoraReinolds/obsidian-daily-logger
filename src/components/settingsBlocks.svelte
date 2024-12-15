@@ -60,6 +60,7 @@
 					id,
 					type: tabs.active.type,
 					name,
+					meta: [],
 					order: []
 				})
 			}
