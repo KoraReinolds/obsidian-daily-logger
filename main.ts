@@ -33,7 +33,27 @@ export default class LoggerPlugin extends Plugin {
 	onModify: null | EventRef
 	onDelete: null | EventRef
 	api = {
-		getBy: (data: any) => this.getData(() => db.getBy(data))
+		getBy: (data: any) =>
+			this.getData(() => db.getBy(data)),
+		pick: (item: any, data: any) => {
+			const entries = Object.entries(data).map(
+				([key, val]: any) => {
+					const keys = val.split('.')
+					let value: any = item
+
+					while (value && keys.length) {
+						const key = keys.shift()
+						if (key) value = value[key]
+					}
+
+					if (value !== undefined) return [key, value]
+
+					return [key, '']
+				}
+			)
+
+			return Object.fromEntries(entries)
+		}
 	}
 
 	async onload() {
