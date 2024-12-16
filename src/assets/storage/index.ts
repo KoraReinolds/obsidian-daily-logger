@@ -1,6 +1,6 @@
 import Dexie, { type Table } from 'dexie'
 
-interface LogData {
+export interface LogData {
 	path: string
 	blockId: string
 	data: any

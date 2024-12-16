@@ -83,10 +83,10 @@
 
 					S.save([
 						(s) => {
-							const block = s.blocks.find(
-								(b) => b.id === S.openedBlockId
+							const changedBlock = s.blocks.find(
+								(b) => b.id === block.id
 							)
-							block?.order.push(item.id)
+							changedBlock?.order.push(item.id)
 							s.items[item.id] = item
 						}
 					])

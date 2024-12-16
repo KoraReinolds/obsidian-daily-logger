@@ -8,7 +8,7 @@ import {
 	TFile,
 	TFolder
 } from 'obsidian'
-import { db } from 'src/assets/storage'
+import { db, type LogData } from 'src/assets/storage'
 import {
 	generateDynamicRegExp,
 	itemData
@@ -33,7 +33,7 @@ export default class LoggerPlugin extends Plugin {
 	onModify: null | EventRef
 	onDelete: null | EventRef
 	api = {
-		getBy: (data: any) => db.getBy(data)
+		getBy: (data: any) => this.getData(() => db.getBy(data))
 	}
 
 	async onload() {
@@ -328,8 +328,7 @@ export default class LoggerPlugin extends Plugin {
 		await db.createMany(filesData)
 	}
 
-	async getAllLogs() {
-		console.time()
+	async getData(f: () => Promise<LogData[]>) {
 		const blocksMeta = Object.fromEntries(
 			this.settings.blocks.map((block) => {
 				const meta = Object.fromEntries(
@@ -338,13 +337,18 @@ export default class LoggerPlugin extends Plugin {
 				return [block.id, meta]
 			})
 		)
-		const res = (await db.getAll()).map((data) => {
+		return (await f()).map((data) => {
 			return {
 				path: data.path,
 				data: data.data,
 				meta: blocksMeta[data.blockId]
 			}
 		})
+	}
+
+	async getAllLogs() {
+		console.time()
+		const res = await this.getData(() => db.getAll())
 		console.timeEnd()
 		return res
 	}
@@ -476,7 +480,7 @@ export default class LoggerPlugin extends Plugin {
 		).filter((log) => !!log)
 
 		return logs.map((data) => ({
-			path: file.path,
+			path: file.name,
 			...data
 		}))
 	}
