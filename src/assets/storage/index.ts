@@ -64,18 +64,25 @@ class LoggerStorage extends Dexie {
 		data: Record<string, string>
 	): Promise<LogData[]> {
 		try {
+			const isMatch = (v1: any, v2: any) => {
+				if (Array.isArray(v2)) {
+					return v2.includes(v1)
+				}
+				return v1 === v2
+			}
+
 			const isItemMatched = (item: LogData) => {
 				return Object.entries(data).every(([key, val]) => {
 					const keys = key.split('.')
 					let value: any = item
 
-					if (value === val) return true
+					if (isMatch(value, val)) return true
 
 					while (value && keys.length) {
 						const key = keys.shift()
 						if (key) value = value[key]
 
-						if (value === val) return true
+						if (isMatch(value, val)) return true
 					}
 
 					return false
