@@ -16,6 +16,7 @@ import {
 import { FileContent } from 'src/entities/file'
 import { getFilesByPath } from 'src/lib/files'
 import { LoggerListModal } from 'src/lib/fuzzyModal'
+import { isItemMatched } from 'src/lib/match'
 import { LoggerSetting } from 'src/settings'
 import {
 	DEFAULT_SETTINGS,
@@ -33,8 +34,16 @@ export default class LoggerPlugin extends Plugin {
 	onModify: null | EventRef
 	onDelete: null | EventRef
 	api = {
-		getBy: (data: any) =>
-			this.getData(() => db.getBy(data)),
+		getBy: async (data: any) => {
+			const metaData = Object.fromEntries(
+				Object.entries(data).filter(([key]) =>
+					key.startsWith('meta.')
+				)
+			)
+			return (
+				await this.getData(() => db.getBy(data))
+			).filter((item) => isItemMatched(metaData, item))
+		},
 		pick: (item: any, data: any) => {
 			const entries = Object.entries(data).map(
 				([key, val]: any) => {

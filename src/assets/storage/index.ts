@@ -1,4 +1,5 @@
 import Dexie, { type Table } from 'dexie'
+import { isItemMatched } from 'src/lib/match'
 
 export interface LogData {
 	path: string
@@ -61,35 +62,20 @@ class LoggerStorage extends Dexie {
 	}
 
 	async getBy(
-		data: Record<string, string>
+		data: Record<string, string | string[]>
 	): Promise<LogData[]> {
 		try {
-			const isMatch = (v1: any, v2: any) => {
-				if (Array.isArray(v2)) {
-					return v2.includes(v1)
-				}
-				return v1 === v2
-			}
+			const dataWithoutMeta = Object.fromEntries(
+				Object.entries(data).filter(
+					([key]) => !key.startsWith('meta.')
+				)
+			)
 
-			const isItemMatched = (item: LogData) => {
-				return Object.entries(data).every(([key, val]) => {
-					const keys = key.split('.')
-					let value: any = item
-
-					if (isMatch(value, val)) return true
-
-					while (value && keys.length) {
-						const key = keys.shift()
-						if (key) value = value[key]
-
-						if (isMatch(value, val)) return true
-					}
-
-					return false
-				})
-			}
-
-			return this.data.filter(isItemMatched).toArray()
+			return this.data
+				.filter((item) =>
+					isItemMatched(dataWithoutMeta, item)
+				)
+				.toArray()
 		} catch (e) {
 			console.error(`Error during ${this.getBy.name}:`, e)
 			return []
