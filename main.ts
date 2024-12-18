@@ -221,21 +221,24 @@ export default class LoggerPlugin extends Plugin {
 				if (!this.createQueue) return
 
 				const isFileCreating = this.createQueue.has(
-					file.path
+					file.name
 				)
 
 				if (isFileCreating) return
 				else {
-					this.createQueue.add(file.path)
+					this.createQueue.add(file.name)
 
 					setTimeout(async () => {
-						await db.removeFileData(file.path)
+						await db.removeFileData(file.name)
 
 						const data = await this.getDataByPath(file.path)
 						await db.createMany(data)
 
-						this.createQueue.delete(file.path)
-						console.log(`File modified: ${file.path}`)
+						this.createQueue.delete(file.name)
+						console.log(
+							`File modified: ${file.name} with `,
+							data
+						)
 					}, 2000)
 				}
 			}
