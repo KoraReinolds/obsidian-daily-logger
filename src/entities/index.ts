@@ -104,6 +104,36 @@ export const itemData: Record<EItemType, TItemData> = {
 	}
 }
 
+export const generateTemplate = async (params: {
+	items: TItem[]
+	wrapToGroup: boolean
+}): Promise<string> => {
+	const { items, wrapToGroup } = params
+
+	const combinedPatternParts = await Promise.all(
+		items.map((item) => {
+			if (item.nested?.length) {
+				return generateTemplate({
+					items: item.nested,
+					wrapToGroup: !!item.name
+				})
+			}
+
+			if (item.name) {
+				return wrapToGroup ? `{${item.name}}` : item.value
+			}
+
+			if (item.type === EItemType.text) {
+				return item.value
+			}
+
+			return ''
+		})
+	)
+
+	return combinedPatternParts.join(' ')
+}
+
 export const generateDynamicRegExp = async (params: {
 	items: TItem[]
 	deep: boolean
