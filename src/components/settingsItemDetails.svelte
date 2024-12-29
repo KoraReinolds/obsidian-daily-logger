@@ -68,7 +68,8 @@
 				text
 					.setPlaceholder('Type key')
 					.setValue(item.name)
-					.onChange(async (value) => {
+					.inputEl.addEventListener('blur', async () => {
+						const value = text.getValue()
 						S.save([
 							(s) => {
 								const changedItem = s.items[item.id]
@@ -106,7 +107,9 @@
 					text
 						.setPlaceholder('Type value')
 						.setValue(getValueFromItem(S.settings, item))
-						.onChange(async (value) => {
+						.setDisabled(data ? data.isDisabled : true)
+						.inputEl.addEventListener('blur', async () => {
+							const value = text.getValue()
 							S.save([
 								(s) => {
 									const changedItem = s.items[item.id]
@@ -114,7 +117,6 @@
 								}
 							])
 						})
-						.setDisabled(data ? data.isDisabled : true)
 				)
 				.setClass('daily-logger-block-item-data')
 
@@ -125,7 +127,9 @@
 				text
 					.setPlaceholder('Type default value')
 					.setValue(item.defaultValue)
-					.onChange(async (value) => {
+					.setDisabled(data ? data.isDisabled : true)
+					.inputEl.addEventListener('blur', async () => {
+						const value = text.getValue()
 						S.save([
 							(s) => {
 								const changedItem = s.items[item.id]
@@ -133,7 +137,6 @@
 							}
 						])
 					})
-					.setDisabled(data ? data.isDisabled : true)
 			)
 			.setClass('daily-logger-block-item-data')
 
