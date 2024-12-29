@@ -58,6 +58,7 @@
 				if (!tabs.active) return
 				s.blocks.push({
 					id,
+					sectionName: '',
 					type: tabs.active.type,
 					name,
 					meta: [],

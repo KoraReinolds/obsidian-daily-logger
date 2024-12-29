@@ -74,6 +74,26 @@
 			)
 			.setClass('daily-logger-block-item-header')
 
+		new Setting(containerEl)
+			.setName('Section name')
+			.addText((text) =>
+				text
+					.setPlaceholder('Type section name')
+					.setValue(block.sectionName)
+					.onChange((value) => {
+						S.save([
+							(s) => {
+								const changedBlock = s.blocks.find(
+									(b) => block.id === b.id
+								)
+								if (changedBlock)
+									changedBlock.sectionName = value
+							}
+						])
+					})
+			)
+			.setClass('daily-logger-block-item-header')
+
 		const metaSettings = new Setting(containerEl)
 			.setName('Meta')
 			.addButton((btn) => {

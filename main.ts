@@ -42,81 +42,29 @@ export default class LoggerPlugin extends Plugin {
 				data: Record<string, string>
 			}[]
 		) => {
+			const dataWithBlocks = params.map((data) => {
+				const block = this.settings.blocks.find(
+					(b) => b.name === data.name
+				)
+				return {
+					...data,
+					sectionName:
+						block?.sectionName ||
+						this.settings.global.sectionName
+				}
+			})
 			// @ts-ignore
 			const grouped = Object.groupBy(
-				params,
-				(item: any) => item.name
+				dataWithBlocks,
+				({ sectionName }) => sectionName
 			)
+			const delay = (ms: number) =>
+				new Promise((resolve) => setTimeout(resolve, ms))
 
-			const mappedTemplates = await Promise.all(
-				Object.entries(grouped)
-					.map(([name, data]) => {
-						const dataArr = (data as any).map((d) => d.data)
-						const block = this.settings.blocks.find(
-							(b) => b.name === name
-						)
-						if (!block) return null
-						return [block, dataArr]
-					})
-					.filter((item) => !!item)
-					.map(async (params) => {
-						const block: TBlock =
-							params[0] as never as TBlock
-						const dataArr = params[1]
-
-						const items = await this.getItemsForBlockId(
-							block.id
-						)
-						const template = await generateTemplate({
-							items,
-							wrapToGroup: true
-						})
-						return [template, dataArr]
-					})
-			)
-
-			const logs = mappedTemplates.reduce((res, cur) => {
-				const template = cur[0] as string
-				const dataArr = cur[1] as Record<string, string>[]
-
-				const logs = dataArr.map((data) => {
-					const log = template.replace(
-						/{(\w+)}/g,
-						(_, key) => {
-							return key in data ? data[key] : `{${key}}`
-						}
-					)
-					console.log(template, data, log)
-					return log
-				})
-				return res.concat(logs)
-			}, [])
-
-			const folderPath = 'Journal/Daily'
-			const dateFormat = 'YYYY-MM-DD'
-			// @ts-ignore
-			const todayDate = moment().format(dateFormat)
-			const filePath = `${folderPath}/${todayDate}.md`
-			const file =
-				this.app.vault.getAbstractFileByPath(filePath)
-
-			if (file instanceof TFile) {
-				const fileContent = await new FileContent(
-					this.app,
-					file
-				).init()
-
-				const endLoc = fileContent.getEndOfSectionByName(
-					this.settings.global.sectionName
-				)
-
-				if (!endLoc) return
-
-				const content = fileContent._content
-				const lines = content.split('\n')
-				lines.splice(endLoc.line, 0, logs.join('\n'))
-				const updatedContent = lines.join('\n')
-				await this.app.vault.modify(file, updatedContent)
+			for (const entry of Object.entries(grouped)) {
+				const [sectionName, data]: any = entry
+				await this.logByName(sectionName, data)
+				await delay(500)
 			}
 		},
 		getBy: async (data: any) => {
@@ -150,6 +98,89 @@ export default class LoggerPlugin extends Plugin {
 		}
 	}
 
+	async logByName(
+		sectionName: string,
+		params: {
+			name: string
+			data: Record<string, string>
+		}[]
+	) {
+		// @ts-ignore
+		const grouped = Object.groupBy(
+			params,
+			(item: any) => item.name
+		)
+
+		const mappedTemplates = await Promise.all(
+			Object.entries(grouped)
+				.map(([name, data]) => {
+					const dataArr = (data as any).map((d) => d.data)
+					const block = this.settings.blocks.find(
+						(b) => b.name === name
+					)
+					if (!block) return null
+					return [block, dataArr]
+				})
+				.filter((item) => !!item)
+				.map(async (params) => {
+					const block: TBlock = params[0] as never as TBlock
+					const dataArr = params[1]
+
+					const items = await this.getItemsForBlockId(
+						block.id
+					)
+					const template = await generateTemplate({
+						items,
+						wrapToGroup: true
+					})
+					return [template, dataArr]
+				})
+		)
+
+		const logs = mappedTemplates.reduce((res, cur) => {
+			const template = cur[0] as string
+			const dataArr = cur[1] as Record<string, string>[]
+
+			const logs = dataArr.map((data) => {
+				const log = template.replace(
+					/{(\w+)}/g,
+					(_, key) => {
+						return key in data ? data[key] : `{${key}}`
+					}
+				)
+				console.log(template, data, log)
+				return log
+			})
+			return res.concat(logs)
+		}, [])
+
+		const folderPath = 'Journal/Daily'
+		const dateFormat = 'YYYY-MM-DD'
+		// @ts-ignore
+		const todayDate = moment().format(dateFormat)
+		const filePath = `${folderPath}/${todayDate}.md`
+		const file =
+			this.app.vault.getAbstractFileByPath(filePath)
+
+		if (file instanceof TFile) {
+			const fileContent = await new FileContent(
+				this.app,
+				file
+			).init()
+
+			const endLoc =
+				fileContent.getEndOfSectionByName(sectionName)
+
+			if (!endLoc) return
+
+			const content = fileContent._content
+			const lines = content.split('\n')
+			lines.splice(endLoc.line, 0, logs.join('\n'))
+			const updatedContent = lines.join('\n')
+			await this.app.vault.modify(file, updatedContent)
+		}
+	}
+
 	async onload() {
 		const cssContent = await this.loadCSSFile(
 			'src/assets/index.css'
@@ -175,8 +206,8 @@ export default class LoggerPlugin extends Plugin {
 		ribbonIconEl.addClass('my-plugin-ribbon-class')
 
 		// This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem()
-		statusBarItemEl.setText('Status Bar Text')
+		//const statusBarItemEl = this.addStatusBarItem()
+		//statusBarItemEl.setText('Status Bar Text')
 
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
