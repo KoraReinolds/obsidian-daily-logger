@@ -281,10 +281,14 @@ export default class LoggerPlugin extends Plugin {
 					list
 				).open()
 
+				const block = this.settings.blocks.find(
+					(b) => b.name === commandName
+				)
+
 				const log =
 					await this.getLogByBlockName(commandName)
 
-				if (!log || !view.file) return
+				if (!log || !view.file || !block) return
 
 				console.log(log, await this.parseLog(log))
 
@@ -294,7 +298,8 @@ export default class LoggerPlugin extends Plugin {
 				).init()
 
 				const endLoc = content.getEndOfSectionByName(
-					this.settings.global.sectionName
+					block.sectionName ||
+						this.settings.global.sectionName
 				)
 
 				if (!endLoc) return
@@ -455,7 +460,6 @@ export default class LoggerPlugin extends Plugin {
 	}
 
 	async getDataByPath(path: string) {
-		console.time()
 		const files = getFilesByPath(this.app, path)
 		const filesData = (
 			await Promise.all(
@@ -622,9 +626,11 @@ export default class LoggerPlugin extends Plugin {
 			file
 		).init()
 
-		const sectionContent = content.getSectionContentByName(
-			this.settings.global.sectionName
-		)
+		// NOTE: unoptimize way to get data
+		const sectionContent = content._content
+		//const sectionContent = content.getSectionContentByName(
+		//	this.settings.global.sectionName
+		//)
 
 		if (!sectionContent) return []
 
