@@ -56,7 +56,7 @@
 		S.save([
 			(s) => {
 				if (!tabs.active) return
-				s.blocks.push({
+				s.blocks.unshift({
 					id,
 					sectionName: '',
 					type: tabs.active.type,
@@ -64,6 +64,7 @@
 					meta: [],
 					order: []
 				})
+				S.openedBlockId = id
 			}
 		])
 	}

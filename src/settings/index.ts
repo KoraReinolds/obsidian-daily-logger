@@ -7,20 +7,12 @@ import Blocks from '../components/settingsBlocks.svelte'
 import {
 	ELoggerType,
 	type ILoggerSettings,
-	type TBlock,
-	type TItem,
 	type TTabs
 } from './types'
 
 export class LoggerSetting extends PluginSettingTab {
 	plugin: LoggerPlugin
 	settings: ILoggerSettings
-	expandedBlocks: Record<string, boolean> = {}
-	globalBlockCopy: TItem
-	itemCopy: TItem
-	blockCopy: TBlock
-	openedBlockId?: string
-	openedItemId?: string
 	tabs: TTabs = {
 		list: []
 	}
