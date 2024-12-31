@@ -2,56 +2,16 @@ import LoggerPlugin from 'main'
 import { App, PluginSettingTab, Setting } from 'obsidian'
 import { mount } from 'svelte'
 import Component from '../components/settings.svelte'
-import General from '../components/settingsGeneral.svelte'
-import Blocks from '../components/settingsBlocks.svelte'
-import {
-	ELoggerType,
-	type ILoggerSettings,
-	type TTabs
-} from './types'
+import { type ILoggerSettings } from './types'
 
 export class LoggerSetting extends PluginSettingTab {
 	plugin: LoggerPlugin
 	settings: ILoggerSettings
-	tabs: TTabs = {
-		list: []
-	}
 
 	constructor(app: App, plugin: LoggerPlugin) {
 		super(app, plugin)
 		this.plugin = plugin
 		this.settings = this.plugin.settings
-		this.tabs.list = [
-			{
-				name: 'General',
-				type: ELoggerType.GENERAL,
-				component: General
-			},
-			{
-				name: 'Logs',
-				type: ELoggerType.LOGGER,
-				component: Blocks,
-				data: {
-					settings: {
-						header: {
-							btnText: 'Add New Log'
-						}
-					}
-				}
-			},
-			{
-				name: 'Templates',
-				type: ELoggerType.TEMPLATE,
-				component: Blocks,
-				data: {
-					settings: {
-						header: {
-							btnText: 'Add New Template'
-						}
-					}
-				}
-			}
-		]
 	}
 
 	display(): void {
@@ -87,7 +47,6 @@ export class LoggerSetting extends PluginSettingTab {
 		mount(Component, {
 			target: containerEl,
 			props: {
-				tabs: this.tabs,
 				settings: this.settings,
 				save: (settings: ILoggerSettings) => {
 					this.plugin.settings = settings

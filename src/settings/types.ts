@@ -55,6 +55,7 @@ export type TBlock = {
 	meta: TMeta[]
 	sectionName: string
 	locked?: boolean
+	groups: string[]
 }
 
 export interface ILoggerSettings {
@@ -86,7 +87,8 @@ export const DEFAULT_SETTINGS: ILoggerSettings = {
 			type: ELoggerType.TEMPLATE,
 			order: [],
 			name: 'Text',
-			locked: true
+			locked: true,
+			groups: ['template']
 		},
 		{
 			id: EItemType.hours,
@@ -95,7 +97,8 @@ export const DEFAULT_SETTINGS: ILoggerSettings = {
 			type: ELoggerType.TEMPLATE,
 			order: [],
 			name: 'Hours',
-			locked: true
+			locked: true,
+			groups: ['template']
 		},
 		{
 			id: EItemType.minutes,
@@ -104,7 +107,8 @@ export const DEFAULT_SETTINGS: ILoggerSettings = {
 			type: ELoggerType.TEMPLATE,
 			order: [],
 			name: 'Minutes',
-			locked: true
+			locked: true,
+			groups: ['template']
 		},
 		{
 			id: EItemType.link,
@@ -113,7 +117,8 @@ export const DEFAULT_SETTINGS: ILoggerSettings = {
 			type: ELoggerType.TEMPLATE,
 			order: [],
 			name: 'Link',
-			locked: true
+			locked: true,
+			groups: ['template']
 		}
 	]
 }

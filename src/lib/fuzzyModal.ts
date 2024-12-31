@@ -1,7 +1,7 @@
 import {
 	FuzzySuggestModal,
 	App,
-	FuzzyMatch
+	type FuzzyMatch
 } from 'obsidian'
 import { getFilesByPath } from './files'
 

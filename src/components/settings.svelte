@@ -1,18 +1,53 @@
 <script lang="ts">
-	import type {
-		ILoggerSettings,
-		TTab,
-		TTabs
+	import {
+		ELoggerType,
+		type ILoggerSettings,
+		type TTab,
+		type TTabs
 	} from 'src/settings/types'
+	import General from '../components/settingsGeneral.svelte'
+	import Blocks from '../components/settingsBlocks.svelte'
 	import { S } from './settingsState.svelte'
 
 	const props: {
-		tabs: TTabs
 		settings: ILoggerSettings
 		save: (settings: ILoggerSettings) => Promise<void>
 	} = $props()
 
-	const tabs: TTabs = $state(props.tabs)
+	const tabs: TTabs = $state({
+		list: [
+			{
+				name: 'General',
+				type: ELoggerType.GENERAL,
+				component: General
+			},
+			{
+				name: 'All',
+				type: ELoggerType.LOGGER,
+				component: Blocks,
+				data: {
+					settings: {
+						header: {
+							btnText: 'Add New Log'
+						}
+					}
+				}
+			},
+			{
+				name: 'Templates',
+				type: ELoggerType.TEMPLATE,
+				component: Blocks,
+				data: {
+					settings: {
+						header: {
+							btnText: 'Add New Template'
+						}
+					}
+				}
+			}
+		]
+	})
+
 	S.settings = props.settings
 	S.save = (changes: ((s: ILoggerSettings) => void)[]) => {
 		const copy = JSON.parse(JSON.stringify(S.settings))
