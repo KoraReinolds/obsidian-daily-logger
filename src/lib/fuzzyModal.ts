@@ -104,7 +104,6 @@ export class FindOrCreateNoteModal extends FuzzySuggestModal<string> {
 						template: string
 					}[] = templater.settings.folder_templates
 
-					console.log(this.folderPath)
 					const template = templates.find(
 						(t) => t.folder === this.folderPath
 					)?.template

@@ -11,7 +11,7 @@ export const DEFAUTL_ITEM_DATA = {
 
 export type TTab = {
 	name: string
-	component: any
+	component?: any
 	data?: ITabData
 	type: ELoggerType
 }
@@ -19,6 +19,8 @@ export type TTab = {
 export type TTabs = {
 	active?: TTab
 	list: TTab[]
+	order: string[]
+	data: Record<string, TTab>
 	container?: HTMLElement
 	contentContainer?: HTMLElement
 }
@@ -59,6 +61,7 @@ export type TBlock = {
 }
 
 export interface ILoggerSettings {
+	tabs: TTabs
 	global: {
 		folderPath: string
 		header: string
@@ -71,6 +74,42 @@ export interface ILoggerSettings {
 }
 
 export const DEFAULT_SETTINGS: ILoggerSettings = {
+	tabs: {
+		order: [
+			ELoggerType.GENERAL,
+			ELoggerType.LOGGER,
+			ELoggerType.TEMPLATE
+		],
+		data: {
+			[ELoggerType.GENERAL]: {
+				name: 'General',
+				type: ELoggerType.GENERAL
+			},
+			[ELoggerType.LOGGER]: {
+				name: 'All',
+				type: ELoggerType.LOGGER,
+				data: {
+					settings: {
+						header: {
+							btnText: 'Add New Log'
+						}
+					}
+				}
+			},
+			[ELoggerType.TEMPLATE]: {
+				name: 'Templates',
+				type: ELoggerType.TEMPLATE,
+				data: {
+					settings: {
+						header: {
+							btnText: 'Add New Template'
+						}
+					}
+				}
+			}
+		},
+		list: []
+	},
 	global: {
 		folderPath: '',
 		header: '',

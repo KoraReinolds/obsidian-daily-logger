@@ -47,9 +47,10 @@ export class LoggerSetting extends PluginSettingTab {
 		mount(Component, {
 			target: containerEl,
 			props: {
-				settings: this.settings,
+				settings: this.plugin.settings,
 				save: (settings: ILoggerSettings) => {
 					this.plugin.settings = settings
+
 					this.plugin.saveSettings()
 				}
 			}

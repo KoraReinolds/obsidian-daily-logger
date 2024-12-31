@@ -10,6 +10,7 @@
 	import { S } from './settingsState.svelte'
 	import { v4 as uuidv4 } from 'uuid'
 	import BlockMeta from './settingsMeta.svelte'
+	import { moveElement } from 'src/lib/string'
 
 	let containerEl: HTMLElement
 	let listEl: HTMLElement
@@ -154,19 +155,13 @@
 						const oldIndex = evt.oldDraggableIndex
 						const newIndex = evt.newDraggableIndex
 
-						if (
-							!changedBlock ||
-							oldIndex === undefined ||
-							newIndex === undefined
+						if (!changedBlock) return
+
+						changedBlock.order = moveElement(
+							changedBlock.order,
+							oldIndex,
+							newIndex
 						)
-							return
-						;[
-							[changedBlock.order[oldIndex]],
-							[changedBlock.order[newIndex]]
-						] = [
-							[changedBlock.order[newIndex]],
-							[changedBlock.order[oldIndex]]
-						]
 					}
 				])
 			}

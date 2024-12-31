@@ -8,45 +8,29 @@
 	import General from '../components/settingsGeneral.svelte'
 	import Blocks from '../components/settingsBlocks.svelte'
 	import { S } from './settingsState.svelte'
+	import { onMount } from 'svelte'
+	import Sortable from 'sortablejs'
+	import { moveElement } from 'src/lib/string'
 
 	const props: {
 		settings: ILoggerSettings
 		save: (settings: ILoggerSettings) => Promise<void>
 	} = $props()
 
-	const tabs: TTabs = $state({
-		list: [
+	const getComponent = (type: ELoggerType) => {
+		return (
 			{
-				name: 'General',
-				type: ELoggerType.GENERAL,
-				component: General
-			},
-			{
-				name: 'All',
-				type: ELoggerType.LOGGER,
-				component: Blocks,
-				data: {
-					settings: {
-						header: {
-							btnText: 'Add New Log'
-						}
-					}
-				}
-			},
-			{
-				name: 'Templates',
-				type: ELoggerType.TEMPLATE,
-				component: Blocks,
-				data: {
-					settings: {
-						header: {
-							btnText: 'Add New Template'
-						}
-					}
-				}
-			}
-		]
-	})
+				[ELoggerType.GENERAL]: General,
+				[ELoggerType.LOGGER]: Blocks,
+				[ELoggerType.TEMPLATE]: Blocks
+			}[type] || Blocks
+		)
+	}
+
+	const tabs: TTabs = $state(props.settings.tabs)
+
+	tabs.list = tabs.order.map((id) => tabs.data[id])
+	tabs.active = tabs.data[ELoggerType.LOGGER]
 
 	S.settings = props.settings
 	S.save = (changes: ((s: ILoggerSettings) => void)[]) => {
@@ -57,14 +41,14 @@
 		props.save(copy)
 	}
 
-	tabs.active = tabs.list[1]
-
 	const setactivetab = (tab: TTab) => {
 		tabs.active = tab
-		activeComponent = tab.component
+		activeComponent = getComponent(tab.type)
 	}
 
-	let activeComponent: any = $state(tabs.active.component)
+	let activeComponent: any = $state(
+		getComponent(tabs.active.type)
+	)
 
 	const getTabCount = (tab: TTab) => {
 		const count = S.settings.blocks.filter(
@@ -73,10 +57,35 @@
 
 		return count ? `(${count})` : ''
 	}
+
+	let listEl: HTMLElement
+
+	onMount(() => {
+		if (!listEl) return
+
+		Sortable.create(listEl, {
+			onEnd: (evt) => {
+				S.save([
+					(s) => {
+						const oldIndex = evt.oldDraggableIndex
+						const newIndex = evt.newDraggableIndex
+
+						s.tabs.order = moveElement(
+							s.tabs.order,
+							oldIndex,
+							newIndex
+						)
+
+						tabs.order = s.tabs.order
+					}
+				])
+			}
+		})
+	})
 </script>
 
 <div>
-	<ul class="daily-logger-tabs">
+	<ul bind:this={listEl} class="daily-logger-tabs">
 		{#each tabs.list as tab (tab.name)}
 			<li
 				class:active={tab === tabs.active}
