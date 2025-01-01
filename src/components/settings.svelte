@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { v4 as uuidv4 } from 'uuid'
 	import {
 		ELoggerType,
 		type ILoggerSettings,
@@ -31,6 +32,22 @@
 
 	tabs.list = tabs.order.map((id) => tabs.data[id])
 	tabs.active = tabs.data[ELoggerType.LOGGER]
+
+	const addNewGroup = () => {
+		const id = uuidv4()
+
+		tabs.data[id] = {
+			type: id as ELoggerType,
+			name: 'New group' + Math.random()
+		}
+		tabs.order.unshift(id)
+		tabs.list = tabs.order.map((id) => tabs.data[id])
+		S.save([
+			(s) => {
+				s.tabs = tabs
+			}
+		])
+	}
 
 	S.settings = props.settings
 	S.save = (changes: ((s: ILoggerSettings) => void)[]) => {
@@ -86,6 +103,12 @@
 
 <div>
 	<ul bind:this={listEl} class="daily-logger-tabs">
+		<li
+			class="daily-logger-tabs-btn active"
+			onclick={() => addNewGroup()}
+		>
+			+
+		</li>
 		{#each tabs.list as tab (tab.name)}
 			<li
 				class:active={tab === tabs.active}

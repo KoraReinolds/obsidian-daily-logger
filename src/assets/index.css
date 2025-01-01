@@ -1,11 +1,13 @@
 .daily-logger-tabs {
 	list-style: none;
 	display: flex;
-	padding: 0;
+	padding: 8px 0 0 0;
 	margin: 0;
 	margin-top: 16px;
 	border-top: 1px solid var(--background-modifier-border);
 	border-bottom: 1px solid var(--background-modifier-border);
+	overflow-x: scroll;
+	overflow-y: hidden;
 }
 
 .daily-logger-tabs li {
@@ -14,6 +16,7 @@
 	border: 1px solid transparent;
 	transition: background-color 0.3s ease;
 	color: var(--text-normal);
+	flex: 0 0 auto;
 }
 
 .daily-logger-tabs li.active {
