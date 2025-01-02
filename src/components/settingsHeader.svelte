@@ -12,14 +12,20 @@
 	const {
 		addNewBlock,
 		pasteBlock,
-		activeTab
+		activeTab,
+		removeGroup
 	}: {
 		addNewBlock: () => void
 		pasteBlock: () => void
 		activeTab: TTab
+		removeGroup: () => void
 	} = $props()
 
-	const header = $derived(activeTab.data?.settings.header)
+	const header = $derived(
+		activeTab.data?.settings.header || {
+			remove: true
+		}
+	)
 
 	onMount(() => {
 		if (!containerEl || !header) return
@@ -56,13 +62,26 @@
 			})
 		})
 
-		blockHeader
-			.addButton((btn) =>
-				btn
-					.setButtonText(header.btnText)
-					.onClick(addNewBlock)
-			)
-			.setClass('daily-logger-blocks-header')
+		if (header.btnText) {
+			blockHeader
+				.addButton((btn) =>
+					btn
+						.setButtonText(header.btnText)
+						.onClick(addNewBlock)
+				)
+				.setClass('daily-logger-blocks-header')
+		}
+
+		if (header.remove) {
+			blockHeader
+				.addButton((btn) =>
+					btn
+						.setIcon('trash-2')
+						.setTooltip('Remove group')
+						.onClick(removeGroup)
+				)
+				.setClass('daily-logger-blocks-header')
+		}
 	})
 </script>
 

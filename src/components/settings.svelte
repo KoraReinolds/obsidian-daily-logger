@@ -30,7 +30,10 @@
 
 	const tabs: TTabs = $state(props.settings.tabs)
 
-	tabs.list = tabs.order.map((id) => tabs.data[id])
+	$effect(() => {
+		tabs.list = tabs.order.map((id) => tabs.data[id])
+	})
+
 	tabs.active = tabs.data[ELoggerType.LOGGER]
 
 	const addNewGroup = () => {
@@ -38,10 +41,17 @@
 
 		tabs.data[id] = {
 			type: id as ELoggerType,
-			name: 'New group' + Math.random()
+			name: 'New group' + Math.random(),
+			data: {
+				settings: {
+					header: {
+						remove: true
+					}
+				}
+			}
 		}
 		tabs.order.unshift(id)
-		tabs.list = tabs.order.map((id) => tabs.data[id])
+		tabs.active = tabs.data[id]
 		S.save([
 			(s) => {
 				s.tabs = tabs
@@ -58,10 +68,15 @@
 		props.save(copy)
 	}
 
-	const setactivetab = (tab: TTab) => {
+	const setActiveTab = (tab: TTab) => {
 		tabs.active = tab
-		activeComponent = getComponent(tab.type)
 	}
+
+	$effect(() => {
+		if (tabs.active) {
+			activeComponent = getComponent(tabs.active.type)
+		}
+	})
 
 	let activeComponent: any = $state(
 		getComponent(tabs.active.type)
@@ -111,8 +126,8 @@
 		</li>
 		{#each tabs.list as tab (tab.name)}
 			<li
-				class:active={tab === tabs.active}
-				onclick={() => setactivetab(tab)}
+				class:active={tab?.type === tabs.active?.type}
+				onclick={() => setActiveTab(tab)}
 			>
 				{tab.name}
 				{getTabCount(tab)}

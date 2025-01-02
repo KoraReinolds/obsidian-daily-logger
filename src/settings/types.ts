@@ -165,7 +165,8 @@ export const DEFAULT_SETTINGS: ILoggerSettings = {
 export interface ITabData {
 	settings: {
 		header: {
-			btnText: string
+			remove?: boolean
+			btnText?: string
 		}
 	}
 }

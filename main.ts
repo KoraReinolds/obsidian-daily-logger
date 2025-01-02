@@ -148,6 +148,7 @@ export default class LoggerPlugin extends Plugin {
 						return key in data ? data[key] : `{${key}}`
 					}
 				)
+
 				console.log(template, data, log)
 				return log
 			})

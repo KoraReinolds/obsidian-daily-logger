@@ -75,6 +75,24 @@
 		{addNewBlock}
 		pasteBlock={() => pasteBlock(S.blockCopy)}
 		activeTab={tabs.active}
+		removeGroup={() => {
+			S.save([
+				(s) => {
+					if (!tabs.active) return
+
+					delete s.tabs.data[tabs.active.type]
+					s.tabs.order = s.tabs.order.filter(
+						(id) => id !== tabs.active?.type
+					)
+					const newActiveId = s.tabs.order[0]
+					s.tabs.active = s.tabs.data[newActiveId]
+
+					tabs.active = s.tabs.active
+					tabs.data = s.tabs.data
+					tabs.order = s.tabs.order
+				}
+			])
+		}}
 	/>
 {/if}
 
