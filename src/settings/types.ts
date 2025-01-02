@@ -167,6 +167,7 @@ export interface ITabData {
 		header: {
 			remove?: boolean
 			btnText?: string
+			rename?: boolean
 		}
 	}
 }

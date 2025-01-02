@@ -45,7 +45,8 @@
 			data: {
 				settings: {
 					header: {
-						remove: true
+						remove: true,
+						rename: true
 					}
 				}
 			}

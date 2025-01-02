@@ -75,6 +75,20 @@
 		{addNewBlock}
 		pasteBlock={() => pasteBlock(S.blockCopy)}
 		activeTab={tabs.active}
+		renameGroup={(value) => {
+			S.save([
+				(s) => {
+					if (!s.tabs.active) return
+
+					const tab = tabs.active
+
+					if (tab) {
+						tab.name = value
+						s.tabs.data[s.tabs.active.type] = tab
+					}
+				}
+			])
+		}}
 		removeGroup={() => {
 			S.save([
 				(s) => {

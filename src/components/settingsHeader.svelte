@@ -13,12 +13,14 @@
 		addNewBlock,
 		pasteBlock,
 		activeTab,
-		removeGroup
+		removeGroup,
+		renameGroup
 	}: {
 		addNewBlock: () => void
 		pasteBlock: () => void
 		activeTab: TTab
 		removeGroup: () => void
+		renameGroup: (value: string) => void
 	} = $props()
 
 	const header = $derived(
@@ -50,6 +52,14 @@
 				'setting-item-description'
 			)
 		})
+
+		if (header.rename) {
+			blockHeader.addText((text) =>
+				text.setValue(activeTab.name).onChange((val) => {
+					renameGroup(val)
+				})
+			)
+		}
 
 		blockHeader.addButton((btn) => {
 			btn
