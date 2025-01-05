@@ -41,7 +41,7 @@
 
 		tabs.data[id] = {
 			type: id as ELoggerType,
-			name: 'New group' + Math.random(),
+			name: 'New group',
 			data: {
 				settings: {
 					header: {
@@ -53,6 +53,7 @@
 		}
 		tabs.order.unshift(id)
 		tabs.active = tabs.data[id]
+
 		S.save([
 			(s) => {
 				s.tabs = tabs

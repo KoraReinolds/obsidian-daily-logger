@@ -56,10 +56,15 @@
 		S.save([
 			(s) => {
 				if (!tabs.active) return
+				console.log(tabs)
 				s.blocks.unshift({
 					id,
 					sectionName: '',
 					type: tabs.active.type,
+					groups: {
+						//[ELoggerType.LOGGER]: true,
+						//[ELoggerType.TEMPLATE]: true
+					},
 					name,
 					meta: [],
 					order: []

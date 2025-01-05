@@ -57,7 +57,7 @@ export type TBlock = {
 	meta: TMeta[]
 	sectionName: string
 	locked?: boolean
-	groups: string[]
+	groups: Record<string, boolean>
 }
 
 export interface ILoggerSettings {

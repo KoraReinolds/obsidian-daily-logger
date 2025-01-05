@@ -76,7 +76,7 @@
 			blockHeader
 				.addButton((btn) =>
 					btn
-						.setButtonText(header.btnText)
+						.setButtonText(header.btnText || '')
 						.onClick(addNewBlock)
 				)
 				.setClass('daily-logger-blocks-header')
