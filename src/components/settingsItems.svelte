@@ -85,6 +85,25 @@
 			.setClass('daily-logger-block-item-header')
 
 		new Setting(containerEl)
+			.setName('Path')
+			.addText((text) =>
+				text
+					.setPlaceholder('Type file or folder path')
+					.setValue(block.path || '')
+					.onChange((value) => {
+						S.save([
+							(s) => {
+								const changedBlock = s.blocks.find(
+									(b) => block.id === b.id
+								)
+								if (changedBlock) changedBlock.path = value
+							}
+						])
+					})
+			)
+			.setClass('daily-logger-block-item-header')
+
+		new Setting(containerEl)
 			.setName('Section name')
 			.addText((text) =>
 				text

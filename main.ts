@@ -226,8 +226,13 @@ export default class LoggerPlugin extends Plugin {
 				//if (file instanceof TFile) {
 				//	console.log(file, await this.parseFile(file))
 				//}
-				console.log(await this.getAllLogs())
-				//console.log(await this.parseLog(''))
+				//console.log(await this.getAllLogs())
+				console.log(
+					await this.parseLog(
+						'- [ ] 84 - test ⛔ h3v0pc 📅 2025-01-12'
+						//'\t- [ ] subtask 🆔 h3v0pc 📅 2025-01-12'
+					)
+				)
 			}
 		})
 
@@ -482,9 +487,18 @@ export default class LoggerPlugin extends Plugin {
 		await db.clear()
 
 		console.time()
-		const filesData = await this.getDataByPath(
-			this.settings.global.folderPath
+		const paths = new Set(
+			[this.settings.global.folderPath].concat(
+				this.settings.blocks
+					.map((block) => block.path)
+					.filter((item) => !!item)
+			)
 		)
+		const filesData = (
+			await Promise.all(
+				[...paths].map((path) => this.getDataByPath(path))
+			)
+		).flat()
 		console.timeEnd()
 
 		await db.createMany(filesData)

@@ -19,3 +19,13 @@ export function moveElement<T>(
 	newArray.splice(adjustedToIndex, 0, element)
 	return newArray
 }
+
+export function escapeRegex(pattern: string): string {
+	/**
+	 * Экранирует специальные символы в строке для использования в регулярных выражениях.
+	 *
+	 * @param pattern - Строка, которую нужно экранировать.
+	 * @returns Экранированная строка.
+	 */
+	return pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}

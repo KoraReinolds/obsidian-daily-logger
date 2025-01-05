@@ -1,5 +1,6 @@
 import type { TItemData } from 'src/entities/types'
 import { FindOrCreateNoteModal } from 'src/lib/fuzzyModal'
+import { escapeRegex } from 'src/lib/string'
 import {
 	EItemType,
 	type TItem,
@@ -82,7 +83,7 @@ export const itemData: Record<EItemType, TItemData> = {
 		defaultValue: '',
 		toRegexpr: async (item) => {
 			if (item.anyText) return `.+?`
-			return item.value.trim()
+			return escapeRegex(item.value.trim())
 		},
 		isDisabled: false
 	},

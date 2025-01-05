@@ -56,6 +56,7 @@ export type TBlock = {
 	order: string[]
 	meta: TMeta[]
 	sectionName: string
+	path: string
 	locked?: boolean
 	groups: Record<string, boolean>
 }
