@@ -2,29 +2,20 @@ import {
 	FuzzySuggestModal,
 	App,
 	type FuzzyMatch,
-	Modal,
-	ButtonComponent,
-	Setting
+	Modal
 } from 'obsidian'
 import { getFilesByPath } from './files'
-import {
-	ELoggerType,
-	type ILoggerSettings
-} from 'src/settings/types'
+import { type ILoggerSettings } from 'src/settings/types'
+import Component from '../components/modalConfirm.svelte'
+import { mount } from 'svelte'
 
 export class LoggerConfirmModal extends Modal {
 	private resolve: (value: any) => void
 	private settings: ILoggerSettings
-	list: string[]
-	blockType: string
 
 	constructor(app: App, settings: ILoggerSettings) {
 		super(app)
 		this.settings = settings
-		this.list = settings.blocks
-			.filter((block) => block.type === ELoggerType.LOGGER)
-			.map((block) => block.name)
-		this.blockType = this.list[0]
 	}
 
 	open(): Promise<boolean> {
@@ -37,38 +28,16 @@ export class LoggerConfirmModal extends Modal {
 	onOpen() {
 		const { contentEl } = this
 
-		new Setting(contentEl)
-			.setName('Type')
-			.addDropdown((dd) => {
-				dd.addOptions(
-					Object.fromEntries(
-						this.list.map((item) => [item, item])
-					)
-				)
-					.setValue(this.blockType)
-					.onChange((value) => {
-						this.blockType = value
-					})
-			})
-
-		const buttonContainer = contentEl.createDiv({
-			cls: 'modal-buttons'
+		mount(Component, {
+			target: contentEl,
+			props: {
+				settings: this.settings,
+				resolve: (res) => {
+					this.resolve(res)
+					this.close()
+				}
+			}
 		})
-
-		new ButtonComponent(buttonContainer)
-			.setButtonText('OK')
-			.setCta()
-			.onClick(() => {
-				this.resolve(this.blockType)
-				this.close()
-			})
-
-		new ButtonComponent(buttonContainer)
-			.setButtonText('Cancel')
-			.onClick(() => {
-				this.resolve(false)
-				this.close()
-			})
 	}
 
 	onClose() {

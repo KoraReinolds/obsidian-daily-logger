@@ -276,11 +276,10 @@ export default class LoggerPlugin extends Plugin {
 				editor: Editor,
 				view: MarkdownView
 			) => {
-				const commandName = await new LoggerConfirmModal(
+				const log = await new LoggerConfirmModal(
 					this.app,
 					this.settings
 				).open()
-				console.log(commandName)
 
 				//const block = this.settings.blocks.find(
 				//	(b) => b.name === commandName
@@ -312,7 +311,7 @@ export default class LoggerPlugin extends Plugin {
 				//
 				//editor.setSelection(position, position)
 				//
-				//editor.replaceSelection(`${log.trim()}\n`)
+				editor.replaceSelection(`${log.trim()}\n`)
 			}
 		})
 
@@ -367,21 +366,6 @@ export default class LoggerPlugin extends Plugin {
 				console.log(`File deleted: ${file.path}`)
 			}
 		)
-	}
-
-	async getLogByBlockName(blockName: string) {
-		const block = this.settings.blocks.find(
-			(block) => block.name === blockName
-		)
-
-		if (!block) return
-
-		const log = await this.getLogFromBlock(
-			block.id,
-			this.settings.global.delimiter
-		)
-
-		return log
 	}
 
 	onunload() {
@@ -522,59 +506,6 @@ export default class LoggerPlugin extends Plugin {
 		const res = await this.getData(() => db.getAll())
 		console.timeEnd()
 		return res
-	}
-
-	async getLogFromBlock(
-		blockId: string,
-		delimiter = ''
-	): Promise<string> {
-		const items = await this.getItemsFromBlock(blockId)
-		const values = await Promise.all(
-			items.map((item) => {
-				const data =
-					itemData[item.type as keyof typeof EItemType]
-				if (data) {
-					return data.toValue(item)
-				} else {
-					return this.getLogFromBlock(
-						item.type,
-						item.delimiter
-					)
-				}
-			})
-		)
-
-		return values.join(delimiter)
-	}
-
-	async getItemsFromBlock(
-		blockId?: string,
-		deep?: boolean
-	): Promise<TItem[]> {
-		const block = this.settings.blocks.find(
-			(block) => block.id === blockId
-		)
-
-		if (!block) return []
-
-		const items = await Promise.all(
-			block.order
-				.map((id) => {
-					return this.settings.items[id]
-				})
-				.filter((item) => !!item)
-				.map((item) => {
-					if (EItemType[item.type as EItemType]) {
-						return [item]
-					} else {
-						return deep
-							? this.getItemsFromBlock(item.type)
-							: [item]
-					}
-				})
-		)
-
-		return items.flat()
 	}
 
 	getDataFromItems(
