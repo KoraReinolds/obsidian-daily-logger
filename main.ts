@@ -16,7 +16,7 @@ import {
 } from 'src/entities'
 import { FileContent } from 'src/entities/file'
 import { getFilesByPath } from 'src/lib/files'
-import { LoggerListModal } from 'src/lib/fuzzyModal'
+import { LoggerConfirmModal } from 'src/lib/modal'
 import { isItemMatched } from 'src/lib/match'
 import { LoggerSetting } from 'src/settings'
 import {
@@ -276,48 +276,43 @@ export default class LoggerPlugin extends Plugin {
 				editor: Editor,
 				view: MarkdownView
 			) => {
-				const list = this.settings.blocks
-					.filter(
-						(block) => block.type === ELoggerType.LOGGER
-					)
-					.map((block) => block.name)
-
-				const commandName = await new LoggerListModal(
+				const commandName = await new LoggerConfirmModal(
 					this.app,
-					list
+					this.settings
 				).open()
+				console.log(commandName)
 
-				const block = this.settings.blocks.find(
-					(b) => b.name === commandName
-				)
-
-				const log =
-					await this.getLogByBlockName(commandName)
-
-				if (!log || !view.file || !block) return
-
-				console.log(log, await this.parseLog(log))
-
-				const content = await new FileContent(
-					this.app,
-					view.file
-				).init()
-
-				const endLoc = content.getEndOfSectionByName(
-					block.sectionName ||
-						this.settings.global.sectionName
-				)
-
-				if (!endLoc) return
-
-				const position: EditorPosition = {
-					line: endLoc.line,
-					ch: endLoc.col
-				}
-
-				editor.setSelection(position, position)
-
-				editor.replaceSelection(`${log.trim()}\n`)
+				//const block = this.settings.blocks.find(
+				//	(b) => b.name === commandName
+				//)
+				//
+				//const log =
+				//	await this.getLogByBlockName(commandName)
+				//
+				//if (!log || !view.file || !block) return
+				//
+				//console.log(log, await this.parseLog(log))
+				//
+				//const content = await new FileContent(
+				//	this.app,
+				//	view.file
+				//).init()
+				//
+				//const endLoc = content.getEndOfSectionByName(
+				//	block.sectionName ||
+				//		this.settings.global.sectionName
+				//)
+				//
+				//if (!endLoc) return
+				//
+				//const position: EditorPosition = {
+				//	line: endLoc.line,
+				//	ch: endLoc.col
+				//}
+				//
+				//editor.setSelection(position, position)
+				//
+				//editor.replaceSelection(`${log.trim()}\n`)
 			}
 		})
 

@@ -1,5 +1,5 @@
 import type { TItemData } from 'src/entities/types'
-import { FindOrCreateNoteModal } from 'src/lib/fuzzyModal'
+import { FindOrCreateNoteModal } from 'src/lib/modal'
 import { escapeRegex } from 'src/lib/string'
 import {
 	EItemType,

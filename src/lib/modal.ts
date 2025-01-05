@@ -1,9 +1,81 @@
 import {
 	FuzzySuggestModal,
 	App,
-	type FuzzyMatch
+	type FuzzyMatch,
+	Modal,
+	ButtonComponent,
+	Setting
 } from 'obsidian'
 import { getFilesByPath } from './files'
+import {
+	ELoggerType,
+	type ILoggerSettings
+} from 'src/settings/types'
+
+export class LoggerConfirmModal extends Modal {
+	private resolve: (value: any) => void
+	private settings: ILoggerSettings
+	list: string[]
+	blockType: string
+
+	constructor(app: App, settings: ILoggerSettings) {
+		super(app)
+		this.settings = settings
+		this.list = settings.blocks
+			.filter((block) => block.type === ELoggerType.LOGGER)
+			.map((block) => block.name)
+		this.blockType = this.list[0]
+	}
+
+	open(): Promise<boolean> {
+		return new Promise((resolve) => {
+			this.resolve = resolve
+			super.open()
+		})
+	}
+
+	onOpen() {
+		const { contentEl } = this
+
+		new Setting(contentEl)
+			.setName('Type')
+			.addDropdown((dd) => {
+				dd.addOptions(
+					Object.fromEntries(
+						this.list.map((item) => [item, item])
+					)
+				)
+					.setValue(this.blockType)
+					.onChange((value) => {
+						this.blockType = value
+					})
+			})
+
+		const buttonContainer = contentEl.createDiv({
+			cls: 'modal-buttons'
+		})
+
+		new ButtonComponent(buttonContainer)
+			.setButtonText('OK')
+			.setCta()
+			.onClick(() => {
+				this.resolve(this.blockType)
+				this.close()
+			})
+
+		new ButtonComponent(buttonContainer)
+			.setButtonText('Cancel')
+			.onClick(() => {
+				this.resolve(false)
+				this.close()
+			})
+	}
+
+	onClose() {
+		const { contentEl } = this
+		contentEl.empty()
+	}
+}
 
 export class LoggerListModal extends FuzzySuggestModal<string> {
 	_list: string[]
