@@ -24,33 +24,55 @@ export const getLogByBlockName = async (
 	return log
 }
 
-export const getItemsFromBlock = async (
+export const getItemsForBlockId = (
+	settings: ILoggerSettings,
+	id: string
+) => {
+	const items = getItemsFromBlock(settings, id)
+
+	return items
+		.map((item) => {
+			if (itemData[item.type as EItemType]) {
+				return item
+			} else {
+				return getItemsForBlockId(settings, item.type)
+			}
+		})
+		.map((res, i) => {
+			return Array.isArray(res)
+				? {
+						...items[i],
+						nested: res
+					}
+				: res
+		})
+}
+
+export const getItemsFromBlock = (
 	settings: ILoggerSettings,
 	blockId?: string,
 	deep?: boolean
-): Promise<TItem[]> => {
+): TItem[] => {
 	const block = settings.blocks.find(
 		(block) => block.id === blockId
 	)
 
 	if (!block) return []
 
-	const items = await Promise.all(
-		block.order
-			.map((id) => {
-				return settings.items[id]
-			})
-			.filter((item) => !!item)
-			.map((item) => {
-				if (EItemType[item.type as EItemType]) {
-					return [item]
-				} else {
-					return deep
-						? getItemsFromBlock(settings, item.type)
-						: [item]
-				}
-			})
-	)
+	const items = block.order
+		.map((id) => {
+			return settings.items[id]
+		})
+		.filter((item) => !!item)
+		.map((item) => {
+			if (EItemType[item.type as EItemType]) {
+				return [item]
+			} else {
+				return deep
+					? getItemsFromBlock(settings, item.type)
+					: [item]
+			}
+		})
 
 	return items.flat()
 }
@@ -60,7 +82,7 @@ export const getLogFromBlock = async (
 	blockId: string,
 	delimiter = ''
 ): Promise<string> => {
-	const items = await getItemsFromBlock(settings, blockId)
+	const items = getItemsFromBlock(settings, blockId)
 
 	const values = await Promise.all(
 		items.map((item) => {

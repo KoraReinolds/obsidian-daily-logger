@@ -1,6 +1,5 @@
 import {
 	Editor,
-	type EditorPosition,
 	type EventRef,
 	MarkdownView,
 	Notice,
@@ -9,11 +8,7 @@ import {
 	TFolder
 } from 'obsidian'
 import { db, type LogData } from 'src/assets/storage'
-import {
-	generateDynamicRegExp,
-	generateTemplate,
-	itemData
-} from 'src/entities'
+import { generateTemplate, parseLog } from 'src/entities'
 import { FileContent } from 'src/entities/file'
 import { getFilesByPath } from 'src/lib/files'
 import { LoggerConfirmModal } from 'src/lib/modal'
@@ -21,12 +16,10 @@ import { isItemMatched } from 'src/lib/match'
 import { LoggerSetting } from 'src/settings'
 import {
 	DEFAULT_SETTINGS,
-	EItemType,
-	ELoggerType,
 	type ILoggerSettings,
-	type TBlock,
-	type TItem
+	type TBlock
 } from 'src/settings/types'
+import { getItemsForBlockId } from 'src/settings/model'
 
 export default class LoggerPlugin extends Plugin {
 	settings: ILoggerSettings
@@ -126,7 +119,8 @@ export default class LoggerPlugin extends Plugin {
 					const block: TBlock = params[0] as never as TBlock
 					const dataArr = params[1]
 
-					const items = await this.getItemsForBlockId(
+					const items = getItemsForBlockId(
+						this.settings,
 						block.id
 					)
 					const template = await generateTemplate({
@@ -227,8 +221,10 @@ export default class LoggerPlugin extends Plugin {
 				//	console.log(file, await this.parseFile(file))
 				//}
 				//console.log(await this.getAllLogs())
+
 				console.log(
-					await this.parseLog(
+					parseLog(
+						this.settings,
 						'- [ ] 84 - test ⛔ h3v0pc 📅 2025-01-12'
 						//'\t- [ ] subtask 🆔 h3v0pc 📅 2025-01-12'
 					)
@@ -508,59 +504,6 @@ export default class LoggerPlugin extends Plugin {
 		return res
 	}
 
-	getDataFromItems(
-		items: TItem[],
-		matches: RegExpMatchArray,
-		i = 0
-	) {
-		const itemsData = items.reduce(
-			(r, item, index) => {
-				if (item.isOptional && index > 0) i += 1
-				if (item.name) {
-					if (item.nested?.length) {
-						const { index, itemsData } =
-							this.getDataFromItems(item.nested, matches, i)
-						r[item.name] = itemsData
-						i = index
-					} else {
-						r[item.name] = (matches[i] || '').trim()
-						i += 1
-					}
-				}
-				return r
-			},
-			{} as Record<string, any>
-		)
-
-		return {
-			index: i,
-			itemsData
-		}
-	}
-
-	async getItemsForBlockId(id: string): Promise<any> {
-		const items = await this.getItemsFromBlock(id)
-
-		return (
-			await Promise.all(
-				items.map((item) => {
-					if (itemData[item.type as EItemType]) {
-						return item
-					} else {
-						return this.getItemsForBlockId(item.type)
-					}
-				})
-			)
-		).map((res, i) => {
-			return Array.isArray(res)
-				? {
-						...items[i],
-						nested: res
-					}
-				: res
-		})
-	}
-
 	async parseFile(file: TFile) {
 		const content = await new FileContent(
 			this.app,
@@ -579,7 +522,7 @@ export default class LoggerPlugin extends Plugin {
 
 		const logs = (
 			await Promise.all(
-				lines.map((line) => this.parseLog(line))
+				lines.map((line) => parseLog(this.settings, line))
 			)
 		).filter((log) => !!log)
 
@@ -587,62 +530,6 @@ export default class LoggerPlugin extends Plugin {
 			path: file.name,
 			...data
 		}))
-	}
-
-	async parseLog(log: string): Promise<{
-		blockId: string
-		data: Record<string, string>
-	} | null> {
-		const blocks = this.settings.blocks.filter(
-			(block) => block.type === ELoggerType.LOGGER
-		)
-
-		const itemsArr = await Promise.all(
-			blocks.map((block) =>
-				this.getItemsForBlockId(block.id)
-			)
-		)
-
-		const regArr = await Promise.all(
-			itemsArr.map((items) =>
-				generateDynamicRegExp({
-					items,
-					deep: false,
-					wrapToGroup: true,
-					delimiter: this.settings.global.delimiter
-				})
-			)
-		)
-
-		let firstMatch = -1
-		let matches: RegExpMatchArray | null = null
-
-		regArr.forEach((reg, i) => {
-			const match = log.match(reg)
-			if (match) {
-				firstMatch = i
-				matches = match
-				return null
-			}
-		})
-
-		if (firstMatch < 0 || !matches) {
-			if (log.startsWith('>>')) {
-				console.log(log)
-			}
-			return null
-		}
-
-		const res = this.getDataFromItems(
-			itemsArr[firstMatch],
-			matches,
-			1
-		).itemsData
-
-		return {
-			blockId: blocks[firstMatch].id,
-			data: res
-		}
 	}
 
 	isFile(file: any): file is TFile {
@@ -660,27 +547,6 @@ export default class LoggerPlugin extends Plugin {
 			this.app.vault.getAbstractFileByPath(path)
 		if (this.isFolder(folder)) return folder
 		return null
-	}
-
-	async suggestFleByPath(
-		path: string
-	): Promise<TFile | undefined> {
-		const file = await this.getFolderByPath(path)
-		if (this.isFolder(file)) {
-			const files = file.children.filter((f) =>
-				this.isFile(f)
-			)
-			// @ts-ignore
-			files.sort((a, b) => b.stat.mtime - a.stat.mtime)
-
-			// @ts-ignore
-			return await this.tp.templater.current_functions_object.system.suggester(
-				(file: TFile) => file.name,
-				files
-			)
-		} else {
-			new Notice(`Can't find '${path}' folder`)
-		}
 	}
 
 	async loadCSSFile(filename: string): Promise<string> {

@@ -49,10 +49,7 @@
 							return
 						}
 
-						items = await getItemsFromBlock(
-							settings,
-							block.id
-						)
+						items = getItemsFromBlock(settings, block.id)
 					})
 			})
 

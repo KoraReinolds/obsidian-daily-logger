@@ -1,11 +1,13 @@
 import type { TItemData } from 'src/entities/types'
 import { FindOrCreateNoteModal } from 'src/lib/modal'
 import { escapeRegex } from 'src/lib/string'
+import { getItemsForBlockId } from 'src/settings/model'
 import {
 	EItemType,
 	type TItem,
 	type ILoggerSettings,
-	type TBlock
+	type TBlock,
+	ELoggerType
 } from 'src/settings/types'
 
 enum EMoment {
@@ -75,13 +77,13 @@ export const itemData: Record<EItemType, TItemData> = {
 			).open()
 		},
 		defaultValue: '',
-		toRegexpr: async () => `\\[\\[[^\\]]+\\]\\]`,
+		toRegexpr: () => `\\[\\[[^\\]]+\\]\\]`,
 		isDisabled: false
 	},
 	[EItemType.text]: {
 		toValue: async (item) => item.value,
 		defaultValue: '',
-		toRegexpr: async (item) => {
+		toRegexpr: (item) => {
 			if (item.anyText) return `.+?`
 			return escapeRegex(item.value.trim())
 		},
@@ -91,7 +93,7 @@ export const itemData: Record<EItemType, TItemData> = {
 		// @ts-ignore
 		toValue: async (item) => moment().format(item.value),
 		defaultValue: 'HH',
-		toRegexpr: async (item) =>
+		toRegexpr: (item) =>
 			momentPatternToRegex(item.value as EMoment),
 		isDisabled: true
 	},
@@ -99,7 +101,7 @@ export const itemData: Record<EItemType, TItemData> = {
 		// @ts-ignore
 		toValue: async (item) => moment().format(item.value),
 		defaultValue: 'mm',
-		toRegexpr: async (item) =>
+		toRegexpr: (item) =>
 			momentPatternToRegex(item.value as EMoment),
 		isDisabled: true
 	}
@@ -135,34 +137,31 @@ export const generateTemplate = async (params: {
 	return combinedPatternParts.join(' ')
 }
 
-export const generateDynamicRegExp = async (params: {
+export const generateDynamicRegExp = (params: {
 	items: TItem[]
 	deep: boolean
 	wrapToGroup: boolean
 	delimiter: string
-}): Promise<RegExp | string> => {
+}): RegExp | string => {
 	const { items, deep, wrapToGroup, delimiter } = params
 
-	const combinedPatternParts = (
-		await Promise.all(
-			items.map((item) => {
-				if (item.nested?.length) {
-					return generateDynamicRegExp({
-						items: item.nested,
-						deep: true,
-						wrapToGroup: !!item.name,
-						delimiter: item.delimiter
-					})
-				}
-				const data = itemData[item.type as EItemType]
-				if (!data) {
-					throw new Error(`Unknown type: ${item.type}`)
-				}
+	const combinedPatternParts = items
+		.map((item) => {
+			if (item.nested?.length) {
+				return generateDynamicRegExp({
+					items: item.nested,
+					deep: true,
+					wrapToGroup: !!item.name,
+					delimiter: item.delimiter
+				})
+			}
+			const data = itemData[item.type as EItemType]
+			if (!data) {
+				throw new Error(`Unknown type: ${item.type}`)
+			}
 
-				return data.toRegexpr(item)
-			})
-		)
-	)
+			return data.toRegexpr(item)
+		})
 		.filter((str) => !!str)
 		.map((str, i) => {
 			const opt = items[i].isOptional ? '?' : ''
@@ -196,4 +195,93 @@ export const generateDynamicRegExp = async (params: {
 	return deep
 		? combinedPattern
 		: new RegExp(`^\\s*${combinedPattern}\\s*$`)
+}
+
+export const parseLog = (
+	settings: ILoggerSettings,
+	log: string
+): {
+	blockId: string
+	data: Record<string, string>
+} | null => {
+	debugger
+	const blocks = settings.blocks.filter(
+		(block) => block.type === ELoggerType.LOGGER
+	)
+
+	const itemsArr = blocks.map((block) =>
+		getItemsForBlockId(settings, block.id)
+	)
+
+	const regArr = itemsArr.map((items) =>
+		generateDynamicRegExp({
+			items,
+			deep: false,
+			wrapToGroup: true,
+			delimiter: settings.global.delimiter
+		})
+	)
+
+	let firstMatch = -1
+	let matches: RegExpMatchArray | null = null
+
+	regArr.forEach((reg, i) => {
+		const match = log.match(reg)
+		if (match) {
+			firstMatch = i
+			matches = match
+			return null
+		}
+	})
+
+	if (firstMatch < 0 || !matches) {
+		if (log.startsWith('>>')) {
+			console.log(log)
+		}
+		return null
+	}
+
+	const res = getDataFromItems(
+		itemsArr[firstMatch],
+		matches,
+		1
+	).itemsData
+
+	return {
+		blockId: blocks[firstMatch].id,
+		data: res
+	}
+}
+
+export const getDataFromItems = (
+	items: TItem[],
+	matches: RegExpMatchArray,
+	i = 0
+) => {
+	const itemsData = items.reduce(
+		(r, item, index) => {
+			if (item.isOptional && index > 0) i += 1
+			if (item.name) {
+				if (item.nested?.length) {
+					const { index, itemsData } = getDataFromItems(
+						item.nested,
+						matches,
+						i
+					)
+					r[item.name] = itemsData
+					i = index
+				} else {
+					r[item.name] = (matches[i] || '').trim()
+					i += 1
+				}
+			}
+			return r
+		},
+		{} as Record<string, any>
+	)
+
+	return {
+		index: i,
+		itemsData
+	}
 }
