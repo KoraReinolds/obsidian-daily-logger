@@ -21,6 +21,16 @@ export const getValueFromBlock = (
 	settings: ILoggerSettings,
 	block: TBlock
 ) => {
+	const items = getItemsForBlockId(settings, block.id)
+
+	const reg = generateDynamicRegExp({
+		items,
+		deep: false,
+		wrapToGroup: true,
+		delimiter: settings.global.delimiter
+	})
+	console.log(reg)
+
 	return block.order
 		.map((id) => settings.items[id])
 		.filter((item) => !!item)
@@ -199,12 +209,12 @@ export const generateDynamicRegExp = (params: {
 
 export const parseLog = (
 	settings: ILoggerSettings,
+	regArr: (string | RegExp)[],
 	log: string
 ): {
 	blockId: string
 	data: Record<string, string>
 } | null => {
-	debugger
 	const blocks = settings.blocks.filter(
 		(block) => block.type === ELoggerType.LOGGER
 	)
@@ -213,14 +223,7 @@ export const parseLog = (
 		getItemsForBlockId(settings, block.id)
 	)
 
-	const regArr = itemsArr.map((items) =>
-		generateDynamicRegExp({
-			items,
-			deep: false,
-			wrapToGroup: true,
-			delimiter: settings.global.delimiter
-		})
-	)
+	//const regArr = settings.regArr
 
 	let firstMatch = -1
 	let matches: RegExpMatchArray | null = null

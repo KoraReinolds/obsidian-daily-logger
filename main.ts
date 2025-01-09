@@ -7,7 +7,11 @@ import {
 	TFile
 } from 'obsidian'
 import { db, type LogData } from 'src/assets/storage'
-import { generateTemplate, parseLog } from 'src/entities'
+import {
+	generateDynamicRegExp,
+	generateTemplate,
+	parseLog
+} from 'src/entities'
 import { FileContent } from 'src/entities/file'
 import { getFilesByPath } from 'src/lib/files'
 import { LoggerConfirmModal } from 'src/lib/modal'
@@ -15,6 +19,7 @@ import { isItemMatched } from 'src/lib/match'
 import { LoggerSetting } from 'src/settings'
 import {
 	DEFAULT_SETTINGS,
+	ELoggerType,
 	type ILoggerSettings,
 	type TBlock
 } from 'src/settings/types'
@@ -27,6 +32,7 @@ export default class LoggerPlugin extends Plugin {
 	createQueue: Set<string> = new Set()
 	onModify: null | EventRef
 	onDelete: null | EventRef
+	regArr: (string | RegExp)[]
 	api = {
 		logByName: async (
 			params: {
@@ -224,6 +230,7 @@ export default class LoggerPlugin extends Plugin {
 				console.log(
 					parseLog(
 						this.settings,
+						this.regArr,
 						'- [ ] 84 - test ⛔ h3v0pc 📅 2025-01-12'
 						//'\t- [ ] subtask 🆔 h3v0pc 📅 2025-01-12'
 					)
@@ -418,6 +425,23 @@ export default class LoggerPlugin extends Plugin {
 			settings: this.getSettingsCopy(this.settings),
 			lastSettings: this.getSettingsCopy(this.lastSettings)
 		})
+
+		const blocks = this.settings.blocks.filter(
+			(block) => block.type === ELoggerType.LOGGER
+		)
+
+		const itemsArr = blocks.map((block) =>
+			getItemsForBlockId(this.settings, block.id)
+		)
+
+		this.regArr = itemsArr.map((items) =>
+			generateDynamicRegExp({
+				items,
+				deep: false,
+				wrapToGroup: true,
+				delimiter: this.settings.global.delimiter
+			})
+		)
 	}
 
 	async clearChanges() {
@@ -520,7 +544,9 @@ export default class LoggerPlugin extends Plugin {
 		const lines = sectionContent.split('\n')
 
 		const logs = lines
-			.map((line) => parseLog(this.settings, line))
+			.map((line) =>
+				parseLog(this.settings, this.regArr, line)
+			)
 			.filter((log) => !!log)
 
 		return logs.map((data) => ({
