@@ -176,11 +176,17 @@ export const generateDynamicRegExp = (params: {
 		.map((str, i) => {
 			const opt = items[i].isOptional ? '?' : ''
 
-			return items[i].name &&
-				!items[i].nested?.length &&
-				wrapToGroup
-				? `(${str})${opt}`
-				: `${str}${opt}`
+			const hasName = items[i].name
+			const hasNestedItems = items[i].nested?.length
+			const prefix = hasName ? '?:' : ''
+
+			if (opt) {
+				return `(${prefix}${str})?`
+			} else {
+				return hasName && !hasNestedItems && wrapToGroup
+					? `(${str})`
+					: str
+			}
 		})
 
 	let combinedPattern = combinedPatternParts[0]
@@ -195,7 +201,7 @@ export const generateDynamicRegExp = (params: {
 
 		if (prevItem) {
 			combinedPattern += prevItem.isOptional
-				? `(${delimiter})?`
+				? `(?:${delimiter})?`
 				: delimiter
 		}
 
@@ -222,8 +228,6 @@ export const parseLog = (
 	const itemsArr = blocks.map((block) =>
 		getItemsForBlockId(settings, block.id)
 	)
-
-	//const regArr = settings.regArr
 
 	let firstMatch = -1
 	let matches: RegExpMatchArray | null = null
@@ -261,9 +265,9 @@ export const getDataFromItems = (
 	matches: RegExpMatchArray,
 	i = 0
 ) => {
+	//console.log(items, matches)
 	const itemsData = items.reduce(
-		(r, item, index) => {
-			if (item.isOptional && index > 0) i += 1
+		(r, item) => {
 			if (item.name) {
 				if (item.nested?.length) {
 					const { index, itemsData } = getDataFromItems(

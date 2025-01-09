@@ -192,6 +192,7 @@ export default class LoggerPlugin extends Plugin {
 			this.app.plugins?.plugins['templater-obsidian']
 
 		await this.loadSettings()
+		this.getRegExprArr()
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon(
@@ -426,6 +427,10 @@ export default class LoggerPlugin extends Plugin {
 			lastSettings: this.getSettingsCopy(this.lastSettings)
 		})
 
+		this.getRegExprArr()
+	}
+
+	getRegExprArr() {
 		const blocks = this.settings.blocks.filter(
 			(block) => block.type === ELoggerType.LOGGER
 		)
