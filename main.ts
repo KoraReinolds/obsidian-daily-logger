@@ -4,8 +4,7 @@ import {
 	MarkdownView,
 	Notice,
 	Plugin,
-	TFile,
-	TFolder
+	TFile
 } from 'obsidian'
 import { db, type LogData } from 'src/assets/storage'
 import { generateTemplate, parseLog } from 'src/entities'
@@ -520,33 +519,14 @@ export default class LoggerPlugin extends Plugin {
 
 		const lines = sectionContent.split('\n')
 
-		const logs = (
-			await Promise.all(
-				lines.map((line) => parseLog(this.settings, line))
-			)
-		).filter((log) => !!log)
+		const logs = lines
+			.map((line) => parseLog(this.settings, line))
+			.filter((log) => !!log)
 
 		return logs.map((data) => ({
 			path: file.name,
 			...data
 		}))
-	}
-
-	isFile(file: any): file is TFile {
-		return file instanceof TFile
-	}
-
-	isFolder(file: any): file is TFolder {
-		return file instanceof TFolder
-	}
-
-	async getFolderByPath(
-		path: string
-	): Promise<TFolder | null> {
-		const folder =
-			this.app.vault.getAbstractFileByPath(path)
-		if (this.isFolder(folder)) return folder
-		return null
 	}
 
 	async loadCSSFile(filename: string): Promise<string> {
