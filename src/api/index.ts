@@ -5,12 +5,16 @@ import { logByName } from './logByName'
 import { getData } from './data'
 import { isItemMatched } from 'src/lib/match'
 import type { App } from 'obsidian'
+import { parseLog } from './parseLog'
 
 export const api = (
 	app: App,
-	settings: ILoggerSettings
+	settings: ILoggerSettings,
+	regArr: (string | RegExp)[]
 ) => {
 	return {
+		parseLog: async (log: string) =>
+			parseLog(settings, regArr, log),
 		replaceData,
 		logByName: async (
 			params: {

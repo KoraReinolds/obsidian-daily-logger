@@ -7,10 +7,7 @@ import {
 	TFile
 } from 'obsidian'
 import { db } from 'src/assets/storage'
-import {
-	generateDynamicRegExp,
-	parseLog
-} from 'src/entities'
+import { generateDynamicRegExp } from 'src/entities'
 import { FileContent } from 'src/entities/file'
 import { getFilesByPath } from 'src/lib/files'
 import { LoggerConfirmModal } from 'src/lib/modal'
@@ -23,6 +20,7 @@ import {
 import { getItemsForBlockId } from 'src/settings/model'
 import { api } from 'src/api'
 import { getData } from 'src/api/data'
+import { parseLog } from 'src/api/parseLog'
 
 export default class LoggerPlugin extends Plugin {
 	settings: ILoggerSettings
@@ -46,7 +44,7 @@ export default class LoggerPlugin extends Plugin {
 
 		await this.loadSettings()
 		this.getRegExprArr()
-		this.api = api(this.app, this.settings)
+		this.api = api(this.app, this.settings, this.regArr)
 
 		this.addCommand({
 			id: 'daily-logger-show-list',
@@ -117,10 +115,10 @@ export default class LoggerPlugin extends Plugin {
 						await db.createMany(data)
 
 						this.createQueue.delete(file.name)
-						//console.log(
-						//	`File modified: ${file.name} with `,
-						//	data
-						//)
+						console.log(
+							`File modified: ${file.name} with `,
+							data
+						)
 					}, 2000)
 				}
 			}
