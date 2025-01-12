@@ -95,7 +95,7 @@ export const itemData: Record<EItemType, TItemData> = {
 		defaultValue: '',
 		toRegexpr: (item) => {
 			if (item.anyText) return `.+?`
-			return escapeRegex(item.value.trim())
+			return escapeRegex(item.value)
 		},
 		isDisabled: false
 	},
@@ -120,15 +120,17 @@ export const itemData: Record<EItemType, TItemData> = {
 export const generateTemplate = async (params: {
 	items: TItem[]
 	wrapToGroup: boolean
+	delimiter: string
 }): Promise<string> => {
-	const { items, wrapToGroup } = params
+	const { items, wrapToGroup, delimiter } = params
 
 	const combinedPatternParts = await Promise.all(
 		items.map((item) => {
 			if (item.nested?.length) {
 				return generateTemplate({
 					items: item.nested,
-					wrapToGroup: !!item.name
+					wrapToGroup: !!item.name,
+					delimiter: item.delimiter
 				})
 			}
 
@@ -144,7 +146,7 @@ export const generateTemplate = async (params: {
 		})
 	)
 
-	return combinedPatternParts.join(' ')
+	return combinedPatternParts.join(delimiter)
 }
 
 export const generateDynamicRegExp = (params: {
@@ -178,7 +180,7 @@ export const generateDynamicRegExp = (params: {
 
 			const hasName = items[i].name
 			const hasNestedItems = items[i].nested?.length
-			const prefix = hasName ? '?:' : ''
+			const prefix = hasName && i ? '?:' : ''
 
 			if (opt) {
 				return `(${prefix}${str})?`
@@ -210,7 +212,7 @@ export const generateDynamicRegExp = (params: {
 
 	return deep
 		? combinedPattern
-		: new RegExp(`^\\s*${combinedPattern}\\s*$`)
+		: new RegExp(`^${combinedPattern}\\s*$`)
 }
 
 export const getDataFromItems = (
@@ -231,7 +233,7 @@ export const getDataFromItems = (
 					r[item.name] = itemsData
 					i = index
 				} else {
-					r[item.name] = (matches[i] || '').trim()
+					r[item.name] = matches[i] || ''
 					i += 1
 				}
 			}

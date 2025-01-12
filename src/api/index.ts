@@ -1,11 +1,11 @@
 import type { ILoggerSettings } from 'src/settings/types'
-import { replaceData } from './replace'
 import { db } from 'src/assets/storage'
 import { logByName } from './logByName'
 import { getData } from './data'
 import { isItemMatched } from 'src/lib/match'
 import type { App } from 'obsidian'
 import { parseLog } from './parseLog'
+import { getLogsFromDataByName } from './getLogsFromDataByName'
 
 export const api = (
 	app: App,
@@ -13,9 +13,12 @@ export const api = (
 	regArr: (string | RegExp)[]
 ) => {
 	return {
-		parseLog: async (log: string) =>
+		getLogsFromDataByName: async (
+			name: string,
+			params: any
+		) => getLogsFromDataByName(settings, name, params),
+		parseLog: (log: string) =>
 			parseLog(settings, regArr, log),
-		replaceData,
 		logByName: async (
 			params: {
 				name: string
