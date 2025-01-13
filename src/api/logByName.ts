@@ -40,7 +40,8 @@ export const logByName = async (
 				const items = getItemsForBlockId(settings, block.id)
 				const template = await generateTemplate({
 					items,
-					wrapToGroup: true
+					wrapToGroup: true,
+					delimiter: settings.global.delimiter
 				})
 				return [template, dataArr]
 			})
